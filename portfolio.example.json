@@ -1,0 +1,156 @@
+{
+  "meta": {
+    "last_updated": "2026-01-01",
+    "base_currency": "TWD"
+  },
+
+  "cash": {
+    "total_twd": 100000,
+    "breakdown": {
+      "銀行A（日常生活備用）": 20000,
+      "銀行B（投資扣款專用）": 80000
+    },
+    "note": "現金策略說明"
+  },
+
+  "long_term": {
+    "positions": [
+      {
+        "ticker": "006208",
+        "name": "富邦台50",
+        "type": "equity_etf",
+        "market": "TW",
+        "cost_twd": 10000,
+        "shares": 100,
+        "sector": "台灣大盤指數",
+        "theme": "台股核心配置",
+        "dca_monthly": true,
+        "dca_amount_twd": 3000,
+        "broker": "券商名稱",
+        "note": "備註"
+      },
+      {
+        "ticker": "VTI",
+        "name": "Vanguard Total Stock Market ETF",
+        "type": "equity_etf",
+        "market": "US",
+        "cost_twd": 30000,
+        "shares": 1.5,
+        "sector": "美國全市場股票",
+        "theme": "核心長期持倉",
+        "dca_monthly": true,
+        "dca_amount_twd": 2500,
+        "broker": "券商名稱",
+        "note": "備註"
+      },
+      {
+        "ticker": "00679B",
+        "name": "元大美債1-3",
+        "type": "bond_etf",
+        "market": "TW",
+        "cost_twd": 15000,
+        "shares": 400,
+        "sector": "短期美國公債",
+        "theme": "防禦性部位",
+        "dca_monthly": true,
+        "dca_amount_twd": 5000,
+        "broker": "券商名稱",
+        "note": "備註"
+      }
+    ]
+  },
+
+  "tactical": {
+    "positions": [
+      {
+        "ticker": "2330",
+        "name": "台積電",
+        "type": "stock",
+        "market": "TW",
+        "cost_twd": 50000,
+        "shares": 100,
+        "sector": "半導體",
+        "theme": "AI算力需求",
+        "position_size": "half",
+        "resistance_key": 1100,
+        "support_ref": 950,
+        "status": "持有，觀察突破前高",
+        "strategy": "突破 1100 元阻力確認後加碼至滿倉；跌破 950 元支撐再評估",
+        "catalysts": [
+          "2026-Q1 法說會",
+          "CoWoS 產能持續擴充"
+        ],
+        "fundamentals": {
+          "2025_eps_estimate": "~50元"
+        },
+        "broker": "券商名稱",
+        "note": "備註"
+      }
+    ]
+  },
+
+  "crypto": {
+    "positions": [
+      {
+        "ticker": "BTC",
+        "name": "Bitcoin",
+        "exchange": "交易所名稱",
+        "type": "spot",
+        "cost_twd": 20000,
+        "quantity": 0.003,
+        "note": "現貨長期持有"
+      },
+      {
+        "ticker": "USDT",
+        "name": "Tether USD",
+        "exchange": "交易所名稱",
+        "type": "stablecoin",
+        "cost_twd": 10000,
+        "quantity": 312,
+        "role": "現貨買入資金",
+        "note": "備用資金"
+      }
+    ]
+  },
+
+  "watchlist": [
+    {
+      "ticker": "NVDA",
+      "name": "NVIDIA Corporation",
+      "exchange": "NASDAQ",
+      "market": "US",
+      "sector": "半導體",
+      "theme": "AI GPU 龍頭",
+      "priority": 1,
+      "watch_reason": "觀察原因說明",
+      "entry_condition": "進場條件說明",
+      "key_metrics": {
+        "52w_high_usd": 153,
+        "decline_from_high": -0.15,
+        "additional": {
+          "forward_pe": "~30x"
+        }
+      },
+      "catalysts": [
+        "下一季財報",
+        "Blackwell 出貨進度"
+      ],
+      "risks": [
+        "估值偏高",
+        "出口管制風險"
+      ],
+      "note": "觀察筆記"
+    }
+  ],
+
+  "strategy": {
+    "investment_horizon": "12個月",
+    "overall_theme": "整體投資主題說明",
+    "key_upcoming_events": [
+      { "date": "2026-03-01", "ticker": "NVDA", "event": "Q4 財報" }
+    ],
+    "risk_notes": [
+      "主要風險說明"
+    ]
+  }
+}
