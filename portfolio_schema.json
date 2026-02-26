@@ -1,0 +1,223 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "portfolio.schema.json",
+  "title": "Daily Finance Report — Portfolio Input Schema v1.0",
+  "description": "個人資產配置輸入規格。stock/ETF 即時股價由 API 抓取，JSON 只存成本與策略資訊。",
+  "type": "object",
+  "required": ["meta", "cash", "long_term", "tactical", "crypto", "watchlist", "strategy"],
+  "additionalProperties": false,
+
+  "definitions": {
+
+    "market": {
+      "type": "string",
+      "enum": ["TW", "US"],
+      "description": "交易市場：TW = 台灣，US = 美國"
+    },
+
+    "long_term_position": {
+      "type": "object",
+      "description": "長期配置持倉（ETF、債券 ETF），以宏觀總經為核心邏輯",
+      "required": ["ticker", "name", "type", "market", "cost_twd", "sector", "theme", "dca_monthly"],
+      "additionalProperties": false,
+      "properties": {
+        "ticker":         { "type": "string", "description": "代碼，台股直接填 0050，程式自動加 .TW" },
+        "name":           { "type": "string" },
+        "type":           { "type": "string", "enum": ["equity_etf", "bond_etf"] },
+        "market":         { "$ref": "#/definitions/market" },
+        "cost_twd":       { "type": ["number", "null"], "minimum": 0, "description": "投入總成本（台幣），不確定時填 null" },
+        "shares":         { "type": "number", "minimum": 0, "description": "持有股數／單位數（選填，有值時程式可計算市值）" },
+        "sector":         { "type": "string" },
+        "theme":          { "type": "string", "description": "投資主題，如「台股核心配置」" },
+        "dca_monthly":    { "type": "boolean" },
+        "dca_amount_twd": { "type": "number", "minimum": 0, "description": "每月定期定額金額（dca_monthly=true 時必填）" },
+        "broker":         { "type": "string", "description": "券商名稱" },
+        "note":           { "type": "string" }
+      },
+      "if":   { "properties": { "dca_monthly": { "const": true } } },
+      "then": { "required": ["dca_amount_twd"] }
+    },
+
+    "tactical_position": {
+      "type": "object",
+      "description": "波段投資持倉（個股），有明確進出場邏輯與技術分析",
+      "required": ["ticker", "name", "type", "market", "cost_twd", "sector", "theme"],
+      "additionalProperties": false,
+      "properties": {
+        "ticker":          { "type": "string" },
+        "name":            { "type": "string" },
+        "type":            { "type": "string", "const": "stock" },
+        "market":          { "$ref": "#/definitions/market" },
+        "cost_twd":        { "type": ["number", "null"], "description": "投入總成本（台幣），不確定時填 null" },
+        "shares":          { "type": "number", "minimum": 0 },
+        "sector":          { "type": "string" },
+        "theme":           { "type": "string" },
+        "position_size":   { "type": "string", "enum": ["full", "half", "quarter", "custom"], "description": "倉位大小：full=滿倉 half=半倉 quarter=1/4倉" },
+        "position_pct":    { "type": "number", "minimum": 0, "maximum": 1, "description": "position_size=custom 時填精確百分比，如 0.3" },
+        "resistance_key":  { "type": "number", "description": "關鍵壓力位（原始貨幣）" },
+        "support_ref":     { "type": "number", "description": "參考支撐位（原始貨幣）" },
+        "status":          { "type": "string", "description": "目前狀態描述" },
+        "strategy":        { "type": "string", "description": "操作策略文字說明" },
+        "catalysts":       { "type": "array", "items": { "type": "string" }, "description": "近期催化劑列表" },
+        "fundamentals":    { "type": "object", "description": "基本面資料，自由 key-value，無固定 schema" },
+        "broker":          { "type": "string" },
+        "note":            { "type": "string" }
+      }
+    },
+
+    "crypto_position": {
+      "type": "object",
+      "description": "加密貨幣持倉（現貨 / 穩定幣 / 合約）",
+      "required": ["ticker", "exchange", "type", "cost_twd"],
+      "additionalProperties": false,
+      "properties": {
+        "ticker":   { "type": "string", "description": "資產代碼，如 BTC / ETH / USDT" },
+        "name":     { "type": "string" },
+        "exchange": { "type": "string", "description": "交易所名稱，如 Bitget / Bitunix" },
+        "type":     { "type": "string", "enum": ["spot", "stablecoin", "contract"], "description": "spot=現貨 stablecoin=穩定幣 contract=合約帳戶" },
+        "cost_twd": { "type": ["number", "null"], "minimum": 0 },
+        "quantity": { "type": "number", "minimum": 0, "description": "持有數量（選填）" },
+        "role":     { "type": "string", "description": "資金用途說明" },
+        "note":     { "type": "string" }
+      }
+    },
+
+    "watchlist_entry": {
+      "type": "object",
+      "description": "觀察清單標的，完全獨立於持倉，買入後不移入 tactical",
+      "required": ["ticker", "name", "exchange", "market", "sector", "theme", "priority", "watch_reason", "entry_condition", "key_metrics", "catalysts", "risks"],
+      "additionalProperties": false,
+      "properties": {
+        "ticker":          { "type": "string" },
+        "name":            { "type": "string" },
+        "exchange":        { "type": "string", "description": "如 NASDAQ / NYSE" },
+        "market":          { "$ref": "#/definitions/market" },
+        "sector":          { "type": "string" },
+        "theme":           { "type": "string" },
+        "priority":        { "type": "integer", "minimum": 1, "description": "優先級，1 最高" },
+        "watch_reason":    { "type": "string", "description": "為何加入觀察清單" },
+        "entry_condition": { "type": "string", "description": "進場條件（技術面 + 基本面）" },
+        "key_metrics": {
+          "type": "object",
+          "required": ["52w_high_usd", "decline_from_high"],
+          "additionalProperties": false,
+          "properties": {
+            "52w_high_usd":       { "type": "number", "description": "52 週高點（USD）" },
+            "decline_from_high":  { "type": "number", "minimum": -1, "maximum": 0, "description": "距高點跌幅，小數表示，-0.29 = -29%" },
+            "additional":         { "type": "object", "description": "標的特有的自由附加指標" }
+          }
+        },
+        "catalysts": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "risks":     { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "note":      { "type": "string" }
+      }
+    },
+
+    "upcoming_event": {
+      "type": "object",
+      "required": ["date", "ticker", "event"],
+      "additionalProperties": false,
+      "properties": {
+        "date":   { "type": "string", "format": "date", "description": "ISO 8601，如 2026-03-03" },
+        "ticker": { "type": "string", "description": "相關標的代碼；非個股事件填 MARKET" },
+        "event":  { "type": "string", "description": "事件說明" }
+      }
+    }
+  },
+
+  "properties": {
+
+    "meta": {
+      "type": "object",
+      "description": "資料集基本資訊",
+      "required": ["last_updated", "base_currency"],
+      "additionalProperties": false,
+      "properties": {
+        "last_updated":   { "type": "string", "format": "date", "description": "最後手動更新日期（ISO 8601）" },
+        "base_currency":  { "type": "string", "const": "TWD", "description": "基礎換算貨幣，固定為 TWD" }
+      }
+    },
+
+    "cash": {
+      "type": "object",
+      "description": "現金部位（不含任何投資標的）",
+      "required": ["total_twd"],
+      "additionalProperties": false,
+      "properties": {
+        "total_twd":  { "type": "number", "minimum": 0 },
+        "breakdown":  {
+          "type": "object",
+          "description": "帳戶明細，key 為帳戶名稱，value 為金額（台幣）",
+          "additionalProperties": { "type": "number", "minimum": 0 }
+        },
+        "note": { "type": "string" }
+      }
+    },
+
+    "long_term": {
+      "type": "object",
+      "description": "長期配置區塊：ETF、債券 ETF，以宏觀邏輯為主，不做短線操作",
+      "required": ["positions"],
+      "additionalProperties": false,
+      "properties": {
+        "positions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/long_term_position" }
+        }
+      }
+    },
+
+    "tactical": {
+      "type": "object",
+      "description": "波段投資區塊：個股，有明確進出場邏輯、技術分析與基本面研究",
+      "required": ["positions"],
+      "additionalProperties": false,
+      "properties": {
+        "positions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/tactical_position" }
+        }
+      }
+    },
+
+    "crypto": {
+      "type": "object",
+      "description": "加密貨幣獨立區塊（結構特殊，以 exchange 為主軸而非 broker）",
+      "required": ["positions"],
+      "additionalProperties": false,
+      "properties": {
+        "positions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/crypto_position" }
+        }
+      }
+    },
+
+    "watchlist": {
+      "type": "array",
+      "description": "觀察清單，完全獨立。買入後在 Claude 對話中更新 tactical，不自動移動。",
+      "items": { "$ref": "#/definitions/watchlist_entry" }
+    },
+
+    "strategy": {
+      "type": "object",
+      "description": "人工判斷的投資策略（僅保留無法計算的主觀欄位）",
+      "required": ["investment_horizon", "overall_theme", "key_upcoming_events", "risk_notes"],
+      "additionalProperties": false,
+      "properties": {
+        "investment_horizon":    { "type": "string", "description": "投資時程，如「6個月（2026下半年集中部署）」" },
+        "overall_theme":         { "type": "string", "description": "整體投資主題" },
+        "key_upcoming_events":   {
+          "type": "array",
+          "items": { "$ref": "#/definitions/upcoming_event" },
+          "description": "近期關鍵事件，依日期排序。非個股事件的 ticker 填 MARKET"
+        },
+        "risk_notes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "人工風險備注清單"
+        }
+      }
+    }
+  }
+}

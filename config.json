@@ -1,0 +1,38 @@
+{
+  "claude_cli": "claude",
+  "claude_model": "",
+  "claude_timeout_seconds": 300,
+  "reports_dir": "reports",
+  "logs_dir": "logs",
+  "portfolio_file": "portfolio.json",
+  "max_articles_per_stock": 5,
+  "max_market_articles": 20,
+  "max_articles_per_extra_ticker": 3,
+  "news_sources": {
+    "market_rss": [
+      "https://finance.yahoo.com/rss/topfinstories",
+      "https://feeds.reuters.com/reuters/businessNews",
+      "https://feeds.marketwatch.com/marketwatch/topstories/",
+      "https://www.cnbc.com/id/100003114/device/rss/rss.html",
+      "https://feeds.marketwatch.com/marketwatch/realtimeheadlines/"
+    ],
+    "market_extra_tickers": [
+      "NVDA", "AAPL", "MSFT", "META", "GOOGL",
+      "AMZN", "TSLA", "AMD", "TSM", "SMCI"
+    ]
+  },
+  "report_language": "zh-TW",
+
+  "memory": {
+    "enabled": true,
+    "memory_dir": "memory",
+    "context_days": 5,
+    "generate_summary": true
+  },
+
+  "sync": {
+    "enabled": false,
+    "auto_pull": true,
+    "auto_push": true
+  }
+}

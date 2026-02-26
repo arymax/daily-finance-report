@@ -1,0 +1,310 @@
+{
+  "meta": {
+    "last_updated": "2026-02-26",
+    "base_currency": "TWD"
+  },
+
+  "cash": {
+    "total_twd": 381113,
+    "breakdown": {
+      "中信（日常生活備用）": 11219,
+      "玉山（投資扣款專用）": 86710,
+      "永豐（投資扣款專用）": 283184
+    },
+    "note": "高現金比例保留市場大幅回調時的彈藥，購車計畫已暫取消，資金可更積極運用"
+  },
+
+  "long_term": {
+    "positions": [
+      {
+        "ticker": "006208",
+        "name": "富邦台50",
+        "type": "equity_etf",
+        "market": "TW",
+        "cost_twd": 5839,
+        "shares": 52,
+        "sector": "台灣大盤指數",
+        "theme": "台股核心配置",
+        "dca_monthly": false,
+        "broker": "玉山證券",
+        "note": "長期定期定額核心部位；損益平衡價 112.57 TWD（均價 112.25 + 手續費）"
+      },
+      {
+        "ticker": "00679B",
+        "name": "元大美債1-3",
+        "type": "bond_etf",
+        "market": "TW",
+        "cost_twd": 23611,
+        "shares": 758,
+        "sector": "短期美國公債",
+        "theme": "防禦性部位",
+        "dca_monthly": true,
+        "dca_amount_twd": 7500,
+        "broker": "玉山證券",
+        "note": "月定額扣款，防禦部位核心；均價 31.14 TWD"
+      },
+      {
+        "ticker": "00864B",
+        "name": "群益0-1年美債",
+        "type": "bond_etf",
+        "market": "TW",
+        "cost_twd": 15748,
+        "shares": 379,
+        "sector": "超短期美國公債",
+        "theme": "防禦性部位/類現金",
+        "dca_monthly": true,
+        "dca_amount_twd": 5000,
+        "broker": "玉山證券",
+        "note": "月定額扣款，近現金特性；均價 41.54 TWD"
+      },
+      {
+        "ticker": "VTI",
+        "name": "Vanguard Total Stock Market ETF",
+        "type": "equity_etf",
+        "market": "US",
+        "cost_twd": 39000,
+        "shares": 4.12911,
+        "sector": "美國全市場股票",
+        "theme": "核心長期持倉",
+        "dca_monthly": true,
+        "dca_amount_twd": 2500,
+        "broker": "永豐大戶投",
+        "note": "美股核心配置，長期定期定額；均價約 295 USD（依成本反推，匯率估算 32）"
+      },
+      {
+        "ticker": "VT",
+        "name": "Vanguard Total World Stock ETF",
+        "type": "equity_etf",
+        "market": "US",
+        "cost_twd": 15000,
+        "shares": 3.41164,
+        "sector": "全球股票",
+        "theme": "全球市場分散",
+        "dca_monthly": false,
+        "broker": "永豐大戶投",
+        "note": "全球分散配置，與VTI有部分重疊；均價約 137 USD（依成本反推，匯率估算 32）"
+      },
+      {
+        "ticker": "VGIT",
+        "name": "Vanguard Intermediate-Term Treasury ETF",
+        "type": "bond_etf",
+        "market": "US",
+        "cost_twd": 15000,
+        "shares": 8.01501,
+        "sector": "中期美國公債",
+        "theme": "防禦性部位",
+        "dca_monthly": true,
+        "dca_amount_twd": 2500,
+        "broker": "永豐大戶投",
+        "note": "月定額扣款，美股帳戶防禦配置；均價約 58.5 USD（依成本反推，匯率估算 32）"
+      }
+    ]
+  },
+
+  "tactical": {
+    "positions": [
+      {
+        "ticker": "3030",
+        "name": "德律科技",
+        "type": "stock",
+        "market": "TW",
+        "cost_twd": 41608,
+        "shares": 200,
+        "sector": "半導體設備／AOI檢測",
+        "theme": "AI先進封裝設備",
+        "position_size": "full",
+        "resistance_key": 217,
+        "support_ref": 200,
+        "status": "已加倉至滿倉（第二批 2/26 未交割），均價 208.04 TWD",
+        "strategy": "持滿倉觀察突破 217 元前高；若突破確認則考慮續抱；跌破 200 元重要支撐再評估減碼",
+        "catalysts": [
+          "2026-02-25 年度財報董事會提報",
+          "1月自結EPS 1.29元（年化加速至~15元）",
+          "1月營收8.94億（歷史新高，年增38.5%）",
+          "封測大廠2026資本支出擴大（日月光50-60億美元、京元電393億台幣、力成150-200億台幣）",
+          "半導體X-ray檢測新平台2026年推出"
+        ],
+        "fundamentals": {
+          "2025_annual_revenue": "84.67億元（年增33%）",
+          "2025_eps_estimate": "~10元",
+          "jan2026_eps_self_reported": 1.29,
+          "gross_margin": "58~60%",
+          "blue_ocean_revenue_pct": "81%",
+          "forward_pe_approx": "18~19x",
+          "peer_pe_avg": "42x（致茂、由田）"
+        },
+        "broker": "玉山證券",
+        "note": "第一批 100 股：均價 200.28 / 損益平衡 201.18 TWD；第二批 100 股：均價 215.80 / 損益平衡 216.76 TWD（2/26 未交割）；合計均價 208.04 / 合計損益平衡約 208.97 TWD；估值被嚴重低估，同業本益比42x vs 德律18~19x"
+      }
+    ]
+  },
+
+  "crypto": {
+    "positions": [
+      {
+        "ticker": "USDT",
+        "name": "Tether USD",
+        "exchange": "Bitget",
+        "type": "stablecoin",
+        "cost_twd": 52320,
+        "quantity": 1635,
+        "role": "合約保證金／現貨買入資金",
+        "note": "1,635 USDT；cost_twd 依匯率估算 32 換算"
+      },
+      {
+        "ticker": "USDT",
+        "name": "Tether USD",
+        "exchange": "Bitunix",
+        "type": "contract",
+        "cost_twd": 31136,
+        "quantity": 973,
+        "role": "短線合約交易",
+        "note": "973 USDT；合約學習帳戶，操作策略為短線數小時內收倉；cost_twd 依匯率估算 32 換算"
+      },
+      {
+        "ticker": "BTC",
+        "name": "Bitcoin",
+        "exchange": "Bitget",
+        "type": "spot",
+        "cost_twd": 16255,
+        "quantity": 0.006537,
+        "note": "現貨長期持有；均價約 77,705 USD，數量依成本反推（匯率估算 32）"
+      },
+      {
+        "ticker": "ETH",
+        "name": "Ethereum",
+        "exchange": "Bitget",
+        "type": "spot",
+        "cost_twd": 5700,
+        "quantity": 0.1547,
+        "note": "現貨長期持有；均價約 1,188 USD，數量依成本反推（匯率估算 31）"
+      },
+      {
+        "ticker": "XRP",
+        "name": "XRP",
+        "exchange": "Bitget",
+        "type": "spot",
+        "cost_twd": 5011,
+        "quantity": 60.57,
+        "note": "現貨長期持有；均價約 2.585 USD，數量依成本反推（匯率估算 32）"
+      }
+    ]
+  },
+
+  "watchlist": [
+    {
+      "ticker": "CRWD",
+      "name": "CrowdStrike Holdings",
+      "exchange": "NASDAQ",
+      "market": "US",
+      "sector": "資安軟體",
+      "theme": "AI時代企業資安平台整合",
+      "priority": 1,
+      "watch_reason": "Anthropic Code Security工具引發錯誤賣壓，基本面不變；3/3財報是最近期催化劑",
+      "entry_condition": "3/3財報後視ARR成長與指引，技術面確認底部或帶量反彈",
+      "key_metrics": {
+        "52w_high_usd": 543,
+        "decline_from_high": -0.29,
+        "additional": {
+          "ytd_decline": "-17%",
+          "arr": "49.2億美元，年增23%",
+          "customer_6plus_modules_pct": "49%",
+          "dcf_fair_value_usd": 540
+        }
+      },
+      "catalysts": [
+        "2026-03-03 Q4財報",
+        "Anthropic工具誤殺提供買點",
+        "企業資安需求長期結構成長"
+      ],
+      "risks": [
+        "估值仍偏高",
+        "AI取代資安軟體市場敘事持續",
+        "財報若不如預期將再殺"
+      ],
+      "note": "五檔軟體股中最有近期催化劑；財報前可小試探，財報後確認再加倉"
+    },
+    {
+      "ticker": "NET",
+      "name": "Cloudflare Inc.",
+      "exchange": "NYSE",
+      "market": "US",
+      "sector": "網路基礎建設／資安",
+      "theme": "AI流量成長、Zero Trust、CDN",
+      "priority": 2,
+      "watch_reason": "Anthropic Code Security與NET核心業務無競爭關係，屬於嚴重誤殺",
+      "entry_condition": "技術面底部確認，情緒面由bearish轉neutral；等帶量止跌K棒",
+      "key_metrics": {
+        "52w_high_usd": 175,
+        "decline_from_high": -0.34,
+        "additional": {
+          "ytd_decline": "-20%"
+        }
+      },
+      "catalysts": [
+        "AI帶動網路流量長期成長",
+        "Zero Trust企業採用率持續提升"
+      ],
+      "risks": [
+        "短期情緒面仍偏bearish",
+        "無明確近期催化劑"
+      ],
+      "note": "被錯殺邏輯最清晰；情緒底部未確認，列第二優先等技術面信號"
+    },
+    {
+      "ticker": "ALAB",
+      "name": "Astera Labs Inc.",
+      "exchange": "NASDAQ",
+      "market": "US",
+      "sector": "半導體連接方案",
+      "theme": "AI資料中心機架規模連接晶片",
+      "priority": 3,
+      "watch_reason": "財報大幅超預期但CFO離職+毛利率微降引發市場恐慌，基本面長期邏輯完整",
+      "entry_condition": "技術面尚未滿足進場條件；等止跌確認、突破$175阻力位",
+      "key_metrics": {
+        "52w_high_usd": 262.90,
+        "decline_from_high": -0.52,
+        "additional": {
+          "q4_2025_revenue_usd": "2.706億，年增92%",
+          "fy2025_revenue_usd": "8.525億，年增115%",
+          "q1_2026_guidance_usd": "2.86~2.97億",
+          "non_gaap_gross_margin": "75.7%",
+          "analyst_avg_target_usd": 204.47,
+          "analyst_consensus": "17位 Strong Buy，0位 Sell",
+          "implied_upside_from_current": "~60%"
+        }
+      },
+      "catalysts": [
+        "2026-03-02 新CFO Desmond Lynch上任",
+        "2026-03-03 Morgan Stanley TMT Conference",
+        "Scorpio交換器PCIe 6全球唯一量產",
+        "2026年新增至少2家超大型雲端客戶",
+        "Amazon 4.66億美元認股權",
+        "2026-05-12 Q1財報"
+      ],
+      "risks": [
+        "毛利率壓縮趨勢是否持續",
+        "CFO換人管理層不確定性",
+        "技術面尚無底部確認"
+      ],
+      "note": "繼續觀望；不急於接下落飛刀，等技術面進場條件滿足"
+    }
+  ],
+
+  "strategy": {
+    "investment_horizon": "6個月（2026下半年集中部署）",
+    "overall_theme": "AI基礎建設全鏈路佈局",
+    "key_upcoming_events": [
+      { "date": "2026-03-02", "ticker": "ALAB",   "event": "新CFO Desmond Lynch上任" },
+      { "date": "2026-03-03", "ticker": "CRWD",   "event": "Q4財報" },
+      { "date": "2026-03-03", "ticker": "ALAB",   "event": "Morgan Stanley TMT Conference" },
+      { "date": "2026-05-12", "ticker": "ALAB",   "event": "Q1財報" }
+    ],
+    "risk_notes": [
+      "軟體股IGV ETF今年已跌23%，情緒底部未確認",
+      "AI取代SaaS敘事仍存在，任何AI新工具發布都可能觸發殺盤",
+      "德律217元前高壓力是關鍵觀察點",
+      "合約帳戶僅做短線數小時內，不做隔夜部位"
+    ]
+  }
+}

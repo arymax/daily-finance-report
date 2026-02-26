@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# 本地環境（API keys 等不進 repo）
+.env
+*.env
+
+# 執行日誌（本地就好，不需要同步）
+logs/
+
+# Windows 暫存
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+
+# 確保以下被 git 追蹤（不加 !，只是說明）
+# reports/      ← 每日報告，需同步
+# memory/       ← 每日記憶摘要，需同步
+# portfolio.json ← 持倉資料，需同步
