@@ -98,7 +98,7 @@ def save_report(content: str, report_type: str, reports_dir: Path) -> Path:
 
 
 # ── 主流程 ────────────────────────────────────
-def run(run_portfolio: bool = True, run_market: bool = True) -> None:
+def run(run_portfolio: bool = True, run_market: bool = True, session: str = "morning") -> None:
     config = load_config()
 
     claude_cli   = config.get("claude_cli", "claude")
@@ -121,8 +121,9 @@ def run(run_portfolio: bool = True, run_market: bool = True) -> None:
 
     setup_logging(logs_dir)
 
+    session_label = "早盤（台股盤前／美股盤後）" if session == "morning" else "收盤（台股盤後／美股盤前）"
     logger.info("=" * 55)
-    logger.info("   Daily Finance Report — 啟動")
+    logger.info(f"   Daily Finance Report — {session_label}")
     logger.info("=" * 55)
 
     # ── Git 同步（執行前 pull）──
@@ -200,32 +201,36 @@ def run(run_portfolio: bool = True, run_market: bool = True) -> None:
 
     # ── Task 1：持倉分析 ──
     if run_portfolio:
-        logger.info("── Task 1：持倉分析與操作建議 ───────")
+        task_label = "持倉分析與操作建議" if session == "morning" else "收盤持倉檢視與夜盤操作計畫"
+        logger.info(f"── Task 1：{task_label} ───────")
         try:
             prompt = build_portfolio_prompt(
                 portfolio, news_by_ticker, prices, usd_twd,
                 memory_context=memory_context,
                 thesis_dir=str(thesis_dir),
+                session=session,
             )
             logger.info(f"   Prompt 長度：{len(prompt):,} 字元")
             portfolio_content = call_claude(prompt, claude_cli, claude_model, timeout)
-            save_report(portfolio_content, "portfolio_analysis", reports_dir)
+            save_report(portfolio_content, f"{session}_portfolio_analysis", reports_dir)
         except Exception as e:
             logger.error(f"持倉分析失敗：{e}")
             errors.append(str(e))
 
     # ── Task 2：市場總覽 ──
     if run_market:
-        logger.info("── Task 2：昨晚美股市場總覽 ──────────")
+        task_label = "美股盤後市場總覽" if session == "morning" else "台股收盤總覽與美股盤前預備"
+        logger.info(f"── Task 2：{task_label} ──────────")
         try:
             prompt = build_market_prompt(
                 market_news, watchlist, extra_news_by_ticker,
                 memory_context=memory_context,
                 thesis_dir=str(thesis_dir),
+                session=session,
             )
             logger.info(f"   Prompt 長度：{len(prompt):,} 字元")
             market_content = call_claude(prompt, claude_cli, claude_model, timeout)
-            save_report(market_content, "market_overview", reports_dir)
+            save_report(market_content, f"{session}_market_overview", reports_dir)
         except Exception as e:
             logger.error(f"市場總覽失敗：{e}")
             errors.append(str(e))
@@ -263,10 +268,16 @@ def run(run_portfolio: bool = True, run_market: bool = True) -> None:
 
 # ── CLI 入口 ──────────────────────────────────
 def main():
-    parser = argparse.ArgumentParser(description="每日美股財務報告生成器")
+    parser = argparse.ArgumentParser(description="每日財務報告生成器")
     parser.add_argument("--portfolio", action="store_true", help="只執行持倉分析（Task 1）")
     parser.add_argument("--market",    action="store_true", help="只執行市場總覽（Task 2）")
     parser.add_argument("--validate",  action="store_true", help="只做 schema 驗證，不生成報告")
+    parser.add_argument(
+        "--session",
+        choices=["morning", "evening"],
+        default="morning",
+        help="執行時段：morning（07:00 台股盤前）或 evening（18:00 台股盤後），預設 morning",
+    )
     args = parser.parse_args()
 
     if args.validate:
@@ -276,11 +287,11 @@ def main():
         return
 
     if args.portfolio and not args.market:
-        run(run_portfolio=True, run_market=False)
+        run(run_portfolio=True, run_market=False, session=args.session)
     elif args.market and not args.portfolio:
-        run(run_portfolio=False, run_market=True)
+        run(run_portfolio=False, run_market=True, session=args.session)
     else:
-        run(run_portfolio=True, run_market=True)
+        run(run_portfolio=True, run_market=True, session=args.session)
 
 
 if __name__ == "__main__":
