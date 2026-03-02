@@ -32,12 +32,24 @@ BASE_DIR = Path(__file__).parent.parent.resolve()
 MAIN_PY  = BASE_DIR / "main.py"
 
 
+def _oem_encoding() -> str:
+    """偵測 Windows OEM code page（繁中為 cp950），供 schtasks 輸出解碼用。"""
+    if sys.platform == "win32":
+        try:
+            import ctypes
+            cp = ctypes.windll.kernel32.GetOEMCP()
+            return f"cp{cp}"
+        except Exception:
+            pass
+    return "utf-8"
+
+
 def _run(cmd: list, check: bool = True) -> subprocess.CompletedProcess:
     return subprocess.run(
         cmd,
         capture_output=True,
         text=True,
-        encoding="utf-8",
+        encoding=_oem_encoding(),
         errors="replace",
         check=check,
     )
