@@ -1,0 +1,11 @@
+[project]
+name = "daily-finance-report"
+version = "0.1.0"
+description = "每日自動生成股票持倉分析與市場總覽報告"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "feedparser>=6.0.10",
+    "jsonschema>=4.23.0",
+    "yfinance>=0.2.36",
+]

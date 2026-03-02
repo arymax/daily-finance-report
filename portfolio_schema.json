@@ -85,7 +85,7 @@
     "watchlist_entry": {
       "type": "object",
       "description": "觀察清單標的，完全獨立於持倉，買入後不移入 tactical",
-      "required": ["ticker", "name", "exchange", "market", "sector", "theme", "priority", "watch_reason", "entry_condition", "key_metrics", "catalysts", "risks"],
+      "required": ["ticker", "name", "exchange", "market", "sector", "theme", "priority", "entry_condition", "key_metrics", "catalysts"],
       "additionalProperties": false,
       "properties": {
         "ticker":          { "type": "string" },

@@ -126,6 +126,7 @@ def build_portfolio_prompt(
     prices: dict = None,
     usd_twd: float = 32.0,
     memory_context: str = "",
+    thesis_dir: str = "",
 ) -> str:
     prices = prices or {}
     date_str = _date_header()
@@ -143,6 +144,20 @@ def build_portfolio_prompt(
         f"（即時匯率：USD/TWD ≈ {usd_twd:.1f}）",
         "",
     ]
+
+    if thesis_dir:
+        lines += [
+            "---",
+            "",
+            "# 個股買入背景資料庫（thesis）",
+            "",
+            f"在分析每支個股（波段持倉與觀察清單）時，請先嘗試讀取對應的 thesis 檔案：",
+            f"`{thesis_dir}/{{TICKER}}.md`（例如：`{thesis_dir}/3030.md`、`{thesis_dir}/CRWD.md`）",
+            "若檔案存在，請引用其內容，逐項驗證原始買入邏輯是否仍然成立；若不存在則略過。",
+            "",
+            "---",
+            "",
+        ]
 
     if memory_context:
         lines += [
@@ -261,6 +276,10 @@ def build_portfolio_prompt(
 
             if pos.get("note"):
                 lines += [f"- 備注：{pos['note']}"]
+
+            if thesis_dir:
+                lines += [f"- 📋 買入背景：請讀取 `{thesis_dir}/{ticker}.md`（若存在）"]
+
             lines += [""]
 
             news = news_by_ticker.get(ticker, [])
@@ -327,6 +346,10 @@ def build_portfolio_prompt(
 
             if w.get("note"):
                 lines += [f"- 備注：{w['note']}"]
+
+            if thesis_dir:
+                lines += [f"- 📋 買入背景：請讀取 `{thesis_dir}/{ticker}.md`（若存在）"]
+
             lines += [""]
 
             news = news_by_ticker.get(ticker, [])
@@ -376,6 +399,16 @@ def build_portfolio_prompt(
         "- 操作建議（粗體標示）：**繼續持有 / 加碼 / 減碼 / 停損**",
         "- 操作理由（具體，3-5 句，含基本面或技術面依據）",
         "- 關鍵技術位：壓力位 / 支撐位",
+        "- **持倉檢核（每次必答，逐項回答）**",
+        "  1. 買進邏輯：當初吸引買進的商業模式或成長驅動是什麼？（一句話）",
+        "  2. 邏輯是否被破壞：有沒有出現「事實面」的改變讓原始邏輯失效？（非股價下跌）",
+        "  3. 等待的事件：當初設定的催化劑有沒有出現 / 消失 / 延後？",
+        "  4. 倉位匹配度：現在的確定性程度，和目前持倉規模是否還匹配？",
+        "  5. 不安來源：若感到猶豫，是來自股價波動，還是基本面出現裂痕？",
+        "- **合理賣出條件（明確列出，至少一條）**",
+        "  - 當初等的事件已完全反映在股價中，且沒有新的催化劑接棒",
+        "  - 買進邏輯被事實推翻（非股價推翻）",
+        "  - 出現更高確定性的替代機會，倉位調配有明確意義",
         "",
         "## 四、加密貨幣評估",
         "- 現貨部位合理性（依市值佔比與市場環境評估）",
@@ -383,6 +416,11 @@ def build_portfolio_prompt(
         "",
         "## 五、觀察清單進場評估",
         "針對每個標的，提供：",
+        "- **進場決策框架（每次必答）**",
+        "  1. 買進理由：這家公司的商業模式 / 成長驅動邏輯是什麼？（1-2 句）",
+        "  2. 等待的事件：具體等待哪個催化劑？（訂單 / 產品發布 / 財報指標）",
+        "  3. 定價評估：DCF 底線在哪裡（本金保護）？PE 重新定價的空間有多大？",
+        "  4. 確定性階段：公司現在在哪個階段？（概念期 / 驗證期 / 加速成長期 / 成熟期）",
         "- 進場條件達成狀態：✅ 已達成 / ⏳ 未達成 / 🔄 部分達成",
         "- 建議動作（具體說明觸發條件與時程）",
         "",
@@ -402,14 +440,12 @@ def build_portfolio_prompt(
     return "\n".join(lines)
 
 
-# ─────────────────────────────────────────────
-# Task 2：昨晚美股市場總覽與板塊機會
-# ─────────────────────────────────────────────
 def build_market_prompt(
     market_news: list,
     watchlist: list,
     extra_news: dict = None,
     memory_context: str = "",
+    thesis_dir: str = "",
 ) -> str:
     date_str = _date_header()
 
@@ -418,6 +454,20 @@ def build_market_prompt(
         "請根據以下昨晚美股收盤後的市場新聞，提供今日早晨的市場總覽與投資機會簡報，以繁體中文回答。",
         "",
     ]
+
+    if thesis_dir:
+        lines += [
+            "---",
+            "",
+            "# 個股買入背景資料庫（thesis）",
+            "",
+            f"在分析觀察清單中的每個標的時，請先嘗試讀取對應的 thesis 檔案：",
+            f"`{thesis_dir}/{{TICKER}}.md`（例如：`{thesis_dir}/CRWD.md`）",
+            "若檔案存在，請引用其中的買入邏輯，結合今日市場新聞，判斷原始投資背景的時空條件是否已發生變化。",
+            "",
+            "---",
+            "",
+        ]
 
     if memory_context:
         lines += [
@@ -461,12 +511,13 @@ def build_market_prompt(
     if watchlist:
         lines += ["---", "", "# 我的觀察清單（請在分析中特別關注）", ""]
         for w in watchlist:
+            ticker  = w["ticker"]
             km      = w.get("key_metrics", {})
             high    = km.get("52w_high_usd", "—")
             decline = km.get("decline_from_high")
             decline_str = f"{decline*100:.0f}%" if decline is not None else "—"
 
-            lines += [f"### {w['name']}（{w['ticker']}）　優先級 {w['priority']}"]
+            lines += [f"### {w['name']}（{ticker}）　優先級 {w['priority']}"]
             lines += [f"- 52 週高點 USD {high}，距高點 {decline_str}"]
             if w.get("watch_reason"):
                 lines += [f"- 觀察原因：{w['watch_reason']}"]
@@ -482,6 +533,10 @@ def build_market_prompt(
                 lines += ["- 催化劑：" + "、".join(catalysts[:3])]
             if w.get("note"):
                 lines += [f"- 策略：{w['note']}"]
+
+            if thesis_dir:
+                lines += [f"- 📋 買入背景：請讀取 `{thesis_dir}/{ticker}.md`（若存在）"]
+
             lines += [""]
 
     lines += [
@@ -512,7 +567,7 @@ def build_market_prompt(
         "- 機會背景（2-3 句）",
         "- 代表性個股（2-3 檔）",
         "- 切入理由",
-        "若觀察清單標的（CRWD / NET / ALAB）有相關機會，請特別標注。",
+        "若觀察清單標的有相關機會，請特別標注，並對照其 thesis 買入邏輯說明目前時空背景是否仍然成立。",
         "",
         "## 六、今日風險提示",
         "- 今日需特別注意的市場風險（條列）",

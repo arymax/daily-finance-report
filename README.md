@@ -17,7 +17,7 @@
 | 工具 | 說明 |
 |------|------|
 | Python 3.10+ | [python.org](https://www.python.org/downloads/) |
-| [uv](https://docs.astral.sh/uv/getting-started/installation/) | 套件管理（推薦）|
+| [uv](https://docs.astral.sh/uv/getting-started/installation/) | 套件管理（必要）|
 | [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) | `claude` 指令需可執行 |
 | Git | 同步用 |
 
@@ -34,22 +34,11 @@ cd daily-finance-report
 
 ### 2. 安裝套件
 
-**使用 uv（推薦）：**
 ```bash
-uv venv
-uv pip install -r requirements.txt
+uv sync
 ```
 
-**使用 pip：**
-```bash
-python -m venv .venv
-
-# Windows
-.venv\Scripts\pip install -r requirements.txt
-
-# macOS / Linux
-.venv/bin/pip install -r requirements.txt
-```
+這會自動根據 `pyproject.toml` 與 `uv.lock` 建立 `.venv` 並安裝所有依賴。
 
 ### 3. 設定個人持倉
 
@@ -63,11 +52,7 @@ cp portfolio.example.json portfolio.json
 
 驗證格式是否正確：
 ```bash
-# Windows
-.venv\Scripts\python main.py --validate
-
-# macOS / Linux
-.venv/bin/python main.py --validate
+uv run python main.py --validate
 ```
 
 ### 4. 調整設定（可選）
@@ -98,11 +83,7 @@ cp portfolio.example.json portfolio.json
 ### 5. 執行
 
 ```bash
-# Windows
-.venv\Scripts\python main.py
-
-# macOS / Linux
-.venv/bin/python main.py
+uv run python main.py
 ```
 
 報告生成在 `reports/` 目錄。
@@ -112,10 +93,10 @@ cp portfolio.example.json portfolio.json
 ## 指令選項
 
 ```bash
-python main.py              # 完整報告（持倉分析 + 市場總覽）
-python main.py --portfolio  # 只執行持倉分析
-python main.py --market     # 只執行市場總覽
-python main.py --validate   # 只驗證 portfolio.json 格式，不生成報告
+uv run python main.py              # 完整報告（持倉分析 + 市場總覽）
+uv run python main.py --portfolio  # 只執行持倉分析
+uv run python main.py --market     # 只執行市場總覽
+uv run python main.py --validate   # 只驗證 portfolio.json 格式，不生成報告
 ```
 
 ---
@@ -138,19 +119,19 @@ git remote add origin https://github.com/<你的帳號>/<repo>.git
 
 ## Windows 每日排程
 
-安裝 Windows Task Scheduler 排程（每日早上 8:00 自動執行）：
+安裝 Windows Task Scheduler 排程（每日早上 7:00 自動執行）：
 ```bash
-.venv\Scripts\python tools\setup_scheduler.py --install
+uv run python tools/setup_scheduler.py --install
 ```
 
 查看排程狀態：
 ```bash
-.venv\Scripts\python tools\setup_scheduler.py --status
+uv run python tools/setup_scheduler.py --status
 ```
 
 移除排程：
 ```bash
-.venv\Scripts\python tools\setup_scheduler.py --remove
+uv run python tools/setup_scheduler.py --remove
 ```
 
 ---
@@ -164,7 +145,8 @@ daily-finance-report/
 ├── portfolio.json            # 個人持倉（自行建立，勿 commit 敏感資料）
 ├── portfolio.example.json    # 持倉格式範例
 ├── portfolio_schema.json     # portfolio 欄位 schema（格式驗證用）
-├── requirements.txt
+├── pyproject.toml            # 專案設定與依賴（uv init）
+├── uv.lock                   # 精確版本鎖定檔
 │
 ├── core/                     # 核心模組
 │   ├── config.py             # 設定載入 + 日誌初始化

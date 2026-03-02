@@ -31,9 +31,15 @@ def _run(cmd: list, check: bool = True) -> subprocess.CompletedProcess:
 
 def find_python() -> str:
     """
-    優先使用專案 .venv 內的 Python（保證套件隔離）。
-    若 .venv 不存在則 fallback 到目前執行的 Python。
+    優先使用 uv run（若 uv 已安裝且 pyproject.toml 存在）。
+    否則 fallback 到 .venv/Scripts/python.exe，最後才用 sys.executable。
     """
+    import shutil
+
+    uv_exe = shutil.which("uv")
+    if uv_exe and (BASE_DIR / "pyproject.toml").exists():
+        return uv_exe  # caller 會以 "uv run python main.py" 形式組裝指令
+
     venv_python = BASE_DIR / ".venv" / "Scripts" / "python.exe"
     if venv_python.exists():
         return str(venv_python)
@@ -41,14 +47,21 @@ def find_python() -> str:
 
 
 def create_task() -> None:
-    python_exe = find_python()
+    python_or_uv = find_python()
     script_path = str(MAIN_PY)
 
-    # schtasks 的 /tr 參數：用雙引號包住完整指令
-    action = f'"{python_exe}" "{script_path}"'
+    # 若取得的是 uv，使用 "uv run python main.py"（uv init 架構）
+    import shutil
+    uv_exe = shutil.which("uv")
+    if uv_exe and python_or_uv == uv_exe:
+        action = f'"{uv_exe}" run python "{script_path}"'
+        mode = "uv run"
+    else:
+        action = f'"{python_or_uv}" "{script_path}"'
+        mode = ".venv python"
 
-    print(f"  Python   : {python_exe}")
-    print(f"  Script   : {script_path}")
+    print(f"  執行方式  : {mode}")
+    print(f"  指令      : {action}")
     print(f"  任務名稱  : {TASK_NAME}")
     print(f"  執行時間  : 每日 07:00（台灣時間）")
     print()

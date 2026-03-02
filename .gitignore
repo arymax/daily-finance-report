@@ -20,6 +20,16 @@ desktop.ini
 .vscode/
 .idea/
 
+# Serena MCP（本機絕對路徑設定，不進 repo）
+.serena/
+
+# uv — uv.lock 與 .python-version 需被追蹤
+# uv.lock       ← 精確版本鎖定，請 commit
+# .python-version ← Python 版本聲明，請 commit
+
+# thesis/ — 個股買入背景，應被 git 追蹤（記錄個人投資邏輯）
+# thesis/{TICKER}.md ← 每次更新投資邏輯後請 commit
+
 # 確保以下被 git 追蹤（不加 !，只是說明）
 # reports/      ← 每日報告，需同步
 # memory/       ← 每日記憶摘要，需同步

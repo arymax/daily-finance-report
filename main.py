@@ -116,6 +116,7 @@ def run(run_portfolio: bool = True, run_market: bool = True) -> None:
     memory_cfg    = config.get("memory", {})
     sync_cfg      = config.get("sync", {})
     memory_dir    = BASE_DIR / memory_cfg.get("memory_dir", "memory")
+    thesis_dir    = BASE_DIR / "thesis"
     context_days  = memory_cfg.get("context_days", 5)
 
     setup_logging(logs_dir)
@@ -204,6 +205,7 @@ def run(run_portfolio: bool = True, run_market: bool = True) -> None:
             prompt = build_portfolio_prompt(
                 portfolio, news_by_ticker, prices, usd_twd,
                 memory_context=memory_context,
+                thesis_dir=str(thesis_dir),
             )
             logger.info(f"   Prompt 長度：{len(prompt):,} 字元")
             portfolio_content = call_claude(prompt, claude_cli, claude_model, timeout)
@@ -219,6 +221,7 @@ def run(run_portfolio: bool = True, run_market: bool = True) -> None:
             prompt = build_market_prompt(
                 market_news, watchlist, extra_news_by_ticker,
                 memory_context=memory_context,
+                thesis_dir=str(thesis_dir),
             )
             logger.info(f"   Prompt 長度：{len(prompt):,} 字元")
             market_content = call_claude(prompt, claude_cli, claude_model, timeout)
