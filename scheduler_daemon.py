@@ -1,0 +1,85 @@
+"""
+scheduler_daemon.py — 每日財務報告背景排程
+
+每日兩個時段自動觸發 main.py：
+  07:00 — 早盤（台股盤前／美股盤後）
+  18:00 — 收盤（台股盤後／美股盤前）
+
+啟動方式：
+  python scheduler_daemon.py          # 前景執行（有 console）
+  pythonw scheduler_daemon.py         # 背景靜默執行（無 console）
+
+開機自動啟動（不需管理員）：
+  python tools/install_startup.py     # 將背景啟動捷徑加入 Windows 開機啟動
+"""
+
+import logging
+import subprocess
+import sys
+import time
+from datetime import datetime, timezone, timedelta
+from pathlib import Path
+
+import schedule
+
+BASE_DIR = Path(__file__).parent
+TST = timezone(timedelta(hours=8))
+
+# ── Logging ────────────────────────────────────────────────
+logs_dir = BASE_DIR / "logs"
+logs_dir.mkdir(exist_ok=True)
+log_file = logs_dir / f"scheduler_{datetime.now(TST).strftime('%Y%m%d')}.log"
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%H:%M:%S",
+    handlers=[
+        logging.FileHandler(log_file, encoding="utf-8"),
+        logging.StreamHandler(sys.stdout),
+    ],
+)
+logger = logging.getLogger(__name__)
+
+
+# ── Python 執行檔路徑 ──────────────────────────────────────
+def _find_python() -> str:
+    """優先使用 .venv/Scripts/python.exe，找不到才用 sys.executable。"""
+    venv_python = BASE_DIR / ".venv" / "Scripts" / "python.exe"
+    if venv_python.exists():
+        return str(venv_python)
+    return sys.executable
+
+
+# ── 觸發 main.py ───────────────────────────────────────────
+def _trigger(session: str) -> None:
+    now = datetime.now(TST).strftime("%Y-%m-%d %H:%M")
+    logger.info(f"[{now}] 觸發 main.py --session {session}")
+    try:
+        subprocess.Popen(
+            [_find_python(), str(BASE_DIR / "main.py"), "--session", session],
+            cwd=str(BASE_DIR),
+        )
+    except Exception as e:
+        logger.error(f"觸發失敗：{e}")
+
+
+# ── 排程設定 ───────────────────────────────────────────────
+schedule.every().day.at("07:00").do(_trigger, session="morning")
+schedule.every().day.at("18:00").do(_trigger, session="evening")
+
+
+# ── 主迴圈 ────────────────────────────────────────────────
+def main() -> None:
+    logger.info("=" * 50)
+    logger.info("  Daily Finance Report Scheduler 啟動")
+    logger.info("  07:00 → morning  |  18:00 → evening")
+    logger.info("=" * 50)
+
+    while True:
+        schedule.run_pending()
+        time.sleep(30)
+
+
+if __name__ == "__main__":
+    main()

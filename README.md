@@ -117,22 +117,34 @@ git remote add origin https://github.com/<你的帳號>/<repo>.git
 
 ---
 
-## Windows 每日排程
+## 每日自動排程
 
-安裝 Windows Task Scheduler 排程（每日早上 7:00 自動執行）：
+本專案使用 **Python `schedule` 套件**，不依賴 Windows Task Scheduler，無需管理員權限。
+
+### 手動啟動（當次有效）
 ```bash
-uv run python tools/setup_scheduler.py --install
+# 有 console 視窗
+uv run python scheduler_daemon.py
+
+# 背景靜默執行（無視窗）
+start "" .venv\Scripts\pythonw.exe scheduler_daemon.py
 ```
 
-查看排程狀態：
+### 開機自動啟動（永久生效，不需管理員）
 ```bash
-uv run python tools/setup_scheduler.py --status
+uv run python tools/install_startup.py
 ```
 
-移除排程：
+查詢狀態 / 移除：
 ```bash
-uv run python tools/setup_scheduler.py --remove
+uv run python tools/install_startup.py --status
+uv run python tools/install_startup.py --remove
 ```
+
+| 時段 | 時間 | 說明 |
+|------|------|------|
+| morning | 07:00 | 台股盤前／美股盤後分析 |
+| evening | 18:00 | 台股盤後／美股盤前預備 |
 
 ---
 
@@ -159,7 +171,7 @@ daily-finance-report/
 │
 ├── tools/                    # 獨立工具腳本
 │   ├── validate.py           # portfolio schema 驗證 CLI
-│   └── setup_scheduler.py    # Windows Task Scheduler 設定
+│   └── install_startup.py    # 開機自動啟動設定（不需管理員）
 │
 ├── reports/                  # 每日報告（自動生成）
 │   └── YYYYMMDD_*.md
