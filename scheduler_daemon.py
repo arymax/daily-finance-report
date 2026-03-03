@@ -74,9 +74,13 @@ def _trigger(session: str) -> None:
     now = datetime.now(TST).strftime("%Y-%m-%d %H:%M")
     logger.info(f"[{now}] 觸發 main.py --session {session}")
     try:
+        kwargs: dict = {}
+        if sys.platform == "win32":
+            kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW
         subprocess.Popen(
             [_find_python(), str(BASE_DIR / "main.py"), "--session", session],
             cwd=str(BASE_DIR),
+            **kwargs,
         )
     except Exception as e:
         logger.error(f"觸發失敗：{e}")
@@ -85,6 +89,7 @@ def _trigger(session: str) -> None:
 # ── 排程設定 ───────────────────────────────────────────────
 schedule.every().day.at("07:00").do(_trigger, session="morning")
 schedule.every().day.at("18:00").do(_trigger, session="evening")
+schedule.every().day.at("23:05").do(_trigger, session="evening")
 
 
 # ── 主迴圈 ────────────────────────────────────────────────

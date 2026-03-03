@@ -31,7 +31,7 @@
   },
 
   "sync": {
-    "enabled": false,
+    "enabled": true,
     "auto_pull": true,
     "auto_push": true
   },
