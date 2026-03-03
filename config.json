@@ -34,5 +34,9 @@
     "enabled": false,
     "auto_pull": true,
     "auto_push": true
+  },
+
+  "scheduler": {
+    "enabled": true
   }
 }

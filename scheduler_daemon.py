@@ -13,6 +13,7 @@ scheduler_daemon.py — 每日財務報告背景排程
   python tools/install_startup.py     # 將背景啟動捷徑加入 Windows 開機啟動
 """
 
+import json
 import logging
 import subprocess
 import sys
@@ -42,6 +43,18 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+# ── 讀取排程開關 ───────────────────────────────────────────
+def _is_enabled() -> bool:
+    """每次觸發前即時讀取 config.json，讓使用者可隨時關閉排程而無需重啟 daemon。"""
+    try:
+        with open(BASE_DIR / "config.json", "r", encoding="utf-8") as f:
+            config = json.load(f)
+        return config.get("scheduler", {}).get("enabled", True)
+    except Exception as e:
+        logger.warning(f"讀取 config.json 失敗，預設啟用：{e}")
+        return True
+
+
 # ── Python 執行檔路徑 ──────────────────────────────────────
 def _find_python() -> str:
     """優先使用 .venv/Scripts/python.exe，找不到才用 sys.executable。"""
@@ -53,6 +66,11 @@ def _find_python() -> str:
 
 # ── 觸發 main.py ───────────────────────────────────────────
 def _trigger(session: str) -> None:
+    if not _is_enabled():
+        now = datetime.now(TST).strftime("%Y-%m-%d %H:%M")
+        logger.info(f"[{now}] 排程已停用（scheduler.enabled=false），略過 {session}")
+        return
+
     now = datetime.now(TST).strftime("%Y-%m-%d %H:%M")
     logger.info(f"[{now}] 觸發 main.py --session {session}")
     try:
