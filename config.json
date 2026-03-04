@@ -38,5 +38,9 @@
 
   "scheduler": {
     "enabled": true
+  },
+
+  "thesis": {
+    "auto_update": true
   }
 }

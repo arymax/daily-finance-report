@@ -35,6 +35,7 @@ from core.prices import fetch_current_prices, fetch_usd_twd_rate
 from core.prompts import build_portfolio_prompt, build_market_prompt
 import core.memory as mem
 import core.sync as sync
+from core.thesis import load_all_theses, build_update_prompt as build_thesis_prompt, parse_and_save as save_theses
 
 # ── 時區 ──────────────────────────────────────
 TST = timezone(timedelta(hours=8))
@@ -245,6 +246,26 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
                 mem.save_summary(summary, memory_dir)
             except Exception as e:
                 logger.warning(f"記憶摘要生成失敗（不影響主報告）：{e}")
+
+    # ── Task 4：Thesis 自動更新 ──
+    thesis_cfg = config.get("thesis", {})
+    if thesis_cfg.get("auto_update", True) and (portfolio_content or market_content):
+        logger.info("── Task 4：Thesis 自動更新 ────────────────")
+        try:
+            theses = load_all_theses(thesis_dir)
+            if theses:
+                update_prompt = build_thesis_prompt(
+                    theses, portfolio_content, market_content, session=session
+                )
+                logger.info(f"   Prompt 長度：{len(update_prompt):,} 字元")
+                thesis_response = call_claude(update_prompt, claude_cli, claude_model, timeout)
+                updated = save_theses(thesis_response, thesis_dir)
+                if updated:
+                    logger.info(f"  ✅ 更新了 {len(updated)} 個 thesis：{', '.join(updated)}")
+                else:
+                    logger.info("  ℹ️ 今日無 thesis 更新")
+        except Exception as e:
+            logger.warning(f"Thesis 自動更新失敗（不影響主報告）：{e}")
 
     logger.info("=" * 55)
     if errors:

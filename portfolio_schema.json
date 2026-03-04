@@ -85,7 +85,7 @@
     "watchlist_entry": {
       "type": "object",
       "description": "觀察清單標的，完全獨立於持倉，買入後不移入 tactical",
-      "required": ["ticker", "name", "exchange", "market", "sector", "theme", "priority", "entry_condition", "key_metrics", "catalysts"],
+      "required": ["ticker", "name", "exchange", "market", "sector", "theme", "priority", "entry_condition", "key_metrics"],
       "additionalProperties": false,
       "properties": {
         "ticker":          { "type": "string" },
@@ -107,9 +107,9 @@
             "additional":         { "type": "object", "description": "標的特有的自由附加指標" }
           }
         },
-        "catalysts": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
-        "risks":     { "type": "array", "items": { "type": "string" }, "minItems": 1 },
-        "note":      { "type": "string" }
+        "next_event": { "type": "string", "description": "下一個重要事件或進場等待說明" },
+        "risks":      { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "note":       { "type": "string" }
       }
     },
 
