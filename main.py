@@ -36,6 +36,7 @@ from core.prompts import build_portfolio_prompt, build_market_prompt
 import core.memory as mem
 import core.sync as sync
 from core.thesis import load_all_theses, build_update_prompt as build_thesis_prompt, parse_and_save as save_theses
+from core.fundamentals import fetch_fundamentals, update_snapshot_in_thesis
 
 # ── 時區 ──────────────────────────────────────
 TST = timezone(timedelta(hours=8))
@@ -226,6 +227,20 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
     prices = fetch_current_prices(price_tickers)
     usd_twd = fetch_usd_twd_rate()
     logger.info(f"  USD/TWD = {usd_twd:.2f}")
+
+    # ── 抓取基本面指標並寫入 thesis 快照 ──
+    fundamental_tickers: list[tuple[str, str]] = [
+        (pos["ticker"], pos["market"]) for pos in ta_positions
+    ] + [(w["ticker"], w["market"]) for w in watchlist]
+
+    if fundamental_tickers:
+        logger.info("── 抓取基本面指標 ──────────────────────")
+        fundamentals = fetch_fundamentals(fundamental_tickers)
+        update_time = datetime.now(TST).strftime("%Y-%m-%d %H:%M TST")
+        for ticker, metrics in fundamentals.items():
+            tf = thesis_dir / f"{ticker}.md"
+            if tf.exists():
+                update_snapshot_in_thesis(tf, metrics, update_time)
 
     # ── 載入歷史記憶 context ──
     memory_context = ""
