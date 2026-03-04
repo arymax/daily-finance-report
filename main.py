@@ -45,11 +45,14 @@ logger = logging.getLogger(__name__)
 
 
 # ── Claude CLI 呼叫 ────────────────────────────
-def call_claude(prompt: str, claude_cli: str, model: str, timeout: int) -> str:
+def call_claude(prompt: str, claude_cli: str, model: str, timeout: int, stream: bool = False) -> str:
     """
     透過 subprocess 呼叫本地 Claude CLI（stdin 模式）。
     移除 CLAUDECODE 環境變數，避免巢狀 session 錯誤。
+    stream=True 時即時印出 Claude 的回應，同時仍捕捉並回傳完整文字。
     """
+    import time
+
     cmd = [claude_cli, "--print", "--dangerously-skip-permissions"]
     if model:
         cmd += ["--model", model]
@@ -65,25 +68,57 @@ def call_claude(prompt: str, claude_cli: str, model: str, timeout: int) -> str:
         tmp_path = tmp.name
 
     try:
-        with open(tmp_path, "r", encoding="utf-8") as stdin_file:
-            result = subprocess.run(
-                cmd,
-                stdin=stdin_file,
-                capture_output=True,
-                text=True,
-                timeout=timeout,
-                encoding="utf-8",
-                errors="replace",
-                env=env,
-            )
+        if stream:
+            chunks: list[str] = []
+            start = time.monotonic()
+            with open(tmp_path, "r", encoding="utf-8") as stdin_file:
+                proc = subprocess.Popen(
+                    cmd,
+                    stdin=stdin_file,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    env=env,
+                )
+            try:
+                assert proc.stdout
+                for line in iter(proc.stdout.readline, ""):
+                    if time.monotonic() - start > timeout:
+                        proc.kill()
+                        raise subprocess.TimeoutExpired(cmd, timeout)
+                    print(line, end="", flush=True)
+                    chunks.append(line)
+                proc.wait()
+            except Exception:
+                proc.kill()
+                raise
+            if proc.returncode != 0:
+                stderr_out = proc.stderr.read() if proc.stderr else ""
+                raise RuntimeError(
+                    f"Claude CLI 失敗 (exit {proc.returncode})\n{stderr_out[:600].strip()}"
+                )
+            return "".join(chunks).strip()
+        else:
+            with open(tmp_path, "r", encoding="utf-8") as stdin_file:
+                result = subprocess.run(
+                    cmd,
+                    stdin=stdin_file,
+                    capture_output=True,
+                    text=True,
+                    timeout=timeout,
+                    encoding="utf-8",
+                    errors="replace",
+                    env=env,
+                )
+            if result.returncode != 0:
+                raise RuntimeError(
+                    f"Claude CLI 失敗 (exit {result.returncode})\n{result.stderr[:600].strip()}"
+                )
+            return result.stdout.strip()
     finally:
         os.unlink(tmp_path)
-
-    if result.returncode != 0:
-        raise RuntimeError(
-            f"Claude CLI 失敗 (exit {result.returncode})\n{result.stderr[:600].strip()}"
-        )
-    return result.stdout.strip()
 
 
 # ── 報告儲存 ──────────────────────────────────
@@ -102,9 +137,10 @@ def save_report(content: str, report_type: str, reports_dir: Path) -> Path:
 def run(run_portfolio: bool = True, run_market: bool = True, session: str = "morning") -> None:
     config = load_config()
 
-    claude_cli   = config.get("claude_cli", "claude")
-    claude_model = config.get("claude_model", "")
-    timeout      = config.get("claude_timeout_seconds", 300)
+    claude_cli    = config.get("claude_cli", "claude")
+    claude_model  = config.get("claude_model", "")
+    timeout       = config.get("claude_timeout_seconds", 300)
+    stream_output = config.get("stream_claude_output", False)
     reports_dir  = BASE_DIR / config.get("reports_dir", "reports")
     logs_dir     = BASE_DIR / config.get("logs_dir", "logs")
     portfolio_path       = BASE_DIR / config.get("portfolio_file", "portfolio.json")
@@ -212,7 +248,7 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
                 session=session,
             )
             logger.info(f"   Prompt 長度：{len(prompt):,} 字元")
-            portfolio_content = call_claude(prompt, claude_cli, claude_model, timeout)
+            portfolio_content = call_claude(prompt, claude_cli, claude_model, timeout, stream=stream_output)
             save_report(portfolio_content, f"{session}_portfolio_analysis", reports_dir)
         except Exception as e:
             logger.error(f"持倉分析失敗：{e}")
@@ -230,7 +266,7 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
                 session=session,
             )
             logger.info(f"   Prompt 長度：{len(prompt):,} 字元")
-            market_content = call_claude(prompt, claude_cli, claude_model, timeout)
+            market_content = call_claude(prompt, claude_cli, claude_model, timeout, stream=stream_output)
             save_report(market_content, f"{session}_market_overview", reports_dir)
         except Exception as e:
             logger.error(f"市場總覽失敗：{e}")
@@ -242,7 +278,7 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
             logger.info("── Task 3：生成記憶摘要 ───────────────")
             try:
                 summary_prompt = mem.generate_summary(portfolio_content, market_content)
-                summary = call_claude(summary_prompt, claude_cli, claude_model, timeout)
+                summary = call_claude(summary_prompt, claude_cli, claude_model, timeout, stream=stream_output)
                 mem.save_summary(summary, memory_dir)
             except Exception as e:
                 logger.warning(f"記憶摘要生成失敗（不影響主報告）：{e}")
@@ -258,7 +294,7 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
                     theses, portfolio_content, market_content, session=session
                 )
                 logger.info(f"   Prompt 長度：{len(update_prompt):,} 字元")
-                thesis_response = call_claude(update_prompt, claude_cli, claude_model, timeout)
+                thesis_response = call_claude(update_prompt, claude_cli, claude_model, timeout, stream=stream_output)
                 updated = save_theses(thesis_response, thesis_dir)
                 if updated:
                     logger.info(f"  ✅ 更新了 {len(updated)} 個 thesis：{', '.join(updated)}")

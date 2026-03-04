@@ -42,5 +42,7 @@
 
   "thesis": {
     "auto_update": true
-  }
+  },
+
+  "stream_claude_output": true
 }
