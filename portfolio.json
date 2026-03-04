@@ -1,15 +1,16 @@
 {
   "meta": {
-    "last_updated": "2026-03-03",
+    "last_updated": "2026-03-05",
     "base_currency": "TWD"
   },
 
   "cash": {
-    "total_twd": 381113,
+    "total_twd": 331015,
     "breakdown": {
-      "中信（日常生活備用）": 11219,
-      "玉山（投資扣款專用）": 86710,
-      "永豐（投資扣款專用）": 283184
+      "中信（日常生活備用）": 8396,
+      "玉山（投資扣款專用）": 45102,
+      "永豐（投資扣款專用）": 183309,
+      "Firstrade（美股帳戶，含CRWD持倉）": 94208
     },
     "note": "高現金比例保留市場大幅回調時的彈藥，購車計畫已暫取消，資金可更積極運用"
   },
@@ -104,21 +105,42 @@
   "tactical": {
     "positions": [
       {
+        "ticker": "CRWD",
+        "name": "CrowdStrike Holdings",
+        "type": "stock",
+        "market": "US",
+        "cost_twd": 6349,
+        "shares": 0.5,
+        "sector": "資安軟體",
+        "theme": "AI時代企業資安平台整合",
+        "position_size": "custom",
+        "position_pct": 0.05,
+        "status": "試探性倉位，Q4財報確認 ARR $5B+ 後進場",
+        "strategy": "財報超預期（ARR 突破 $5B，年增 >23%），以試探 0.5 股建立基礎倉位；後續視技術面穩固決定是否加碼",
+        "catalysts": [
+          "Q4 財報 ARR 突破 $5B，年增超過 23%",
+          "CEO 稱「有史以來最佳年度（best year yet）」，指引未下修",
+          "地緣政治升溫持續強化企業資安預算"
+        ],
+        "broker": "Firstrade",
+        "note": "均價 396.79 USD（0.5 股 × 396.79）；原始成本 198.40 USD；cost_twd 依匯率估算 32 換算約 6,349 TWD"
+      },
+      {
         "ticker": "3030",
         "name": "德律科技",
         "type": "stock",
         "market": "TW",
-        "cost_twd": 41608,
+        "cost_twd": 41550,
         "shares": 200,
         "sector": "半導體設備／AOI檢測",
         "theme": "AI先進封裝設備",
         "position_size": "full",
         "resistance_key": 217,
         "support_ref": 200,
-        "status": "已加倉至滿倉（第二批 2/26 已交割），均價 208.04 TWD",
+        "status": "已加倉至滿倉，均價 207.75 TWD",
         "strategy": "持滿倉觀察突破 217 元前高；若突破確認則考慮續抱；跌破 200 元重要支撐再評估減碼",
         "broker": "玉山證券",
-        "note": "第一批 100 股：均價 200.28 / 損益平衡 201.18 TWD；第二批 100 股：均價 215.80 / 損益平衡 216.76 TWD；合計均價 208.04 / 合計損益平衡約 208.97 TWD"
+        "note": "合計均價 207.75 TWD / 合計損益平衡 208.97 TWD（含手續費）"
       }
     ]
   },
@@ -130,67 +152,52 @@
         "name": "Tether USD",
         "exchange": "Bitget",
         "type": "stablecoin",
-        "cost_twd": 52320,
-        "quantity": 1635,
+        "cost_twd": 48595,
+        "quantity": 1519,
         "role": "合約保證金／現貨買入資金",
-        "note": "1,635 USDT；cost_twd 依匯率估算 32 換算"
+        "note": "1,519 USDT；cost_twd 依匯率估算 32 換算"
       },
       {
         "ticker": "USDT",
         "name": "Tether USD",
         "exchange": "Bitunix",
         "type": "contract",
-        "cost_twd": 31136,
-        "quantity": 973,
+        "cost_twd": 36818,
+        "quantity": 1150,
         "role": "短線合約交易",
-        "note": "973 USDT；合約學習帳戶，操作策略為短線數小時內收倉；cost_twd 依匯率估算 32 換算"
+        "note": "1,150 USDT；合約學習帳戶，操作策略為短線數小時內收倉；cost_twd 依匯率估算 32 換算"
       },
       {
         "ticker": "BTC",
         "name": "Bitcoin",
         "exchange": "Bitget",
         "type": "spot",
-        "cost_twd": 16255,
+        "cost_twd": 21420,
         "quantity": 0.006537,
-        "note": "現貨長期持有；均價約 77,705 USD，數量依成本反推（匯率估算 32）"
+        "note": "現貨長期持有；cost_twd 2026-03-05 更新"
       },
       {
         "ticker": "ETH",
         "name": "Ethereum",
         "exchange": "Bitget",
         "type": "spot",
-        "cost_twd": 5700,
+        "cost_twd": 6434,
         "quantity": 0.1547,
-        "note": "現貨長期持有；均價約 1,188 USD，數量依成本反推（匯率估算 31）"
+        "note": "現貨長期持有；cost_twd 2026-03-05 更新"
       },
       {
         "ticker": "XRP",
         "name": "XRP",
         "exchange": "Bitget",
         "type": "spot",
-        "cost_twd": 5011,
+        "cost_twd": 5285,
         "quantity": 60.57,
-        "note": "現貨長期持有；均價約 2.585 USD，數量依成本反推（匯率估算 32）"
+        "note": "現貨長期持有；cost_twd 2026-03-05 更新"
       }
     ]
   },
 
   "watchlist": [
-    {
-      "ticker": "CRWD",
-      "name": "CrowdStrike Holdings",
-      "exchange": "NASDAQ",
-      "market": "US",
-      "sector": "資安軟體",
-      "theme": "AI時代企業資安平台整合",
-      "priority": 1,
-      "entry_condition": "3/3財報後視ARR成長與指引，技術面確認底部或帶量反彈",
-      "key_metrics": {
-        "52w_high_usd": 543,
-        "decline_from_high": -0.29
-      },
-      "next_event": "Q4財報結果待確認 ARR ≥23%"
-    },
     {
       "ticker": "NET",
       "name": "Cloudflare Inc.",
