@@ -124,6 +124,27 @@
         "note": "均價 396.79 USD（0.5 股 × 396.79）；原始成本 198.40 USD；cost_twd 依匯率估算 32 換算約 6,349 TWD"
       },
       {
+        "ticker": "ALAB",
+        "name": "Astera Labs Inc.",
+        "type": "stock",
+        "market": "US",
+        "cost_twd": 5923,
+        "shares": 1.5,
+        "sector": "半導體連接方案",
+        "theme": "AI資料中心機架規模連接晶片",
+        "position_size": "custom",
+        "position_pct": 0.05,
+        "status": "試探性倉位，等待 $175 突破或 Q1 財報毛利率確認後評估加碼",
+        "strategy": "以試探倉位建立基礎部位；後續等技術面 $175 帶量突破或 2026-05-12 Q1 財報毛利率企穩後評估加碼",
+        "catalysts": [
+          "Scorpio PCIe 6 全球唯一量產地位，AI 資料中心機架規模架構受益",
+          "Amazon 4.66 億 USD 認股權背書，供應鏈深度整合",
+          "Morgan Stanley TMT Conference 管理層正面表態 Scorpio 出貨加速"
+        ],
+        "broker": "Firstrade",
+        "note": "均價 123.395 USD（1.5 股）；原始成本 185.09 USD；cost_twd 依匯率估算 32 換算約 5,923 TWD"
+      },
+      {
         "ticker": "3030",
         "name": "德律科技",
         "type": "stock",
@@ -208,21 +229,6 @@
         "decline_from_high": -0.34
       },
       "next_event": "等技術面帶量止跌確認後評估進場"
-    },
-    {
-      "ticker": "ALAB",
-      "name": "Astera Labs Inc.",
-      "exchange": "NASDAQ",
-      "market": "US",
-      "sector": "半導體連接方案",
-      "theme": "AI資料中心機架規模連接晶片",
-      "priority": 3,
-      "entry_condition": "技術面尚未滿足進場條件；等止跌確認、突破$175阻力位",
-      "key_metrics": {
-        "52w_high_usd": 262.90,
-        "decline_from_high": -0.52
-      },
-      "next_event": "2026-05-12 Q1財報（觀察毛利率企穩與新CFO信心重建）"
     }
   ],
   "strategy": {
