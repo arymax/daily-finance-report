@@ -3,7 +3,6 @@
     "last_updated": "2026-03-05",
     "base_currency": "TWD"
   },
-
   "cash": {
     "total_twd": 331015,
     "breakdown": {
@@ -14,7 +13,6 @@
     },
     "note": "高現金比例保留市場大幅回調時的彈藥，購車計畫已暫取消，資金可更積極運用"
   },
-
   "long_term": {
     "positions": [
       {
@@ -40,7 +38,7 @@
         "sector": "短期美國公債",
         "theme": "防禦性部位",
         "dca_monthly": true,
-        "dca_amount_twd": 7500,
+        "dca_amount_twd": 2500,
         "broker": "玉山證券",
         "note": "月定額扣款，防禦部位核心；均價 31.14 TWD"
       },
@@ -54,7 +52,7 @@
         "sector": "超短期美國公債",
         "theme": "防禦性部位/類現金",
         "dca_monthly": true,
-        "dca_amount_twd": 5000,
+        "dca_amount_twd": 2500,
         "broker": "玉山證券",
         "note": "月定額扣款，近現金特性；均價 41.54 TWD"
       },
@@ -81,7 +79,8 @@
         "shares": 3.41164,
         "sector": "全球股票",
         "theme": "全球市場分散",
-        "dca_monthly": false,
+        "dca_monthly": true,
+        "dca_amount_twd": 2500,
         "broker": "永豐大戶投",
         "note": "全球分散配置，與VTI有部分重疊；均價約 137 USD（依成本反推，匯率估算 32）"
       },
@@ -101,7 +100,6 @@
       }
     ]
   },
-
   "tactical": {
     "positions": [
       {
@@ -144,7 +142,6 @@
       }
     ]
   },
-
   "crypto": {
     "positions": [
       {
@@ -196,7 +193,6 @@
       }
     ]
   },
-
   "watchlist": [
     {
       "ticker": "NET",
@@ -229,14 +225,25 @@
       "next_event": "2026-05-12 Q1財報（觀察毛利率企穩與新CFO信心重建）"
     }
   ],
-
   "strategy": {
     "investment_horizon": "6個月（2026下半年集中部署）",
     "overall_theme": "AI基礎建設全鏈路佈局",
     "key_upcoming_events": [
-      { "date": "2026-03-03", "ticker": "CRWD",   "event": "Q4財報" },
-      { "date": "2026-03-03", "ticker": "ALAB",   "event": "Morgan Stanley TMT Conference" },
-      { "date": "2026-05-12", "ticker": "ALAB",   "event": "Q1財報" }
+      {
+        "date": "2026-03-03",
+        "ticker": "CRWD",
+        "event": "Q4財報"
+      },
+      {
+        "date": "2026-03-03",
+        "ticker": "ALAB",
+        "event": "Morgan Stanley TMT Conference"
+      },
+      {
+        "date": "2026-05-12",
+        "ticker": "ALAB",
+        "event": "Q1財報"
+      }
     ],
     "risk_notes": [
       "軟體股IGV ETF今年已跌23%，情緒底部未確認",
