@@ -37,6 +37,11 @@ import core.memory as mem
 import core.sync as sync
 from core.thesis import load_all_theses, build_update_prompt as build_thesis_prompt, parse_and_save as save_theses
 from core.fundamentals import fetch_fundamentals, update_snapshot_in_thesis
+from core.research import (
+    build_enrich_prompt,
+    build_candidate_prompt, parse_candidates,
+    build_research_prompt, save_research_thesis,
+)
 
 # ── 時區 ──────────────────────────────────────
 TST = timezone(timedelta(hours=8))
@@ -310,11 +315,17 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
                 )
                 logger.info(f"   Prompt 長度：{len(update_prompt):,} 字元")
                 thesis_response = call_claude(update_prompt, claude_cli, claude_model, timeout, stream=stream_output)
-                updated = save_theses(thesis_response, thesis_dir)
+                updated, alerts = save_theses(thesis_response, thesis_dir)
                 if updated:
                     logger.info(f"  ✅ 更新了 {len(updated)} 個 thesis：{', '.join(updated)}")
                 else:
                     logger.info("  ℹ️ 今日無 thesis 更新")
+                for ticker, alert_text in alerts.items():
+                    logger.warning("  " + "!" * 50)
+                    logger.warning(f"  ⚠️  重大質化事件警報：{ticker}")
+                    logger.warning(f"  {alert_text}")
+                    logger.warning("  請手動重新評估此 thesis 的策略部分")
+                    logger.warning("  " + "!" * 50)
         except Exception as e:
             logger.warning(f"Thesis 自動更新失敗（不影響主報告）：{e}")
 
@@ -338,12 +349,81 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
         sys.exit(1)
 
 
+# ── Enrich 模式：補充現有 thesis 質化深度 ──────────────
+def run_enrich_theses() -> None:
+    """對所有現有 thesis 補充深度質化分析（一次性執行）。"""
+    config      = load_config()
+    claude_cli  = config.get("claude_cli", "claude")
+    claude_model= config.get("claude_model", "")
+    timeout     = config.get("claude_timeout_seconds", 300)
+    stream_output = config.get("stream_claude_output", False)
+    thesis_dir  = BASE_DIR / "thesis"
+    logs_dir    = BASE_DIR / config.get("logs_dir", "logs")
+    portfolio_path = BASE_DIR / config.get("portfolio_file", "portfolio.json")
+
+    setup_logging(logs_dir)
+    logger.info("=" * 55)
+    logger.info("  Thesis Enrichment 模式")
+    logger.info("=" * 55)
+
+    portfolio = load_portfolio(portfolio_path)
+    # 建立 ticker → market 映射
+    market_map: dict[str, str] = {}
+    for pos in portfolio.get("long_term", {}).get("positions", []) + \
+                portfolio.get("tactical", {}).get("positions", []):
+        market_map[pos["ticker"]] = pos["market"]
+    for w in portfolio.get("watchlist", []):
+        market_map[w["ticker"]] = w["market"]
+
+    today_str   = datetime.now(TST).strftime("%Y-%m-%d")
+    update_time = datetime.now(TST).strftime("%Y-%m-%d %H:%M TST")
+    usd_twd     = fetch_usd_twd_rate()
+
+    for thesis_file in sorted(thesis_dir.glob("*.md")):
+        ticker = thesis_file.stem
+        market = market_map.get(ticker, "US" if not ticker.isdigit() else "TW")
+        name   = ticker  # fallback; Claude will refine
+
+        logger.info(f"── 補充 {ticker}.md ─────────────────")
+        try:
+            current_thesis = thesis_file.read_text(encoding="utf-8")
+            articles  = fetch_stock_news(ticker, market=market, max_articles=8)
+            fund_data = fetch_fundamentals([(ticker, market)])
+            price_data = fetch_current_prices([(ticker, market)])
+            price = price_data.get(ticker, {}).get("price")
+
+            prompt = build_enrich_prompt(
+                ticker=ticker, name=name, market=market,
+                current_thesis=current_thesis,
+                news_articles=articles,
+                fundamentals=fund_data.get(ticker, {}),
+                price=price, usd_twd=usd_twd, today=today_str,
+            )
+            logger.info(f"   Prompt 長度：{len(prompt):,} 字元")
+            enriched = call_claude(prompt, claude_cli, claude_model, timeout, stream=stream_output)
+            thesis_file.write_text(enriched.strip() + "\n", encoding="utf-8")
+
+            # 重新寫入快照（enriched 內容覆蓋了原快照）
+            metrics = fund_data.get(ticker, {})
+            if metrics:
+                update_snapshot_in_thesis(thesis_file, metrics, update_time)
+
+            logger.info(f"  ✅ 已補充：{ticker}.md")
+        except Exception as e:
+            logger.error(f"  補充 {ticker} 失敗：{e}")
+
+    logger.info("=" * 55)
+    logger.info("✅ Thesis Enrichment 完成")
+    logger.info("=" * 55)
+
+
 # ── CLI 入口 ──────────────────────────────────
 def main():
     parser = argparse.ArgumentParser(description="每日財務報告生成器")
-    parser.add_argument("--portfolio", action="store_true", help="只執行持倉分析（Task 1）")
-    parser.add_argument("--market",    action="store_true", help="只執行市場總覽（Task 2）")
-    parser.add_argument("--validate",  action="store_true", help="只做 schema 驗證，不生成報告")
+    parser.add_argument("--portfolio",     action="store_true", help="只執行持倉分析（Task 1）")
+    parser.add_argument("--market",        action="store_true", help="只執行市場總覽（Task 2）")
+    parser.add_argument("--validate",      action="store_true", help="只做 schema 驗證，不生成報告")
+    parser.add_argument("--enrich-thesis", action="store_true", help="對所有現有 thesis 補充深度質化分析")
     parser.add_argument(
         "--session",
         choices=["morning", "evening"],
@@ -356,6 +436,10 @@ def main():
         config = load_config()
         portfolio_path = BASE_DIR / config.get("portfolio_file", "portfolio.json")
         validate_portfolio(portfolio_path)
+        return
+
+    if args.enrich_thesis:
+        run_enrich_theses()
         return
 
     if args.portfolio and not args.market:

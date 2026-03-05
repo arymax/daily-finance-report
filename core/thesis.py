@@ -54,34 +54,60 @@ def build_update_prompt(
 
 仔細比對今日報告內容與現有 thesis 文件，找出**需要更新的內容**。
 
-**更新原則：**
+**事實更新原則：**
 - 只更新有新的、具體、可驗證的事實（如財報數字、新的進場條件確認、管理層變動結果）
 - 不更新觀點、策略判斷（這些由使用者自行維護）
 - 近期催化劑表格：若事件已過且有結果，更新「意義」欄或在事件前加「✅」標記已完成
 - 持倉狀態表格（如有）：若價格已超過關鍵阻力或跌破支撐，標記狀態變化
 - 若某個 thesis 文件完全不需要更新，就不要輸出它
 
-**輸出格式（嚴格遵守）：**
-對於每個需要更新的 thesis 文件，輸出完整的新版本內容：
+**重大質化事件警報（⚠️）：**
+若偵測到以下類型事件，**不要**修改 thesis 的策略判斷部分，
+而是在所有 THESIS 區塊之後輸出警報，讓使用者手動評估：
+- 公司宣布重大收購 / 被收購
+- 核心業務方向轉型（exit 主要業務線 / 推出顛覆性新業務）
+- 強力新競爭對手進入（可能直接威脅護城河）
+- 創辦人 / CEO 離職
+- 重大監管行動影響商業模式
+- 重大客戶流失影響護城河評估
+
+警報格式：
+===ALERT: <TICKER>===
+（描述事件，說明為什麼需要使用者手動重新評估 thesis 策略部分）
+===END_ALERT===
+
+**輸出格式（嚴格遵守，先輸出所有 THESIS 區塊，再輸出所有 ALERT 區塊）：**
 
 ===THESIS: <檔名（不含 .md）>===
-（此處放完整的更新後 .md 內容）
+（完整的更新後 .md 內容）
 ===END_THESIS===
 
-若今日報告無新事實需要更新任何 thesis，僅輸出：
+===ALERT: <TICKER>===
+（重大質化事件說明）
+===END_ALERT===
+
+若今日報告無事實需要更新任何 thesis，且無警報，僅輸出：
 NO_UPDATE"""
 
 
-def parse_and_save(response: str, thesis_dir: Path) -> list[str]:
-    """解析 Claude 回傳的區塊，寫入對應 thesis 檔案，回傳更新的檔名列表。"""
+def parse_and_save(
+    response: str, thesis_dir: Path
+) -> tuple[list[str], dict[str, str]]:
+    """
+    解析 Claude 回傳的 THESIS 與 ALERT 區塊。
+    回傳 (updated_list, alerts_dict)：
+      updated_list: 已更新的 thesis 檔名列表
+      alerts_dict:  {TICKER: 警報說明文字}
+    """
+    updated: list[str] = []
+    alerts: dict[str, str] = {}
+
     if response.strip() == "NO_UPDATE":
-        return []
+        return updated, alerts
 
-    pattern = r"===THESIS:\s*(\S+)===\n([\s\S]*?)===END_THESIS==="
-    matches = re.findall(pattern, response)
-
-    updated = []
-    for name, content in matches:
+    # 解析 THESIS 區塊
+    thesis_pattern = r"===THESIS:\s*(\S+)===\n([\s\S]*?)===END_THESIS==="
+    for name, content in re.findall(thesis_pattern, response):
         name = name.strip()
         target = thesis_dir / f"{name}.md"
         if target.exists():
@@ -91,4 +117,9 @@ def parse_and_save(response: str, thesis_dir: Path) -> list[str]:
         else:
             logger.warning(f"  Thesis 更新略過（檔案不存在）：{name}.md")
 
-    return updated
+    # 解析 ALERT 區塊
+    alert_pattern = r"===ALERT:\s*(\S+)===\n([\s\S]*?)===END_ALERT==="
+    for ticker, text in re.findall(alert_pattern, response):
+        alerts[ticker.strip()] = text.strip()
+
+    return updated, alerts
