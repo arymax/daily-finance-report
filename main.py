@@ -350,8 +350,10 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
 
 
 # ── Enrich 模式：補充現有 thesis 質化深度 ──────────────
-def run_enrich_theses() -> None:
-    """對所有現有 thesis 補充深度質化分析（一次性執行）。"""
+def run_enrich_theses(only_tickers: list[str] | None = None) -> None:
+    """對現有 thesis 補充深度質化分析（一次性執行）。
+    only_tickers: 若指定，只處理這些代碼；否則處理所有 thesis 檔案。
+    """
     config      = load_config()
     claude_cli  = config.get("claude_cli", "claude")
     claude_model= config.get("claude_model", "")
@@ -363,7 +365,10 @@ def run_enrich_theses() -> None:
 
     setup_logging(logs_dir)
     logger.info("=" * 55)
-    logger.info("  Thesis Enrichment 模式")
+    if only_tickers:
+        logger.info(f"  Thesis Enrichment 模式（指定：{', '.join(only_tickers)}）")
+    else:
+        logger.info("  Thesis Enrichment 模式（全部）")
     logger.info("=" * 55)
 
     portfolio = load_portfolio(portfolio_path)
@@ -379,7 +384,24 @@ def run_enrich_theses() -> None:
     update_time = datetime.now(TST).strftime("%Y-%m-%d %H:%M TST")
     usd_twd     = fetch_usd_twd_rate()
 
-    for thesis_file in sorted(thesis_dir.glob("*.md")):
+    _SKIP = {"README", "CHANGELOG", "LICENSE", "TODO", "NOTES", "INDEX"}
+
+    # 決定要處理的檔案清單
+    if only_tickers:
+        files_to_process = []
+        for t in only_tickers:
+            f = thesis_dir / f"{t}.md"
+            if f.exists():
+                files_to_process.append(f)
+            else:
+                logger.warning(f"  找不到 thesis/{t}.md，跳過")
+    else:
+        files_to_process = [
+            f for f in sorted(thesis_dir.glob("*.md"))
+            if f.stem.upper() not in _SKIP
+        ]
+
+    for thesis_file in files_to_process:
         ticker = thesis_file.stem
         market = market_map.get(ticker, "US" if not ticker.isdigit() else "TW")
         name   = ticker  # fallback; Claude will refine
@@ -401,7 +423,18 @@ def run_enrich_theses() -> None:
             )
             logger.info(f"   Prompt 長度：{len(prompt):,} 字元")
             enriched = call_claude(prompt, claude_cli, claude_model, timeout, stream=stream_output)
-            thesis_file.write_text(enriched.strip() + "\n", encoding="utf-8")
+
+            # 驗證輸出：第一個字元必須是 '#'
+            enriched_stripped = enriched.strip()
+            if not enriched_stripped.startswith("#"):
+                logger.error(
+                    f"  ❌ {ticker}.md 補充失敗：Claude 輸出不是有效的 Markdown 文件\n"
+                    f"     輸出開頭（前150字）：{enriched_stripped[:150]!r}\n"
+                    f"     原始檔案未修改。"
+                )
+                continue
+
+            thesis_file.write_text(enriched_stripped + "\n", encoding="utf-8")
 
             # 重新寫入快照（enriched 內容覆蓋了原快照）
             metrics = fund_data.get(ticker, {})
@@ -425,6 +458,12 @@ def main():
     parser.add_argument("--validate",      action="store_true", help="只做 schema 驗證，不生成報告")
     parser.add_argument("--enrich-thesis", action="store_true", help="對所有現有 thesis 補充深度質化分析")
     parser.add_argument(
+        "--enrich-ticker",
+        nargs="+",
+        metavar="TICKER",
+        help="只對指定代碼的 thesis 補充質化分析，例如：--enrich-ticker NET ALAB",
+    )
+    parser.add_argument(
         "--session",
         choices=["morning", "evening"],
         default="morning",
@@ -440,6 +479,10 @@ def main():
 
     if args.enrich_thesis:
         run_enrich_theses()
+        return
+
+    if args.enrich_ticker:
+        run_enrich_theses(only_tickers=args.enrich_ticker)
         return
 
     if args.portfolio and not args.market:
