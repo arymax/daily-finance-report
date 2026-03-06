@@ -19,7 +19,6 @@ import logging
 import os
 import subprocess
 import sys
-import tempfile
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
@@ -53,7 +52,7 @@ logger = logging.getLogger(__name__)
 # ── Claude CLI 呼叫 ────────────────────────────
 def call_claude(prompt: str, claude_cli: str, model: str, timeout: int, stream: bool = False) -> str:
     """
-    透過 subprocess 呼叫本地 Claude CLI（stdin 模式）。
+    透過 subprocess 呼叫本地 Claude CLI（stdin pipe 模式，無暫存檔）。
     移除 CLAUDECODE 環境變數，避免巢狀 session 錯誤。
     stream=True 時即時印出 Claude 的回應，同時仍捕捉並回傳完整文字。
     """
@@ -67,64 +66,55 @@ def call_claude(prompt: str, claude_cli: str, model: str, timeout: int, stream: 
     env.pop("CLAUDECODE", None)
     env.pop("CLAUDE_CODE", None)
 
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".txt", delete=False, encoding="utf-8"
-    ) as tmp:
-        tmp.write(prompt)
-        tmp_path = tmp.name
-
-    try:
-        if stream:
-            chunks: list[str] = []
-            start = time.monotonic()
-            with open(tmp_path, "r", encoding="utf-8") as stdin_file:
-                proc = subprocess.Popen(
-                    cmd,
-                    stdin=stdin_file,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                    encoding="utf-8",
-                    errors="replace",
-                    env=env,
-                )
-            try:
-                assert proc.stdout
-                for line in iter(proc.stdout.readline, ""):
-                    if time.monotonic() - start > timeout:
-                        proc.kill()
-                        raise subprocess.TimeoutExpired(cmd, timeout)
-                    print(line, end="", flush=True)
-                    chunks.append(line)
-                proc.wait()
-            except Exception:
-                proc.kill()
-                raise
-            if proc.returncode != 0:
-                stderr_out = proc.stderr.read() if proc.stderr else ""
-                raise RuntimeError(
-                    f"Claude CLI 失敗 (exit {proc.returncode})\n{stderr_out[:600].strip()}"
-                )
-            return "".join(chunks).strip()
-        else:
-            with open(tmp_path, "r", encoding="utf-8") as stdin_file:
-                result = subprocess.run(
-                    cmd,
-                    stdin=stdin_file,
-                    capture_output=True,
-                    text=True,
-                    timeout=timeout,
-                    encoding="utf-8",
-                    errors="replace",
-                    env=env,
-                )
-            if result.returncode != 0:
-                raise RuntimeError(
-                    f"Claude CLI 失敗 (exit {result.returncode})\n{result.stderr[:600].strip()}"
-                )
-            return result.stdout.strip()
-    finally:
-        os.unlink(tmp_path)
+    if stream:
+        chunks: list[str] = []
+        start = time.monotonic()
+        proc = subprocess.Popen(
+            cmd,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            env=env,
+        )
+        try:
+            assert proc.stdin and proc.stdout
+            proc.stdin.write(prompt)
+            proc.stdin.close()
+            for line in iter(proc.stdout.readline, ""):
+                if time.monotonic() - start > timeout:
+                    proc.kill()
+                    raise subprocess.TimeoutExpired(cmd, timeout)
+                print(line, end="", flush=True)
+                chunks.append(line)
+            proc.wait()
+        except Exception:
+            proc.kill()
+            raise
+        if proc.returncode != 0:
+            stderr_out = proc.stderr.read() if proc.stderr else ""
+            raise RuntimeError(
+                f"Claude CLI 失敗 (exit {proc.returncode})\n{stderr_out[:600].strip()}"
+            )
+        return "".join(chunks).strip()
+    else:
+        result = subprocess.run(
+            cmd,
+            input=prompt,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            encoding="utf-8",
+            errors="replace",
+            env=env,
+        )
+        if result.returncode != 0:
+            raise RuntimeError(
+                f"Claude CLI 失敗 (exit {result.returncode})\n{result.stderr[:600].strip()}"
+            )
+        return result.stdout.strip()
 
 
 # ── 報告儲存 ──────────────────────────────────
@@ -308,7 +298,17 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
     if thesis_cfg.get("auto_update", True) and (portfolio_content or market_content):
         logger.info("── Task 4：Thesis 自動更新 ────────────────")
         try:
-            theses = load_all_theses(thesis_dir)
+            # 今日報告分析了哪些 ticker？只更新其中有 thesis 檔案的
+            todays_tickers = {t for t, _ in news_tickers} | set(extra_tickers)
+            theses = {
+                stem: (thesis_dir / f"{stem}.md").read_text(encoding="utf-8")
+                for stem in todays_tickers
+                if (thesis_dir / f"{stem}.md").exists()
+            }
+            logger.info(
+                f"   今日分析 {len(todays_tickers)} 個 ticker，"
+                f"其中 {len(theses)} 個有 thesis：{', '.join(sorted(theses))}"
+            )
             if theses:
                 update_prompt = build_thesis_prompt(
                     theses, portfolio_content, market_content, session=session
@@ -328,6 +328,62 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
                     logger.warning("  " + "!" * 50)
         except Exception as e:
             logger.warning(f"Thesis 自動更新失敗（不影響主報告）：{e}")
+
+    # ── Task 5：自動研究新標的 ──
+    research_cfg = thesis_cfg  # 共用 thesis config 區塊
+    if research_cfg.get("auto_research", False) and (portfolio_content or market_content):
+        max_per_day = research_cfg.get("max_per_day", 3)
+        logger.info("── Task 5：自動研究新標的 ────────────────")
+        try:
+            existing_tickers = {f.stem for f in thesis_dir.glob("*.md")}
+            today_str = datetime.now(TST).strftime("%Y-%m-%d")
+            candidate_prompt = build_candidate_prompt(
+                market_content=market_content,
+                portfolio_content=portfolio_content,
+                existing_tickers=existing_tickers,
+                today=today_str,
+                session=session,
+                max_candidates=max_per_day,
+            )
+            logger.info(f"   Candidate Prompt 長度：{len(candidate_prompt):,} 字元")
+            candidate_response = call_claude(candidate_prompt, claude_cli, claude_model, timeout, stream=stream_output)
+            candidates = parse_candidates(candidate_response)
+
+            if not candidates:
+                logger.info("  ℹ️ 今日無新研究標的")
+            else:
+                logger.info(f"  識別到 {len(candidates)} 個候選：{', '.join(c['ticker'] for c in candidates)}")
+                for c in candidates:
+                    t_ticker = c["ticker"]
+                    t_name   = c["name"]
+                    t_market = c.get("market", "US")
+                    t_reason = c.get("reason", "")
+                    logger.info(f"  ── 研究 {t_ticker}（{t_name}）────")
+                    try:
+                        t_articles  = fetch_stock_news(t_ticker, market=t_market, max_articles=8)
+                        t_fund_data = fetch_fundamentals([(t_ticker, t_market)])
+                        t_price_data = fetch_current_prices([(t_ticker, t_market)])
+                        t_price = t_price_data.get(t_ticker, {}).get("price")
+                        research_prompt = build_research_prompt(
+                            ticker=t_ticker, name=t_name, market=t_market,
+                            reason=t_reason,
+                            news_articles=t_articles,
+                            fundamentals=t_fund_data.get(t_ticker, {}),
+                            price=t_price, usd_twd=usd_twd, today=today_str,
+                        )
+                        logger.info(f"     Research Prompt 長度：{len(research_prompt):,} 字元")
+                        research_content = call_claude(research_prompt, claude_cli, claude_model, timeout, stream=stream_output)
+                        saved_path = save_research_thesis(research_content, t_ticker, thesis_dir)
+                        # 寫入 fundamentals 快照
+                        t_metrics = t_fund_data.get(t_ticker, {})
+                        if t_metrics:
+                            update_time = datetime.now(TST).strftime("%Y-%m-%d %H:%M TST")
+                            update_snapshot_in_thesis(saved_path, t_metrics, update_time)
+                        logger.info(f"  ✅ 新 thesis 已建立：{saved_path.name}")
+                    except Exception as e:
+                        logger.error(f"  研究 {t_ticker} 失敗：{e}")
+        except Exception as e:
+            logger.warning(f"Task 5 自動研究失敗（不影響主報告）：{e}")
 
     logger.info("=" * 55)
     if errors:
@@ -350,8 +406,10 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
 
 
 # ── Enrich 模式：補充現有 thesis 質化深度 ──────────────
-def run_enrich_theses() -> None:
-    """對所有現有 thesis 補充深度質化分析（一次性執行）。"""
+def run_enrich_theses(only_tickers: list[str] | None = None) -> None:
+    """對現有 thesis 補充深度質化分析（一次性執行）。
+    only_tickers: 若指定，只處理這些代碼；否則處理所有 thesis 檔案。
+    """
     config      = load_config()
     claude_cli  = config.get("claude_cli", "claude")
     claude_model= config.get("claude_model", "")
@@ -363,7 +421,10 @@ def run_enrich_theses() -> None:
 
     setup_logging(logs_dir)
     logger.info("=" * 55)
-    logger.info("  Thesis Enrichment 模式")
+    if only_tickers:
+        logger.info(f"  Thesis Enrichment 模式（指定：{', '.join(only_tickers)}）")
+    else:
+        logger.info("  Thesis Enrichment 模式（全部）")
     logger.info("=" * 55)
 
     portfolio = load_portfolio(portfolio_path)
@@ -379,7 +440,24 @@ def run_enrich_theses() -> None:
     update_time = datetime.now(TST).strftime("%Y-%m-%d %H:%M TST")
     usd_twd     = fetch_usd_twd_rate()
 
-    for thesis_file in sorted(thesis_dir.glob("*.md")):
+    _SKIP = {"README", "CHANGELOG", "LICENSE", "TODO", "NOTES", "INDEX"}
+
+    # 決定要處理的檔案清單
+    if only_tickers:
+        files_to_process = []
+        for t in only_tickers:
+            f = thesis_dir / f"{t}.md"
+            if f.exists():
+                files_to_process.append(f)
+            else:
+                logger.warning(f"  找不到 thesis/{t}.md，跳過")
+    else:
+        files_to_process = [
+            f for f in sorted(thesis_dir.glob("*.md"))
+            if f.stem.upper() not in _SKIP
+        ]
+
+    for thesis_file in files_to_process:
         ticker = thesis_file.stem
         market = market_map.get(ticker, "US" if not ticker.isdigit() else "TW")
         name   = ticker  # fallback; Claude will refine
@@ -401,7 +479,18 @@ def run_enrich_theses() -> None:
             )
             logger.info(f"   Prompt 長度：{len(prompt):,} 字元")
             enriched = call_claude(prompt, claude_cli, claude_model, timeout, stream=stream_output)
-            thesis_file.write_text(enriched.strip() + "\n", encoding="utf-8")
+
+            # 驗證輸出：第一個字元必須是 '#'
+            enriched_stripped = enriched.strip()
+            if not enriched_stripped.startswith("#"):
+                logger.error(
+                    f"  ❌ {ticker}.md 補充失敗：Claude 輸出不是有效的 Markdown 文件\n"
+                    f"     輸出開頭（前150字）：{enriched_stripped[:150]!r}\n"
+                    f"     原始檔案未修改。"
+                )
+                continue
+
+            thesis_file.write_text(enriched_stripped + "\n", encoding="utf-8")
 
             # 重新寫入快照（enriched 內容覆蓋了原快照）
             metrics = fund_data.get(ticker, {})
@@ -417,6 +506,180 @@ def run_enrich_theses() -> None:
     logger.info("=" * 55)
 
 
+def run_research_only(session: str = "morning") -> None:
+    """讀取今日已生成的報告，單獨執行 Task 5 自動研究新標的。"""
+    config       = load_config()
+    claude_cli   = config.get("claude_cli", "claude")
+    claude_model = config.get("claude_model", "")
+    timeout      = config.get("claude_timeout_seconds", 300)
+    stream_output = config.get("stream_claude_output", False)
+    reports_dir  = BASE_DIR / config.get("reports_dir", "reports")
+    logs_dir     = BASE_DIR / config.get("logs_dir", "logs")
+    thesis_dir   = BASE_DIR / "thesis"
+    thesis_cfg   = config.get("thesis", {})
+    max_per_day  = thesis_cfg.get("max_per_day", 3)
+
+    setup_logging(logs_dir)
+    logger.info("=" * 55)
+    logger.info(f"  Task 5 獨立執行（{session} session）")
+    logger.info("=" * 55)
+
+    # 讀取今日已生成的報告
+    today_str  = datetime.now(TST).strftime("%Y%m%d")
+    prefix     = f"{today_str}_{session}"
+    portfolio_path_report = reports_dir / f"{prefix}_portfolio_analysis.md"
+    market_path_report    = reports_dir / f"{prefix}_market_overview.md"
+
+    portfolio_content = portfolio_path_report.read_text(encoding="utf-8") if portfolio_path_report.exists() else ""
+    market_content    = market_path_report.read_text(encoding="utf-8")    if market_path_report.exists()    else ""
+
+    if not portfolio_content and not market_content:
+        logger.error(f"  找不到今日 {session} 報告（{prefix}_*.md），請先執行完整分析")
+        return
+
+    logger.info(f"  portfolio_analysis：{'✅' if portfolio_content else '❌ 未找到'}")
+    logger.info(f"  market_overview   ：{'✅' if market_content    else '❌ 未找到'}")
+
+    usd_twd = fetch_usd_twd_rate()
+
+    try:
+        existing_tickers = {f.stem for f in thesis_dir.glob("*.md")}
+        today_label = datetime.now(TST).strftime("%Y-%m-%d")
+        candidate_prompt = build_candidate_prompt(
+            market_content=market_content,
+            portfolio_content=portfolio_content,
+            existing_tickers=existing_tickers,
+            today=today_label,
+            session=session,
+            max_candidates=max_per_day,
+        )
+        logger.info(f"   Candidate Prompt 長度：{len(candidate_prompt):,} 字元")
+        candidate_response = call_claude(candidate_prompt, claude_cli, claude_model, timeout, stream=stream_output)
+        candidates = parse_candidates(candidate_response)
+
+        if not candidates:
+            logger.info("  ℹ️ 今日無新研究標的")
+        else:
+            logger.info(f"  識別到 {len(candidates)} 個候選：{', '.join(c['ticker'] for c in candidates)}")
+            for c in candidates:
+                t_ticker = c["ticker"]
+                t_name   = c["name"]
+                t_market = c.get("market", "US")
+                t_reason = c.get("reason", "")
+                logger.info(f"  ── 研究 {t_ticker}（{t_name}）────")
+                try:
+                    t_articles   = fetch_stock_news(t_ticker, market=t_market, max_articles=8)
+                    t_fund_data  = fetch_fundamentals([(t_ticker, t_market)])
+                    t_price_data = fetch_current_prices([(t_ticker, t_market)])
+                    t_price      = t_price_data.get(t_ticker, {}).get("price")
+                    research_prompt = build_research_prompt(
+                        ticker=t_ticker, name=t_name, market=t_market,
+                        reason=t_reason,
+                        news_articles=t_articles,
+                        fundamentals=t_fund_data.get(t_ticker, {}),
+                        price=t_price, usd_twd=usd_twd, today=today_label,
+                    )
+                    logger.info(f"     Research Prompt 長度：{len(research_prompt):,} 字元")
+                    research_content = call_claude(research_prompt, claude_cli, claude_model, timeout, stream=stream_output)
+                    saved_path = save_research_thesis(research_content, t_ticker, thesis_dir)
+                    t_metrics = t_fund_data.get(t_ticker, {})
+                    if t_metrics:
+                        update_time = datetime.now(TST).strftime("%Y-%m-%d %H:%M TST")
+                        update_snapshot_in_thesis(saved_path, t_metrics, update_time)
+                    logger.info(f"  ✅ 新 thesis 已建立：{saved_path.name}")
+                except Exception as e:
+                    logger.error(f"  研究 {t_ticker} 失敗：{e}")
+    except Exception as e:
+        logger.error(f"Task 5 執行失敗：{e}")
+
+    logger.info("=" * 55)
+    logger.info("✅ Task 5 完成")
+    logger.info("=" * 55)
+
+
+def run_update_thesis(session: str = "morning") -> None:
+    """讀取今日已生成的報告，單獨執行 Task 4 thesis 自動更新。"""
+    config       = load_config()
+    claude_cli   = config.get("claude_cli", "claude")
+    claude_model = config.get("claude_model", "")
+    timeout      = config.get("claude_timeout_seconds", 300)
+    stream_output = config.get("stream_claude_output", False)
+    reports_dir  = BASE_DIR / config.get("reports_dir", "reports")
+    logs_dir     = BASE_DIR / config.get("logs_dir", "logs")
+    thesis_dir   = BASE_DIR / "thesis"
+
+    setup_logging(logs_dir)
+    logger.info("=" * 55)
+    logger.info(f"  Task 4 獨立執行（{session} session）")
+    logger.info("=" * 55)
+
+    # 讀取今日已生成的報告
+    today_str  = datetime.now(TST).strftime("%Y%m%d")
+    prefix     = f"{today_str}_{session}"
+    portfolio_path_report = reports_dir / f"{prefix}_portfolio_analysis.md"
+    market_path_report    = reports_dir / f"{prefix}_market_overview.md"
+
+    portfolio_content = portfolio_path_report.read_text(encoding="utf-8") if portfolio_path_report.exists() else ""
+    market_content    = market_path_report.read_text(encoding="utf-8")    if market_path_report.exists()    else ""
+
+    if not portfolio_content and not market_content:
+        logger.error(f"  找不到今日 {session} 報告（{prefix}_*.md），請先執行完整分析")
+        return
+
+    logger.info(f"  portfolio_analysis：{'✅' if portfolio_content else '❌ 未找到'}")
+    logger.info(f"  market_overview   ：{'✅' if market_content    else '❌ 未找到'}")
+
+    try:
+        # 從報告文字中提取曾被分析的 ticker（只更新有 thesis 的那幾份）
+        cfg_news = config.get("news_sources", {})
+        portfolio_obj = load_portfolio(BASE_DIR / config.get("portfolio_file", "portfolio.json"))
+        lt_pos  = portfolio_obj.get("long_term", {}).get("positions", [])
+        ta_pos  = portfolio_obj.get("tactical",  {}).get("positions", [])
+        wl      = portfolio_obj.get("watchlist", [])
+        report_tickers = (
+            {pos["ticker"] for pos in lt_pos + ta_pos}
+            | {w["ticker"] for w in wl}
+            | set(cfg_news.get("market_extra_tickers", []))
+        )
+        theses = {
+            stem: (thesis_dir / f"{stem}.md").read_text(encoding="utf-8")
+            for stem in report_tickers
+            if (thesis_dir / f"{stem}.md").exists()
+        }
+        logger.info(
+            f"   今日分析 {len(report_tickers)} 個 ticker，"
+            f"其中 {len(theses)} 個有 thesis：{', '.join(sorted(theses))}"
+        )
+        if not theses:
+            logger.info("  ℹ️ 今日分析的 ticker 無對應 thesis")
+            return
+
+        update_prompt = build_thesis_prompt(
+            theses, portfolio_content, market_content, session=session
+        )
+        logger.info(f"   Prompt 長度：{len(update_prompt):,} 字元")
+        thesis_response = call_claude(update_prompt, claude_cli, claude_model, timeout, stream=stream_output)
+        updated, alerts = save_theses(thesis_response, thesis_dir)
+
+        if updated:
+            logger.info(f"  ✅ 更新了 {len(updated)} 個 thesis：{', '.join(updated)}")
+        else:
+            logger.info("  ℹ️ 今日無 thesis 更新")
+
+        for ticker, alert_text in alerts.items():
+            logger.warning("  " + "!" * 50)
+            logger.warning(f"  ⚠️  重大質化事件警報：{ticker}")
+            logger.warning(f"  {alert_text}")
+            logger.warning("  請手動重新評估此 thesis 的策略部分")
+            logger.warning("  " + "!" * 50)
+    except Exception as e:
+        logger.error(f"Task 4 執行失敗：{e}")
+
+    logger.info("=" * 55)
+    logger.info("✅ Task 4 完成")
+    logger.info("=" * 55)
+
+
 # ── CLI 入口 ──────────────────────────────────
 def main():
     parser = argparse.ArgumentParser(description="每日財務報告生成器")
@@ -424,6 +687,14 @@ def main():
     parser.add_argument("--market",        action="store_true", help="只執行市場總覽（Task 2）")
     parser.add_argument("--validate",      action="store_true", help="只做 schema 驗證，不生成報告")
     parser.add_argument("--enrich-thesis", action="store_true", help="對所有現有 thesis 補充深度質化分析")
+    parser.add_argument("--research",       action="store_true", help="讀取今日已生成報告，單獨執行 Task 5 自動研究新標的")
+    parser.add_argument("--update-thesis",  action="store_true", help="讀取今日已生成報告，單獨執行 Task 4 thesis 自動更新")
+    parser.add_argument(
+        "--enrich-ticker",
+        nargs="+",
+        metavar="TICKER",
+        help="只對指定代碼的 thesis 補充質化分析，例如：--enrich-ticker NET ALAB",
+    )
     parser.add_argument(
         "--session",
         choices=["morning", "evening"],
@@ -440,6 +711,18 @@ def main():
 
     if args.enrich_thesis:
         run_enrich_theses()
+        return
+
+    if args.enrich_ticker:
+        run_enrich_theses(only_tickers=args.enrich_ticker)
+        return
+
+    if args.research:
+        run_research_only(session=args.session)
+        return
+
+    if args.update_thesis:
+        run_update_thesis(session=args.session)
         return
 
     if args.portfolio and not args.market:

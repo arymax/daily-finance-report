@@ -41,7 +41,9 @@
   },
 
   "thesis": {
-    "auto_update": true
+    "auto_update": true,
+    "auto_research": true,
+    "max_per_day": 3
   },
 
   "stream_claude_output": true

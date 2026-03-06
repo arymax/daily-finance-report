@@ -98,6 +98,7 @@ def parse_and_save(
     回傳 (updated_list, alerts_dict)：
       updated_list: 已更新的 thesis 檔名列表
       alerts_dict:  {TICKER: 警報說明文字}
+    更新時在檔案末尾寫入 <!-- last_updated: YYYY-MM-DD -->。
     """
     updated: list[str] = []
     alerts: dict[str, str] = {}
@@ -105,13 +106,19 @@ def parse_and_save(
     if response.strip() == "NO_UPDATE":
         return updated, alerts
 
+    today = datetime.now(TST).strftime("%Y-%m-%d")
+
     # 解析 THESIS 區塊
     thesis_pattern = r"===THESIS:\s*(\S+)===\n([\s\S]*?)===END_THESIS==="
     for name, content in re.findall(thesis_pattern, response):
         name = name.strip()
         target = thesis_dir / f"{name}.md"
         if target.exists():
-            target.write_text(content.strip() + "\n", encoding="utf-8")
+            text = content.strip()
+            # 移除舊的 last_updated 標記（避免重複）
+            text = re.sub(r"\n<!-- last_updated: \d{4}-\d{2}-\d{2} -->", "", text)
+            text += f"\n<!-- last_updated: {today} -->\n"
+            target.write_text(text, encoding="utf-8")
             logger.info(f"  Thesis 更新：{name}.md")
             updated.append(name)
         else:
