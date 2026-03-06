@@ -122,12 +122,23 @@ def build_candidate_prompt(
     portfolio_content: str,
     existing_tickers: set[str],
     today: str,
+    session: str = "morning",
     max_candidates: int = 3,
 ) -> str:
     existing_list = "、".join(sorted(existing_tickers)) if existing_tickers else "（無）"
+
+    if session == "morning":
+        market_focus = "美股（US）"
+        market_code  = "US"
+        session_context = "現在是早盤時段，美股剛收盤。請聚焦於今日美股市場的動態。"
+    else:
+        market_focus = "台股（TW）"
+        market_code  = "TW"
+        session_context = "現在是收盤時段，台股剛收盤。請聚焦於今日台股市場的動態。"
+
     return f"""你是一位嚴謹的投資研究助理，負責從每日市場報告中識別值得深入研究的新標的。
 
-今天是 {today}。
+今天是 {today}。{session_context}
 
 ## 今日已生成的報告
 
@@ -147,7 +158,9 @@ def build_candidate_prompt(
 
 ## 你的任務
 
-從今日報告中，識別最多 {max_candidates} 間值得深入研究的公司。
+從今日報告中，識別最多 {max_candidates} 間值得深入研究的**{market_focus}**公司。
+
+**本次只研究 {market_focus} 標的**，其他市場的公司請勿選入。
 
 **選擇標準（依優先順序）：**
 1. **財報發布**：今日報告提到有公司公布財報（不論超預期或不如預期），且該公司尚無 thesis
@@ -157,13 +170,14 @@ def build_candidate_prompt(
 **排除條件：**
 - 已在「已有 thesis 的標的」列表中的任何代碼
 - ETF 或指數基金（只研究個股）
+- 非 {market_focus} 市場的公司
 
 **輸出格式（嚴格遵守，每個候選一個區塊）：**
 
 ===CANDIDATE===
 ticker: <代碼，如 NVDA 或 2330>
 name: <公司全名>
-market: <US 或 TW>
+market: {market_code}
 exchange: <NASDAQ / NYSE / 上市 / 上櫃 / 等>
 reason: <一句話說明觸發事件 + 為什麼值得研究>
 ===END_CANDIDATE===

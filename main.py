@@ -329,6 +329,62 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
         except Exception as e:
             logger.warning(f"Thesis 自動更新失敗（不影響主報告）：{e}")
 
+    # ── Task 5：自動研究新標的 ──
+    research_cfg = thesis_cfg  # 共用 thesis config 區塊
+    if research_cfg.get("auto_research", False) and (portfolio_content or market_content):
+        max_per_day = research_cfg.get("max_per_day", 3)
+        logger.info("── Task 5：自動研究新標的 ────────────────")
+        try:
+            existing_tickers = {f.stem for f in thesis_dir.glob("*.md")}
+            today_str = datetime.now(TST).strftime("%Y-%m-%d")
+            candidate_prompt = build_candidate_prompt(
+                market_content=market_content,
+                portfolio_content=portfolio_content,
+                existing_tickers=existing_tickers,
+                today=today_str,
+                session=session,
+                max_candidates=max_per_day,
+            )
+            logger.info(f"   Candidate Prompt 長度：{len(candidate_prompt):,} 字元")
+            candidate_response = call_claude(candidate_prompt, claude_cli, claude_model, timeout, stream=stream_output)
+            candidates = parse_candidates(candidate_response)
+
+            if not candidates:
+                logger.info("  ℹ️ 今日無新研究標的")
+            else:
+                logger.info(f"  識別到 {len(candidates)} 個候選：{', '.join(c['ticker'] for c in candidates)}")
+                for c in candidates:
+                    t_ticker = c["ticker"]
+                    t_name   = c["name"]
+                    t_market = c.get("market", "US")
+                    t_reason = c.get("reason", "")
+                    logger.info(f"  ── 研究 {t_ticker}（{t_name}）────")
+                    try:
+                        t_articles  = fetch_stock_news(t_ticker, market=t_market, max_articles=8)
+                        t_fund_data = fetch_fundamentals([(t_ticker, t_market)])
+                        t_price_data = fetch_current_prices([(t_ticker, t_market)])
+                        t_price = t_price_data.get(t_ticker, {}).get("price")
+                        research_prompt = build_research_prompt(
+                            ticker=t_ticker, name=t_name, market=t_market,
+                            reason=t_reason,
+                            news_articles=t_articles,
+                            fundamentals=t_fund_data.get(t_ticker, {}),
+                            price=t_price, usd_twd=usd_twd, today=today_str,
+                        )
+                        logger.info(f"     Research Prompt 長度：{len(research_prompt):,} 字元")
+                        research_content = call_claude(research_prompt, claude_cli, claude_model, timeout, stream=stream_output)
+                        saved_path = save_research_thesis(research_content, t_ticker, thesis_dir)
+                        # 寫入 fundamentals 快照
+                        t_metrics = t_fund_data.get(t_ticker, {})
+                        if t_metrics:
+                            update_time = datetime.now(TST).strftime("%Y-%m-%d %H:%M TST")
+                            update_snapshot_in_thesis(saved_path, t_metrics, update_time)
+                        logger.info(f"  ✅ 新 thesis 已建立：{saved_path.name}")
+                    except Exception as e:
+                        logger.error(f"  研究 {t_ticker} 失敗：{e}")
+        except Exception as e:
+            logger.warning(f"Task 5 自動研究失敗（不影響主報告）：{e}")
+
     logger.info("=" * 55)
     if errors:
         logger.error(f"完成，但有 {len(errors)} 個錯誤：")
