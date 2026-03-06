@@ -298,16 +298,16 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
     if thesis_cfg.get("auto_update", True) and (portfolio_content or market_content):
         logger.info("── Task 4：Thesis 自動更新 ────────────────")
         try:
-            # 只送 portfolio 中有持倉或觀察清單的 ticker
-            portfolio_tickers = {
-                pos["ticker"]
-                for pos in lt_positions + ta_positions
-            } | {w["ticker"] for w in watchlist}
-            all_theses = load_all_theses(thesis_dir)
-            theses = {k: v for k, v in all_theses.items() if k in portfolio_tickers}
+            # 今日報告分析了哪些 ticker？只更新其中有 thesis 檔案的
+            todays_tickers = {t for t, _ in news_tickers} | set(extra_tickers)
+            theses = {
+                stem: (thesis_dir / f"{stem}.md").read_text(encoding="utf-8")
+                for stem in todays_tickers
+                if (thesis_dir / f"{stem}.md").exists()
+            }
             logger.info(
-                f"   Thesis 過濾：{len(all_theses)} 份 → {len(theses)} 份"
-                f"（{', '.join(sorted(theses))}）"
+                f"   今日分析 {len(todays_tickers)} 個 ticker，"
+                f"其中 {len(theses)} 個有 thesis：{', '.join(sorted(theses))}"
             )
             if theses:
                 update_prompt = build_thesis_prompt(
@@ -630,21 +630,28 @@ def run_update_thesis(session: str = "morning") -> None:
     logger.info(f"  market_overview   ：{'✅' if market_content    else '❌ 未找到'}")
 
     try:
-        portfolio = load_portfolio(BASE_DIR / config.get("portfolio_file", "portfolio.json"))
-        portfolio_tickers = {
-            pos["ticker"]
-            for pos in portfolio.get("long_term", {}).get("positions", [])
-                       + portfolio.get("tactical", {}).get("positions", [])
-        } | {w["ticker"] for w in portfolio.get("watchlist", [])}
-
-        all_theses = load_all_theses(thesis_dir)
-        theses = {k: v for k, v in all_theses.items() if k in portfolio_tickers}
+        # 從報告文字中提取曾被分析的 ticker（只更新有 thesis 的那幾份）
+        cfg_news = config.get("news_sources", {})
+        portfolio_obj = load_portfolio(BASE_DIR / config.get("portfolio_file", "portfolio.json"))
+        lt_pos  = portfolio_obj.get("long_term", {}).get("positions", [])
+        ta_pos  = portfolio_obj.get("tactical",  {}).get("positions", [])
+        wl      = portfolio_obj.get("watchlist", [])
+        report_tickers = (
+            {pos["ticker"] for pos in lt_pos + ta_pos}
+            | {w["ticker"] for w in wl}
+            | set(cfg_news.get("market_extra_tickers", []))
+        )
+        theses = {
+            stem: (thesis_dir / f"{stem}.md").read_text(encoding="utf-8")
+            for stem in report_tickers
+            if (thesis_dir / f"{stem}.md").exists()
+        }
         logger.info(
-            f"   Thesis 過濾：{len(all_theses)} 份 → {len(theses)} 份"
-            f"（{', '.join(sorted(theses))}）"
+            f"   今日分析 {len(report_tickers)} 個 ticker，"
+            f"其中 {len(theses)} 個有 thesis：{', '.join(sorted(theses))}"
         )
         if not theses:
-            logger.info("  ℹ️ 無符合 portfolio 的 thesis 文件可更新")
+            logger.info("  ℹ️ 今日分析的 ticker 無對應 thesis")
             return
 
         update_prompt = build_thesis_prompt(
