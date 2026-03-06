@@ -597,6 +597,70 @@ def run_research_only(session: str = "morning") -> None:
     logger.info("=" * 55)
 
 
+def run_update_thesis(session: str = "morning") -> None:
+    """讀取今日已生成的報告，單獨執行 Task 4 thesis 自動更新。"""
+    config       = load_config()
+    claude_cli   = config.get("claude_cli", "claude")
+    claude_model = config.get("claude_model", "")
+    timeout      = config.get("claude_timeout_seconds", 300)
+    stream_output = config.get("stream_claude_output", False)
+    reports_dir  = BASE_DIR / config.get("reports_dir", "reports")
+    logs_dir     = BASE_DIR / config.get("logs_dir", "logs")
+    thesis_dir   = BASE_DIR / "thesis"
+
+    setup_logging(logs_dir)
+    logger.info("=" * 55)
+    logger.info(f"  Task 4 獨立執行（{session} session）")
+    logger.info("=" * 55)
+
+    # 讀取今日已生成的報告
+    today_str  = datetime.now(TST).strftime("%Y%m%d")
+    prefix     = f"{today_str}_{session}"
+    portfolio_path_report = reports_dir / f"{prefix}_portfolio_analysis.md"
+    market_path_report    = reports_dir / f"{prefix}_market_overview.md"
+
+    portfolio_content = portfolio_path_report.read_text(encoding="utf-8") if portfolio_path_report.exists() else ""
+    market_content    = market_path_report.read_text(encoding="utf-8")    if market_path_report.exists()    else ""
+
+    if not portfolio_content and not market_content:
+        logger.error(f"  找不到今日 {session} 報告（{prefix}_*.md），請先執行完整分析")
+        return
+
+    logger.info(f"  portfolio_analysis：{'✅' if portfolio_content else '❌ 未找到'}")
+    logger.info(f"  market_overview   ：{'✅' if market_content    else '❌ 未找到'}")
+
+    try:
+        theses = load_all_theses(thesis_dir)
+        if not theses:
+            logger.info("  ℹ️ 無 thesis 文件可更新")
+            return
+
+        update_prompt = build_thesis_prompt(
+            theses, portfolio_content, market_content, session=session
+        )
+        logger.info(f"   Prompt 長度：{len(update_prompt):,} 字元")
+        thesis_response = call_claude(update_prompt, claude_cli, claude_model, timeout, stream=stream_output)
+        updated, alerts = save_theses(thesis_response, thesis_dir)
+
+        if updated:
+            logger.info(f"  ✅ 更新了 {len(updated)} 個 thesis：{', '.join(updated)}")
+        else:
+            logger.info("  ℹ️ 今日無 thesis 更新")
+
+        for ticker, alert_text in alerts.items():
+            logger.warning("  " + "!" * 50)
+            logger.warning(f"  ⚠️  重大質化事件警報：{ticker}")
+            logger.warning(f"  {alert_text}")
+            logger.warning("  請手動重新評估此 thesis 的策略部分")
+            logger.warning("  " + "!" * 50)
+    except Exception as e:
+        logger.error(f"Task 4 執行失敗：{e}")
+
+    logger.info("=" * 55)
+    logger.info("✅ Task 4 完成")
+    logger.info("=" * 55)
+
+
 # ── CLI 入口 ──────────────────────────────────
 def main():
     parser = argparse.ArgumentParser(description="每日財務報告生成器")
@@ -604,7 +668,8 @@ def main():
     parser.add_argument("--market",        action="store_true", help="只執行市場總覽（Task 2）")
     parser.add_argument("--validate",      action="store_true", help="只做 schema 驗證，不生成報告")
     parser.add_argument("--enrich-thesis", action="store_true", help="對所有現有 thesis 補充深度質化分析")
-    parser.add_argument("--research",      action="store_true", help="讀取今日已生成報告，單獨執行 Task 5 自動研究新標的")
+    parser.add_argument("--research",       action="store_true", help="讀取今日已生成報告，單獨執行 Task 5 自動研究新標的")
+    parser.add_argument("--update-thesis",  action="store_true", help="讀取今日已生成報告，單獨執行 Task 4 thesis 自動更新")
     parser.add_argument(
         "--enrich-ticker",
         nargs="+",
@@ -635,6 +700,10 @@ def main():
 
     if args.research:
         run_research_only(session=args.session)
+        return
+
+    if args.update_thesis:
+        run_update_thesis(session=args.session)
         return
 
     if args.portfolio and not args.market:
