@@ -1,6 +1,6 @@
 {
   "meta": {
-    "last_updated": "2026-03-05",
+    "last_updated": "2026-03-07",
     "base_currency": "TWD"
   },
   "cash": {
@@ -103,6 +103,34 @@
   "tactical": {
     "positions": [
       {
+        "ticker": "MRVL",
+        "name": "Marvell Technology Inc.",
+        "type": "stock",
+        "market": "US",
+        "cost_twd": 32000,
+        "shares": 10.83658,
+        "sector": "半導體（自訂 AI 晶片／資料中心網路／光學）",
+        "theme": "AI ASIC 週期最直接受益者——Hyperscaler 定制推論晶片",
+        "position_size": "custom",
+        "position_pct": 0.1,
+        "status": "Q4財報跳空突破後 Path A 進場，首批 $1,000 試探倉位",
+        "strategy": "Path A 突破進場；後續等回測 $85–$88 再評估加碼；停損參考 $65（技術破位）",
+        "catalysts": [
+          "FY2026 Q4 EPS $0.80 超預期，資料中心營收 YoY +78%",
+          "FY2027 營收指引接近 $11B（YoY +30%），Design Win 管線創歷史新高",
+          "Google TPU v6/v7、Amazon Trainium 3/4 量產進入設計管線",
+          "Forward P/E ~20x vs Broadcom 25–28x，仍有估值重估空間"
+        ],
+        "fundamentals": {
+          "forward_pe": 19.6,
+          "forward_eps_fy2027": 4.72,
+          "analyst_target_usd": 114.06,
+          "analyst_count": 39
+        },
+        "broker": "Firstrade",
+        "note": "均價 92.28 USD（10.83658 股）；原始成本 1,000 USD；cost_twd 依匯率估算 32 換算約 32,000 TWD"
+      },
+      {
         "ticker": "CRWD",
         "name": "CrowdStrike Holdings",
         "type": "stock",
@@ -121,7 +149,7 @@
           "地緣政治升溫持續強化企業資安預算"
         ],
         "broker": "Firstrade",
-        "note": "均價 396.79 USD（0.5 股 × 396.79）；原始成本 198.40 USD；cost_twd 依匯率估算 32 換算約 6,349 TWD"
+        "note": "均價 396.80 USD（0.5 股 × 396.80）；原始成本 198.40 USD；cost_twd 依匯率估算 32 換算約 6,349 TWD"
       },
       {
         "ticker": "ALAB",
@@ -142,7 +170,7 @@
           "Morgan Stanley TMT Conference 管理層正面表態 Scorpio 出貨加速"
         ],
         "broker": "Firstrade",
-        "note": "均價 123.395 USD（1.5 股）；原始成本 185.09 USD；cost_twd 依匯率估算 32 換算約 5,923 TWD"
+        "note": "均價 123.39333 USD（1.5 股 × 123.39333）；原始成本 185.09 USD；cost_twd 依匯率估算 32 換算約 5,923 TWD"
       },
       {
         "ticker": "3030",
