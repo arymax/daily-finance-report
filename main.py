@@ -506,6 +506,97 @@ def run_enrich_theses(only_tickers: list[str] | None = None) -> None:
     logger.info("=" * 55)
 
 
+def run_research_only(session: str = "morning") -> None:
+    """讀取今日已生成的報告，單獨執行 Task 5 自動研究新標的。"""
+    config       = load_config()
+    claude_cli   = config.get("claude_cli", "claude")
+    claude_model = config.get("claude_model", "")
+    timeout      = config.get("claude_timeout_seconds", 300)
+    stream_output = config.get("stream_claude_output", False)
+    reports_dir  = BASE_DIR / config.get("reports_dir", "reports")
+    logs_dir     = BASE_DIR / config.get("logs_dir", "logs")
+    thesis_dir   = BASE_DIR / "thesis"
+    thesis_cfg   = config.get("thesis", {})
+    max_per_day  = thesis_cfg.get("max_per_day", 3)
+
+    setup_logging(logs_dir)
+    logger.info("=" * 55)
+    logger.info(f"  Task 5 獨立執行（{session} session）")
+    logger.info("=" * 55)
+
+    # 讀取今日已生成的報告
+    today_str  = datetime.now(TST).strftime("%Y%m%d")
+    prefix     = f"{today_str}_{session}"
+    portfolio_path_report = reports_dir / f"{prefix}_portfolio_analysis.md"
+    market_path_report    = reports_dir / f"{prefix}_market_overview.md"
+
+    portfolio_content = portfolio_path_report.read_text(encoding="utf-8") if portfolio_path_report.exists() else ""
+    market_content    = market_path_report.read_text(encoding="utf-8")    if market_path_report.exists()    else ""
+
+    if not portfolio_content and not market_content:
+        logger.error(f"  找不到今日 {session} 報告（{prefix}_*.md），請先執行完整分析")
+        return
+
+    logger.info(f"  portfolio_analysis：{'✅' if portfolio_content else '❌ 未找到'}")
+    logger.info(f"  market_overview   ：{'✅' if market_content    else '❌ 未找到'}")
+
+    usd_twd = fetch_usd_twd_rate()
+
+    try:
+        existing_tickers = {f.stem for f in thesis_dir.glob("*.md")}
+        today_label = datetime.now(TST).strftime("%Y-%m-%d")
+        candidate_prompt = build_candidate_prompt(
+            market_content=market_content,
+            portfolio_content=portfolio_content,
+            existing_tickers=existing_tickers,
+            today=today_label,
+            session=session,
+            max_candidates=max_per_day,
+        )
+        logger.info(f"   Candidate Prompt 長度：{len(candidate_prompt):,} 字元")
+        candidate_response = call_claude(candidate_prompt, claude_cli, claude_model, timeout, stream=stream_output)
+        candidates = parse_candidates(candidate_response)
+
+        if not candidates:
+            logger.info("  ℹ️ 今日無新研究標的")
+        else:
+            logger.info(f"  識別到 {len(candidates)} 個候選：{', '.join(c['ticker'] for c in candidates)}")
+            for c in candidates:
+                t_ticker = c["ticker"]
+                t_name   = c["name"]
+                t_market = c.get("market", "US")
+                t_reason = c.get("reason", "")
+                logger.info(f"  ── 研究 {t_ticker}（{t_name}）────")
+                try:
+                    t_articles   = fetch_stock_news(t_ticker, market=t_market, max_articles=8)
+                    t_fund_data  = fetch_fundamentals([(t_ticker, t_market)])
+                    t_price_data = fetch_current_prices([(t_ticker, t_market)])
+                    t_price      = t_price_data.get(t_ticker, {}).get("price")
+                    research_prompt = build_research_prompt(
+                        ticker=t_ticker, name=t_name, market=t_market,
+                        reason=t_reason,
+                        news_articles=t_articles,
+                        fundamentals=t_fund_data.get(t_ticker, {}),
+                        price=t_price, usd_twd=usd_twd, today=today_label,
+                    )
+                    logger.info(f"     Research Prompt 長度：{len(research_prompt):,} 字元")
+                    research_content = call_claude(research_prompt, claude_cli, claude_model, timeout, stream=stream_output)
+                    saved_path = save_research_thesis(research_content, t_ticker, thesis_dir)
+                    t_metrics = t_fund_data.get(t_ticker, {})
+                    if t_metrics:
+                        update_time = datetime.now(TST).strftime("%Y-%m-%d %H:%M TST")
+                        update_snapshot_in_thesis(saved_path, t_metrics, update_time)
+                    logger.info(f"  ✅ 新 thesis 已建立：{saved_path.name}")
+                except Exception as e:
+                    logger.error(f"  研究 {t_ticker} 失敗：{e}")
+    except Exception as e:
+        logger.error(f"Task 5 執行失敗：{e}")
+
+    logger.info("=" * 55)
+    logger.info("✅ Task 5 完成")
+    logger.info("=" * 55)
+
+
 # ── CLI 入口 ──────────────────────────────────
 def main():
     parser = argparse.ArgumentParser(description="每日財務報告生成器")
@@ -513,6 +604,7 @@ def main():
     parser.add_argument("--market",        action="store_true", help="只執行市場總覽（Task 2）")
     parser.add_argument("--validate",      action="store_true", help="只做 schema 驗證，不生成報告")
     parser.add_argument("--enrich-thesis", action="store_true", help="對所有現有 thesis 補充深度質化分析")
+    parser.add_argument("--research",      action="store_true", help="讀取今日已生成報告，單獨執行 Task 5 自動研究新標的")
     parser.add_argument(
         "--enrich-ticker",
         nargs="+",
@@ -539,6 +631,10 @@ def main():
 
     if args.enrich_ticker:
         run_enrich_theses(only_tickers=args.enrich_ticker)
+        return
+
+    if args.research:
+        run_research_only(session=args.session)
         return
 
     if args.portfolio and not args.market:
