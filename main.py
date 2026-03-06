@@ -19,7 +19,6 @@ import logging
 import os
 import subprocess
 import sys
-import tempfile
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
@@ -53,7 +52,7 @@ logger = logging.getLogger(__name__)
 # ── Claude CLI 呼叫 ────────────────────────────
 def call_claude(prompt: str, claude_cli: str, model: str, timeout: int, stream: bool = False) -> str:
     """
-    透過 subprocess 呼叫本地 Claude CLI（stdin 模式）。
+    透過 subprocess 呼叫本地 Claude CLI（stdin pipe 模式，無暫存檔）。
     移除 CLAUDECODE 環境變數，避免巢狀 session 錯誤。
     stream=True 時即時印出 Claude 的回應，同時仍捕捉並回傳完整文字。
     """
@@ -67,64 +66,55 @@ def call_claude(prompt: str, claude_cli: str, model: str, timeout: int, stream: 
     env.pop("CLAUDECODE", None)
     env.pop("CLAUDE_CODE", None)
 
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".txt", delete=False, encoding="utf-8"
-    ) as tmp:
-        tmp.write(prompt)
-        tmp_path = tmp.name
-
-    try:
-        if stream:
-            chunks: list[str] = []
-            start = time.monotonic()
-            with open(tmp_path, "r", encoding="utf-8") as stdin_file:
-                proc = subprocess.Popen(
-                    cmd,
-                    stdin=stdin_file,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                    encoding="utf-8",
-                    errors="replace",
-                    env=env,
-                )
-            try:
-                assert proc.stdout
-                for line in iter(proc.stdout.readline, ""):
-                    if time.monotonic() - start > timeout:
-                        proc.kill()
-                        raise subprocess.TimeoutExpired(cmd, timeout)
-                    print(line, end="", flush=True)
-                    chunks.append(line)
-                proc.wait()
-            except Exception:
-                proc.kill()
-                raise
-            if proc.returncode != 0:
-                stderr_out = proc.stderr.read() if proc.stderr else ""
-                raise RuntimeError(
-                    f"Claude CLI 失敗 (exit {proc.returncode})\n{stderr_out[:600].strip()}"
-                )
-            return "".join(chunks).strip()
-        else:
-            with open(tmp_path, "r", encoding="utf-8") as stdin_file:
-                result = subprocess.run(
-                    cmd,
-                    stdin=stdin_file,
-                    capture_output=True,
-                    text=True,
-                    timeout=timeout,
-                    encoding="utf-8",
-                    errors="replace",
-                    env=env,
-                )
-            if result.returncode != 0:
-                raise RuntimeError(
-                    f"Claude CLI 失敗 (exit {result.returncode})\n{result.stderr[:600].strip()}"
-                )
-            return result.stdout.strip()
-    finally:
-        os.unlink(tmp_path)
+    if stream:
+        chunks: list[str] = []
+        start = time.monotonic()
+        proc = subprocess.Popen(
+            cmd,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            env=env,
+        )
+        try:
+            assert proc.stdin and proc.stdout
+            proc.stdin.write(prompt)
+            proc.stdin.close()
+            for line in iter(proc.stdout.readline, ""):
+                if time.monotonic() - start > timeout:
+                    proc.kill()
+                    raise subprocess.TimeoutExpired(cmd, timeout)
+                print(line, end="", flush=True)
+                chunks.append(line)
+            proc.wait()
+        except Exception:
+            proc.kill()
+            raise
+        if proc.returncode != 0:
+            stderr_out = proc.stderr.read() if proc.stderr else ""
+            raise RuntimeError(
+                f"Claude CLI 失敗 (exit {proc.returncode})\n{stderr_out[:600].strip()}"
+            )
+        return "".join(chunks).strip()
+    else:
+        result = subprocess.run(
+            cmd,
+            input=prompt,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            encoding="utf-8",
+            errors="replace",
+            env=env,
+        )
+        if result.returncode != 0:
+            raise RuntimeError(
+                f"Claude CLI 失敗 (exit {result.returncode})\n{result.stderr[:600].strip()}"
+            )
+        return result.stdout.strip()
 
 
 # ── 報告儲存 ──────────────────────────────────
