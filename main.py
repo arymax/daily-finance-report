@@ -298,7 +298,17 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
     if thesis_cfg.get("auto_update", True) and (portfolio_content or market_content):
         logger.info("── Task 4：Thesis 自動更新 ────────────────")
         try:
-            theses = load_all_theses(thesis_dir)
+            # 只送 portfolio 中有持倉或觀察清單的 ticker
+            portfolio_tickers = {
+                pos["ticker"]
+                for pos in lt_positions + ta_positions
+            } | {w["ticker"] for w in watchlist}
+            all_theses = load_all_theses(thesis_dir)
+            theses = {k: v for k, v in all_theses.items() if k in portfolio_tickers}
+            logger.info(
+                f"   Thesis 過濾：{len(all_theses)} 份 → {len(theses)} 份"
+                f"（{', '.join(sorted(theses))}）"
+            )
             if theses:
                 update_prompt = build_thesis_prompt(
                     theses, portfolio_content, market_content, session=session
@@ -620,9 +630,21 @@ def run_update_thesis(session: str = "morning") -> None:
     logger.info(f"  market_overview   ：{'✅' if market_content    else '❌ 未找到'}")
 
     try:
-        theses = load_all_theses(thesis_dir)
+        portfolio = load_portfolio(BASE_DIR / config.get("portfolio_file", "portfolio.json"))
+        portfolio_tickers = {
+            pos["ticker"]
+            for pos in portfolio.get("long_term", {}).get("positions", [])
+                       + portfolio.get("tactical", {}).get("positions", [])
+        } | {w["ticker"] for w in portfolio.get("watchlist", [])}
+
+        all_theses = load_all_theses(thesis_dir)
+        theses = {k: v for k, v in all_theses.items() if k in portfolio_tickers}
+        logger.info(
+            f"   Thesis 過濾：{len(all_theses)} 份 → {len(theses)} 份"
+            f"（{', '.join(sorted(theses))}）"
+        )
         if not theses:
-            logger.info("  ℹ️ 無 thesis 文件可更新")
+            logger.info("  ℹ️ 無符合 portfolio 的 thesis 文件可更新")
             return
 
         update_prompt = build_thesis_prompt(
