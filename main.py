@@ -758,7 +758,21 @@ def main():
         default="morning",
         help="執行時段：morning（07:00 台股盤前）或 evening（18:00 台股盤後），預設 morning",
     )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="強制執行（忽略週末跳過邏輯，用於地緣政治等重大事件）",
+    )
     args = parser.parse_args()
+
+    # ── 週末跳過（無重大事件時不消耗 token）──
+    today_weekday = datetime.now(TST).weekday()  # 0=Mon … 5=Sat, 6=Sun
+    if today_weekday == 6 and not args.force:
+        print(
+            "[週末模式] 今天是週日，跳過所有 Task。\n"
+            "若有地緣政治等重大事件需要分析，請加上 --force 強制執行。"
+        )
+        return
 
     if args.validate:
         config = load_config()
