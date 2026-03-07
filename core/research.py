@@ -13,6 +13,47 @@ logger = logging.getLogger(__name__)
 
 
 # ════════════════════════════════════════════════════
+# 解析 Task 2 market_content 的機器讀取訊號
+# ════════════════════════════════════════════════════
+
+def parse_market_signals(
+    market_content: str,
+) -> tuple[set[str], list[dict]]:
+    """
+    解析 Task 2 輸出中的兩個機器讀取區塊：
+      - THESIS_TRIGGER  → 需要質化更新的 ticker set
+      - RESEARCH_CANDIDATE → 值得新研究的候選 list（格式與 parse_candidates 相同）
+
+    回傳 (triggered_tickers: set[str], candidates: list[dict])
+    """
+    # ── THESIS_TRIGGER ──
+    triggered: set[str] = set()
+    if "NO_THESIS_TRIGGER" not in market_content:
+        trigger_pattern = r"===THESIS_TRIGGER===\s*(.*?)===END_THESIS_TRIGGER==="
+        for block in re.findall(trigger_pattern, market_content, re.DOTALL):
+            for line in block.strip().splitlines():
+                if line.startswith("ticker:"):
+                    t = line.split(":", 1)[1].strip().upper()
+                    if t:
+                        triggered.add(t)
+
+    # ── RESEARCH_CANDIDATE ──
+    candidates: list[dict] = []
+    if "NO_RESEARCH" not in market_content:
+        cand_pattern = r"===RESEARCH_CANDIDATE===\s*(.*?)===END_RESEARCH_CANDIDATE==="
+        for block in re.findall(cand_pattern, market_content, re.DOTALL):
+            candidate: dict[str, str] = {}
+            for line in block.strip().splitlines():
+                if ":" in line:
+                    key, _, val = line.partition(":")
+                    candidate[key.strip()] = val.strip()
+            if candidate.get("ticker") and candidate.get("name"):
+                candidates.append(candidate)
+
+    return triggered, candidates
+
+
+# ════════════════════════════════════════════════════
 # Mode A：補充現有 thesis 的質化深度
 # ════════════════════════════════════════════════════
 

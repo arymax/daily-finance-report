@@ -34,11 +34,12 @@ from core.prices import fetch_current_prices, fetch_usd_twd_rate
 from core.prompts import build_portfolio_prompt, build_market_prompt
 import core.memory as mem
 import core.sync as sync
-from core.thesis import load_all_theses, build_update_prompt as build_thesis_prompt, parse_and_save as save_theses
+from core.thesis import build_update_prompt as build_thesis_prompt, parse_and_save as save_theses
 from core.fundamentals import fetch_fundamentals, update_snapshot_in_thesis
 from core.research import (
     build_enrich_prompt,
     build_candidate_prompt, parse_candidates,
+    parse_market_signals,
     build_research_prompt, save_research_thesis,
 )
 
@@ -63,8 +64,13 @@ def call_claude(prompt: str, claude_cli: str, model: str, timeout: int, stream: 
         cmd += ["--model", model]
 
     env = os.environ.copy()
-    env.pop("CLAUDECODE", None)
-    env.pop("CLAUDE_CODE", None)
+    # 清除所有 Claude Code session 標記，避免子進程被誤判為巢狀 session
+    for _k in (
+        "CLAUDECODE", "CLAUDE_CODE",
+        "CLAUDE_CODE_SSE_PORT", "CLAUDE_CODE_ENTRY_POINT",
+        "CLAUDE_SESSION_ID",
+    ):
+        env.pop(_k, None)
 
     if stream:
         chunks: list[str] = []
@@ -130,6 +136,46 @@ def save_report(content: str, report_type: str, reports_dir: Path) -> Path:
 
 
 # ── 主流程 ────────────────────────────────────
+# ── Lock file（防止多個 main.py 並行執行）────────────
+LOCK_FILE = BASE_DIR / "main.lock"
+
+
+def _pid_alive(pid: int) -> bool:
+    """判斷 PID 是否仍在執行中（Windows / Unix 通用，無第三方依賴）。"""
+    if sys.platform == "win32":
+        # Windows：用 tasklist 查詢 PID
+        try:
+            out = subprocess.run(
+                ["tasklist", "/FI", f"PID eq {pid}", "/NH"],
+                capture_output=True, text=True, timeout=5,
+            )
+            return str(pid) in out.stdout
+        except Exception:
+            return False
+    else:
+        # Unix：透過 /proc 檔案系統
+        return Path(f"/proc/{pid}").exists()
+
+
+def _acquire_lock() -> bool:
+    """嘗試取得執行鎖，回傳是否成功。"""
+    if LOCK_FILE.exists():
+        try:
+            pid = int(LOCK_FILE.read_text().strip())
+            if _pid_alive(pid):
+                return False
+            # 舊進程已結束，清除殘留 lock
+            LOCK_FILE.unlink(missing_ok=True)
+        except Exception:
+            LOCK_FILE.unlink(missing_ok=True)
+    LOCK_FILE.write_text(str(os.getpid()), encoding="utf-8")
+    return True
+
+
+def _release_lock() -> None:
+    LOCK_FILE.unlink(missing_ok=True)
+
+
 def run(run_portfolio: bool = True, run_market: bool = True, session: str = "morning") -> None:
     config = load_config()
 
@@ -148,11 +194,20 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
     extra_tickers = news_sources.get("market_extra_tickers", [])
     memory_cfg    = config.get("memory", {})
     sync_cfg      = config.get("sync", {})
+    thesis_cfg    = config.get("thesis", {})
     memory_dir    = BASE_DIR / memory_cfg.get("memory_dir", "memory")
     thesis_dir    = BASE_DIR / "thesis"
     context_days  = memory_cfg.get("context_days", 5)
+    max_per_day   = thesis_cfg.get("max_per_day", 3)
 
     setup_logging(logs_dir)
+
+    # ── 取得執行鎖（防止並行）──
+    if not _acquire_lock():
+        logger.warning(
+            f"另一個 main.py（PID {LOCK_FILE.read_text().strip()}）正在執行中，本次略過。"
+        )
+        return
 
     session_label = "早盤（台股盤前／美股盤後）" if session == "morning" else "收盤（台股盤後／美股盤前）"
     logger.info("=" * 55)
@@ -269,11 +324,14 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
         task_label = "美股盤後市場總覽" if session == "morning" else "台股收盤總覽與美股盤前預備"
         logger.info(f"── Task 2：{task_label} ──────────")
         try:
+            existing_thesis_tickers = {f.stem for f in thesis_dir.glob("*.md")}
             prompt = build_market_prompt(
                 market_news, watchlist, extra_news_by_ticker,
                 memory_context=memory_context,
                 thesis_dir=str(thesis_dir),
                 session=session,
+                max_research_candidates=max_per_day,
+                existing_thesis_tickers=existing_thesis_tickers,
             )
             logger.info(f"   Prompt 長度：{len(prompt):,} 字元")
             market_content = call_claude(prompt, claude_cli, claude_model, timeout, stream=stream_output)
@@ -281,6 +339,17 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
         except Exception as e:
             logger.error(f"市場總覽失敗：{e}")
             errors.append(str(e))
+
+    # ── 解析 Task 2 機器讀取區塊 ──
+    triggered_tickers: set[str] = set()
+    candidates: list[dict] = []
+    if market_content:
+        triggered_tickers, candidates = parse_market_signals(market_content)
+        logger.info(
+            f"  Task 2 訊號：THESIS_TRIGGER {len(triggered_tickers)} 個"
+            f"（{', '.join(sorted(triggered_tickers)) or '無'}），"
+            f"RESEARCH_CANDIDATE {len(candidates)} 個"
+        )
 
     # ── Task 3：生成記憶摘要 ──
     if memory_cfg.get("enabled", True) and memory_cfg.get("generate_summary", True):
@@ -293,21 +362,18 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
             except Exception as e:
                 logger.warning(f"記憶摘要生成失敗（不影響主報告）：{e}")
 
-    # ── Task 4：Thesis 自動更新 ──
-    thesis_cfg = config.get("thesis", {})
+    # ── Task 4：Thesis 自動更新（只更新 Task 2 觸發的 ticker）──
     if thesis_cfg.get("auto_update", True) and (portfolio_content or market_content):
         logger.info("── Task 4：Thesis 自動更新 ────────────────")
         try:
-            # 今日報告分析了哪些 ticker？只更新其中有 thesis 檔案的
-            todays_tickers = {t for t, _ in news_tickers} | set(extra_tickers)
             theses = {
                 stem: (thesis_dir / f"{stem}.md").read_text(encoding="utf-8")
-                for stem in todays_tickers
+                for stem in triggered_tickers
                 if (thesis_dir / f"{stem}.md").exists()
             }
             logger.info(
-                f"   今日分析 {len(todays_tickers)} 個 ticker，"
-                f"其中 {len(theses)} 個有 thesis：{', '.join(sorted(theses))}"
+                f"   THESIS_TRIGGER {len(triggered_tickers)} 個，"
+                f"其中 {len(theses)} 個有 thesis：{', '.join(sorted(theses)) or '無'}"
             )
             if theses:
                 update_prompt = build_thesis_prompt(
@@ -326,62 +392,51 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
                     logger.warning(f"  {alert_text}")
                     logger.warning("  請手動重新評估此 thesis 的策略部分")
                     logger.warning("  " + "!" * 50)
+            else:
+                logger.info("  ℹ️ 今日無 thesis 需要質化更新")
         except Exception as e:
             logger.warning(f"Thesis 自動更新失敗（不影響主報告）：{e}")
 
-    # ── Task 5：自動研究新標的 ──
-    research_cfg = thesis_cfg  # 共用 thesis config 區塊
-    if research_cfg.get("auto_research", False) and (portfolio_content or market_content):
-        max_per_day = research_cfg.get("max_per_day", 3)
+    # ── Task 5：自動研究新標的（直接使用 Task 2 解析的候選，無需額外 Claude call）──
+    if candidates and (portfolio_content or market_content):
+        max_per_day = thesis_cfg.get("max_per_day", 3)
+        run_candidates = candidates[:max_per_day]
         logger.info("── Task 5：自動研究新標的 ────────────────")
+        logger.info(f"  候選 {len(run_candidates)} 個：{', '.join(c['ticker'] for c in run_candidates)}")
         try:
             existing_tickers = {f.stem for f in thesis_dir.glob("*.md")}
             today_str = datetime.now(TST).strftime("%Y-%m-%d")
-            candidate_prompt = build_candidate_prompt(
-                market_content=market_content,
-                portfolio_content=portfolio_content,
-                existing_tickers=existing_tickers,
-                today=today_str,
-                session=session,
-                max_candidates=max_per_day,
-            )
-            logger.info(f"   Candidate Prompt 長度：{len(candidate_prompt):,} 字元")
-            candidate_response = call_claude(candidate_prompt, claude_cli, claude_model, timeout, stream=stream_output)
-            candidates = parse_candidates(candidate_response)
-
-            if not candidates:
-                logger.info("  ℹ️ 今日無新研究標的")
-            else:
-                logger.info(f"  識別到 {len(candidates)} 個候選：{', '.join(c['ticker'] for c in candidates)}")
-                for c in candidates:
-                    t_ticker = c["ticker"]
-                    t_name   = c["name"]
-                    t_market = c.get("market", "US")
-                    t_reason = c.get("reason", "")
-                    logger.info(f"  ── 研究 {t_ticker}（{t_name}）────")
-                    try:
-                        t_articles  = fetch_stock_news(t_ticker, market=t_market, max_articles=8)
-                        t_fund_data = fetch_fundamentals([(t_ticker, t_market)])
-                        t_price_data = fetch_current_prices([(t_ticker, t_market)])
-                        t_price = t_price_data.get(t_ticker, {}).get("price")
-                        research_prompt = build_research_prompt(
-                            ticker=t_ticker, name=t_name, market=t_market,
-                            reason=t_reason,
-                            news_articles=t_articles,
-                            fundamentals=t_fund_data.get(t_ticker, {}),
-                            price=t_price, usd_twd=usd_twd, today=today_str,
-                        )
-                        logger.info(f"     Research Prompt 長度：{len(research_prompt):,} 字元")
-                        research_content = call_claude(research_prompt, claude_cli, claude_model, timeout, stream=stream_output)
-                        saved_path = save_research_thesis(research_content, t_ticker, thesis_dir)
-                        # 寫入 fundamentals 快照
-                        t_metrics = t_fund_data.get(t_ticker, {})
-                        if t_metrics:
-                            update_time = datetime.now(TST).strftime("%Y-%m-%d %H:%M TST")
-                            update_snapshot_in_thesis(saved_path, t_metrics, update_time)
-                        logger.info(f"  ✅ 新 thesis 已建立：{saved_path.name}")
-                    except Exception as e:
-                        logger.error(f"  研究 {t_ticker} 失敗：{e}")
+            for c in run_candidates:
+                t_ticker = c["ticker"]
+                if t_ticker in existing_tickers:
+                    logger.info(f"  ⚠️  {t_ticker}.md 已存在，跳過")
+                    continue
+                t_name   = c["name"]
+                t_market = c.get("market", "US")
+                t_reason = c.get("reason", "")
+                logger.info(f"  ── 研究 {t_ticker}（{t_name}）────")
+                try:
+                    t_articles   = fetch_stock_news(t_ticker, market=t_market, max_articles=8)
+                    t_fund_data  = fetch_fundamentals([(t_ticker, t_market)])
+                    t_price_data = fetch_current_prices([(t_ticker, t_market)])
+                    t_price      = t_price_data.get(t_ticker, {}).get("price")
+                    research_prompt = build_research_prompt(
+                        ticker=t_ticker, name=t_name, market=t_market,
+                        reason=t_reason,
+                        news_articles=t_articles,
+                        fundamentals=t_fund_data.get(t_ticker, {}),
+                        price=t_price, usd_twd=usd_twd, today=today_str,
+                    )
+                    logger.info(f"     Research Prompt 長度：{len(research_prompt):,} 字元")
+                    research_content = call_claude(research_prompt, claude_cli, claude_model, timeout, stream=stream_output)
+                    saved_path = save_research_thesis(research_content, t_ticker, thesis_dir)
+                    t_metrics = t_fund_data.get(t_ticker, {})
+                    if t_metrics:
+                        update_time = datetime.now(TST).strftime("%Y-%m-%d %H:%M TST")
+                        update_snapshot_in_thesis(saved_path, t_metrics, update_time)
+                    logger.info(f"  ✅ 新 thesis 已建立：{saved_path.name}")
+                except Exception as e:
+                    logger.error(f"  研究 {t_ticker} 失敗：{e}")
         except Exception as e:
             logger.warning(f"Task 5 自動研究失敗（不影響主報告）：{e}")
 
@@ -401,7 +456,9 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
         sync.push(BASE_DIR, f"report: {today}")
 
     logger.info("=" * 55)
+    _release_lock()
     if errors:
+        _release_lock()  # 確保 exit 前釋放
         sys.exit(1)
 
 
@@ -555,12 +612,12 @@ def run_research_only(session: str = "morning") -> None:
         )
         logger.info(f"   Candidate Prompt 長度：{len(candidate_prompt):,} 字元")
         candidate_response = call_claude(candidate_prompt, claude_cli, claude_model, timeout, stream=stream_output)
-        candidates = parse_candidates(candidate_response)
+        candidates = parse_candidates(candidate_response)[:max_per_day]
 
         if not candidates:
             logger.info("  ℹ️ 今日無新研究標的")
         else:
-            logger.info(f"  識別到 {len(candidates)} 個候選：{', '.join(c['ticker'] for c in candidates)}")
+            logger.info(f"  識別到 {len(candidates)} 個候選（上限 {max_per_day}）：{', '.join(c['ticker'] for c in candidates)}")
             for c in candidates:
                 t_ticker = c["ticker"]
                 t_name   = c["name"]

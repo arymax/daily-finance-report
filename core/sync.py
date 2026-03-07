@@ -21,7 +21,7 @@ TST = timezone(timedelta(hours=8))
 logger = logging.getLogger(__name__)
 
 # 只同步這三類，避免意外 commit 敏感或暫存檔案
-_STAGED_PATHS = ["reports/", "memory/", "portfolio.json"]
+_STAGED_PATHS = ["reports/", "memory/", "portfolio.json", "thesis/"]
 
 
 def is_git_repo(repo_dir: Path) -> bool:

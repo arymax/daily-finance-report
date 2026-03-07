@@ -510,6 +510,8 @@ def build_market_prompt(
     memory_context: str = "",
     thesis_dir: str = "",
     session: str = "morning",
+    existing_thesis_tickers: set | None = None,
+    max_research_candidates: int = 3,
 ) -> str:
     date_str = _date_header()
 
@@ -617,6 +619,12 @@ def build_market_prompt(
     # 從觀察清單取出 ticker 清單，用於告知 Claude 哪些標的屬於 watchlist（Section 六禁止重複）
     watchlist_tickers = "、".join(w["ticker"] for w in watchlist) if watchlist else "（無）"
 
+    # 機器讀取區塊說明：提供目前有 thesis 的標的清單（供 Claude 識別）
+    thesis_ticker_list = (
+        "、".join(sorted(existing_thesis_tickers)) if existing_thesis_tickers else "（無）"
+    )
+    watchlist_ticker_set = "、".join(w["ticker"] for w in watchlist) if watchlist else "（無）"
+
     if session == "morning":
         market_output_spec = [
             "---",
@@ -659,6 +667,32 @@ def build_market_prompt(
             "- 今日 / 本周重要財報 / 數據發布預告（含時間）",
             "",
             "請以繁體中文輸出，格式工整、資訊密度高，適合早晨快速閱讀。",
+            "",
+            "---",
+            "",
+            "# 機器讀取區塊（輸出在 7 個章節之後，人類報告部分不得包含這些標籤）",
+            "",
+            f"## A. Thesis 更新觸發（已有 thesis 的標的：{thesis_ticker_list}）",
+            "上述標的中，若今日有以下類型重大事件，請每個輸出一個區塊；若無則輸出 NO_THESIS_TRIGGER",
+            "觸發條件：財報發布 / 重大業務更新 / 分析師大幅調評 / 重大客戶或合約消息",
+            "",
+            "===THESIS_TRIGGER===",
+            "ticker: <代碼>",
+            "reason: <一句話說明觸發事件>",
+            "===END_THESIS_TRIGGER===",
+            "",
+            f"## B. 新研究候選（最多 {max_research_candidates} 個，排除已有 thesis 的標的）",
+            "從今日市場新聞中識別值得深入研究的美股新標的（本次 morning session，聚焦美股），",
+            f"排除已有 thesis 的標的（{thesis_ticker_list}）及觀察清單（{watchlist_ticker_set}）中已有的。",
+            "選擇標準：財報發布 / 強勢板塊代表股 / 重大事件。若無符合條件，輸出 NO_RESEARCH",
+            "",
+            "===RESEARCH_CANDIDATE===",
+            "ticker: <代碼>",
+            "name: <公司全名>",
+            "market: US",
+            "exchange: <NASDAQ / NYSE 等>",
+            "reason: <觸發事件 + 為什麼值得研究>",
+            "===END_RESEARCH_CANDIDATE===",
         ]
     else:
         market_output_spec = [
@@ -706,6 +740,32 @@ def build_market_prompt(
             "- 持倉需特別留意的事項",
             "",
             "請以繁體中文輸出，格式工整、資訊密度高，適合台股收盤後快速閱讀。",
+            "",
+            "---",
+            "",
+            "# 機器讀取區塊（輸出在 6 個章節之後，人類報告部分不得包含這些標籤）",
+            "",
+            f"## A. Thesis 更新觸發（已有 thesis 的標的：{thesis_ticker_list}）",
+            "上述標的中，若今日有以下類型重大事件，請每個輸出一個區塊；若無則輸出 NO_THESIS_TRIGGER",
+            "觸發條件：財報發布 / 重大業務更新 / 分析師大幅調評 / 重大客戶或合約消息",
+            "",
+            "===THESIS_TRIGGER===",
+            "ticker: <代碼>",
+            "reason: <一句話說明觸發事件>",
+            "===END_THESIS_TRIGGER===",
+            "",
+            f"## B. 新研究候選（最多 {max_research_candidates} 個，排除已有 thesis 的標的）",
+            "從今日市場新聞中識別值得深入研究的台股新標的（本次 evening session，聚焦台股），",
+            f"排除已有 thesis 的標的（{thesis_ticker_list}）及觀察清單（{watchlist_ticker_set}）中已有的。",
+            "選擇標準：財報發布 / 強勢板塊代表股 / 重大事件。若無符合條件，輸出 NO_RESEARCH",
+            "",
+            "===RESEARCH_CANDIDATE===",
+            "ticker: <代碼>",
+            "name: <公司全名>",
+            "market: TW",
+            "exchange: <上市 / 上櫃 等>",
+            "reason: <觸發事件 + 為什麼值得研究>",
+            "===END_RESEARCH_CANDIDATE===",
         ]
 
     lines += market_output_spec
