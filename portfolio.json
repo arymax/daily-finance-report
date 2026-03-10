@@ -1,6 +1,6 @@
 {
   "meta": {
-    "last_updated": "2026-03-07",
+    "last_updated": "2026-03-11",
     "base_currency": "TWD"
   },
   "cash": {
@@ -135,21 +135,21 @@
         "name": "CrowdStrike Holdings",
         "type": "stock",
         "market": "US",
-        "cost_twd": 6349,
-        "shares": 0.5,
+        "cost_twd": 20277,
+        "shares": 1.5,
         "sector": "資安軟體",
         "theme": "AI時代企業資安平台整合",
         "position_size": "custom",
-        "position_pct": 0.05,
-        "status": "試探性倉位，Q4財報確認 ARR $5B+ 後進場",
-        "strategy": "財報超預期（ARR 突破 $5B，年增 >23%），以試探 0.5 股建立基礎倉位；後續視技術面穩固決定是否加碼",
+        "position_pct": 0.1,
+        "status": "已加碼至 1.5 股，Q4財報確認 ARR $5B+ 後持續建倉",
+        "strategy": "財報超預期（ARR 突破 $5B，年增 >23%），分批建倉；後續視技術面穩固決定是否繼續加碼",
         "catalysts": [
           "Q4 財報 ARR 突破 $5B，年增超過 23%",
           "CEO 稱「有史以來最佳年度（best year yet）」，指引未下修",
           "地緣政治升溫持續強化企業資安預算"
         ],
         "broker": "Firstrade",
-        "note": "均價 396.80 USD（0.5 股 × 396.80）；原始成本 198.40 USD；cost_twd 依匯率估算 32 換算約 6,349 TWD"
+        "note": "均價 422.45 USD（1.5 股）；原始成本 633.67 USD；批次：0.5 股 @396.80、1 股 @435.27499；cost_twd 依匯率估算 32 換算約 20,277 TWD"
       },
       {
         "ticker": "ALAB",
@@ -171,6 +171,27 @@
         ],
         "broker": "Firstrade",
         "note": "均價 123.39333 USD（1.5 股 × 123.39333）；原始成本 185.09 USD；cost_twd 依匯率估算 32 換算約 5,923 TWD"
+      },
+      {
+        "ticker": "NET",
+        "name": "Cloudflare Inc.",
+        "type": "stock",
+        "market": "US",
+        "cost_twd": 19448,
+        "shares": 3,
+        "sector": "網路基礎建設／資安",
+        "theme": "AI流量成長、Zero Trust、CDN",
+        "position_size": "custom",
+        "position_pct": 0.1,
+        "status": "已進場，3 股試探倉位",
+        "strategy": "技術面底部確認後進場；後續觀察帶量突破確認趨勢",
+        "catalysts": [
+          "AI流量爆發推動 CDN 與 Zero Trust 需求持續成長",
+          "企業資安預算升溫，Cloudflare 平台整合優勢顯著",
+          "從 52 週高點 $175 回調約 34%，提供較佳進場點"
+        ],
+        "broker": "Firstrade",
+        "note": "均價 202.59 USD（3 股）；原始成本 607.77 USD；cost_twd 依匯率估算 32 換算約 19,448 TWD"
       },
       {
         "ticker": "3030",
@@ -198,81 +219,53 @@
         "name": "Tether USD",
         "exchange": "Bitget",
         "type": "stablecoin",
-        "cost_twd": 48595,
-        "quantity": 1519,
+        "cost_twd": 42491,
         "role": "合約保證金／現貨買入資金",
-        "note": "1,519 USDT；cost_twd 依匯率估算 32 換算"
+        "note": "cost_twd 2026-03-11 更新"
       },
       {
         "ticker": "USDT",
         "name": "Tether USD",
         "exchange": "Bitunix",
         "type": "contract",
-        "cost_twd": 36818,
-        "quantity": 1150,
+        "cost_twd": 38290,
         "role": "短線合約交易",
-        "note": "1,150 USDT；合約學習帳戶，操作策略為短線數小時內收倉；cost_twd 依匯率估算 32 換算"
+        "note": "合約學習帳戶，操作策略為短線數小時內收倉；cost_twd 2026-03-11 更新"
       },
       {
         "ticker": "BTC",
         "name": "Bitcoin",
         "exchange": "Bitget",
         "type": "spot",
-        "cost_twd": 21420,
+        "cost_twd": 23774,
         "quantity": 0.006537,
-        "note": "現貨長期持有；cost_twd 2026-03-05 更新"
+        "note": "現貨長期持有；cost_twd 2026-03-11 更新"
       },
       {
         "ticker": "ETH",
         "name": "Ethereum",
         "exchange": "Bitget",
         "type": "spot",
-        "cost_twd": 6434,
+        "cost_twd": 9312,
         "quantity": 0.1547,
-        "note": "現貨長期持有；cost_twd 2026-03-05 更新"
+        "note": "現貨長期持有；cost_twd 2026-03-11 更新"
       },
       {
         "ticker": "XRP",
         "name": "XRP",
         "exchange": "Bitget",
         "type": "spot",
-        "cost_twd": 5285,
+        "cost_twd": 5134,
         "quantity": 60.57,
-        "note": "現貨長期持有；cost_twd 2026-03-05 更新"
+        "note": "現貨長期持有；cost_twd 2026-03-11 更新"
       }
     ]
   },
-  "watchlist": [
-    {
-      "ticker": "NET",
-      "name": "Cloudflare Inc.",
-      "exchange": "NYSE",
-      "market": "US",
-      "sector": "網路基礎建設／資安",
-      "theme": "AI流量成長、Zero Trust、CDN",
-      "priority": 2,
-      "entry_condition": "技術面底部確認，情緒面由bearish轉neutral；等帶量止跌K棒",
-      "key_metrics": {
-        "52w_high_usd": 175,
-        "decline_from_high": -0.34
-      },
-      "next_event": "等技術面帶量止跌確認後評估進場"
-    }
-  ],
+  "watchlist": [],
   "strategy": {
     "investment_horizon": "6個月（2026下半年集中部署）",
     "overall_theme": "AI基礎建設全鏈路佈局",
     "key_upcoming_events": [
-      {
-        "date": "2026-03-03",
-        "ticker": "CRWD",
-        "event": "Q4財報"
-      },
-      {
-        "date": "2026-03-03",
-        "ticker": "ALAB",
-        "event": "Morgan Stanley TMT Conference"
-      },
       {
         "date": "2026-05-12",
         "ticker": "ALAB",
