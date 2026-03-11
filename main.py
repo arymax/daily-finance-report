@@ -34,7 +34,7 @@ from core.prices import fetch_current_prices, fetch_usd_twd_rate
 from core.prompts import build_portfolio_prompt, build_market_prompt
 import core.memory as mem
 import core.sync as sync
-from core.thesis import build_update_prompt as build_thesis_prompt, parse_and_save as save_theses
+from core.thesis import load_all_theses, find_thesis, build_update_prompt as build_thesis_prompt, parse_and_save as save_theses
 from core.fundamentals import fetch_fundamentals, update_snapshot_in_thesis
 from core.research import (
     build_enrich_prompt,
@@ -121,6 +121,36 @@ def call_claude(prompt: str, claude_cli: str, model: str, timeout: int, stream: 
                 f"Claude CLI 失敗 (exit {result.returncode})\n{result.stderr[:600].strip()}"
             )
         return result.stdout.strip()
+
+
+def call_gemini(prompt: str, gemini_cli: str, model: str, timeout: int) -> str:
+    """
+    透過 subprocess 呼叫本地 Gemini CLI（stdin + headless 模式）。
+    使用 -p "" 觸發非互動模式，prompt 經由 stdin 傳入。
+    """
+    cmd = [gemini_cli, "--yolo", "-o", "text", "-p", ""]
+    if model:
+        cmd += ["-m", model]
+
+    env = os.environ.copy()
+    env.pop("CLAUDECODE", None)
+    env.pop("CLAUDE_CODE", None)
+
+    result = subprocess.run(
+        cmd,
+        input=prompt,
+        capture_output=True,
+        text=True,
+        timeout=timeout,
+        encoding="utf-8",
+        errors="replace",
+        env=env,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"Gemini CLI 失敗 (exit {result.returncode})\n{result.stderr[:600].strip()}"
+        )
+    return result.stdout.strip()
 
 
 # ── 報告儲存 ──────────────────────────────────
@@ -288,8 +318,8 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
         fundamentals = fetch_fundamentals(fundamental_tickers)
         update_time = datetime.now(TST).strftime("%Y-%m-%d %H:%M TST")
         for ticker, metrics in fundamentals.items():
-            tf = thesis_dir / f"{ticker}.md"
-            if tf.exists():
+            tf = find_thesis(thesis_dir, ticker)
+            if tf is not None:
                 update_snapshot_in_thesis(tf, metrics, update_time)
 
     # ── 載入歷史記憶 context ──
@@ -367,9 +397,9 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
         logger.info("── Task 4：Thesis 自動更新 ────────────────")
         try:
             theses = {
-                stem: (thesis_dir / f"{stem}.md").read_text(encoding="utf-8")
+                stem: tf.read_text(encoding="utf-8")
                 for stem in triggered_tickers
-                if (thesis_dir / f"{stem}.md").exists()
+                if (tf := find_thesis(thesis_dir, stem)) is not None
             }
             logger.info(
                 f"   THESIS_TRIGGER {len(triggered_tickers)} 個，"
@@ -404,7 +434,7 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
         logger.info("── Task 5：自動研究新標的 ────────────────")
         logger.info(f"  候選 {len(run_candidates)} 個：{', '.join(c['ticker'] for c in run_candidates)}")
         try:
-            existing_tickers = {f.stem for f in thesis_dir.glob("*.md")}
+            existing_tickers = {f.stem for f in thesis_dir.rglob("*.md")}
             today_str = datetime.now(TST).strftime("%Y-%m-%d")
             for c in run_candidates:
                 t_ticker = c["ticker"]
@@ -429,12 +459,13 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
                     )
                     logger.info(f"     Research Prompt 長度：{len(research_prompt):,} 字元")
                     research_content = call_claude(research_prompt, claude_cli, claude_model, timeout, stream=stream_output)
-                    saved_path = save_research_thesis(research_content, t_ticker, thesis_dir)
+                    t_sector = c.get("sector", "")
+                    saved_path = save_research_thesis(research_content, t_ticker, thesis_dir, sector=t_sector)
                     t_metrics = t_fund_data.get(t_ticker, {})
                     if t_metrics:
                         update_time = datetime.now(TST).strftime("%Y-%m-%d %H:%M TST")
                         update_snapshot_in_thesis(saved_path, t_metrics, update_time)
-                    logger.info(f"  ✅ 新 thesis 已建立：{saved_path.name}")
+                    logger.info(f"  ✅ 新 thesis 已建立：{saved_path.relative_to(thesis_dir)}")
                 except Exception as e:
                     logger.error(f"  研究 {t_ticker} 失敗：{e}")
         except Exception as e:
@@ -638,12 +669,13 @@ def run_research_only(session: str = "morning") -> None:
                     )
                     logger.info(f"     Research Prompt 長度：{len(research_prompt):,} 字元")
                     research_content = call_claude(research_prompt, claude_cli, claude_model, timeout, stream=stream_output)
-                    saved_path = save_research_thesis(research_content, t_ticker, thesis_dir)
+                    t_sector = c.get("sector", "")
+                    saved_path = save_research_thesis(research_content, t_ticker, thesis_dir, sector=t_sector)
                     t_metrics = t_fund_data.get(t_ticker, {})
                     if t_metrics:
                         update_time = datetime.now(TST).strftime("%Y-%m-%d %H:%M TST")
                         update_snapshot_in_thesis(saved_path, t_metrics, update_time)
-                    logger.info(f"  ✅ 新 thesis 已建立：{saved_path.name}")
+                    logger.info(f"  ✅ 新 thesis 已建立：{saved_path.relative_to(thesis_dir)}")
                 except Exception as e:
                     logger.error(f"  研究 {t_ticker} 失敗：{e}")
     except Exception as e:
@@ -699,9 +731,9 @@ def run_update_thesis(session: str = "morning") -> None:
             | set(cfg_news.get("market_extra_tickers", []))
         )
         theses = {
-            stem: (thesis_dir / f"{stem}.md").read_text(encoding="utf-8")
+            stem: tf.read_text(encoding="utf-8")
             for stem in report_tickers
-            if (thesis_dir / f"{stem}.md").exists()
+            if (tf := find_thesis(thesis_dir, stem)) is not None
         }
         logger.info(
             f"   今日分析 {len(report_tickers)} 個 ticker，"
@@ -733,6 +765,67 @@ def run_update_thesis(session: str = "morning") -> None:
         logger.error(f"Task 4 執行失敗：{e}")
 
     logger.info("=" * 55)
+
+
+def run_premarket_check() -> None:
+    """
+    美股開盤前盤前晨檢：
+    1. 抓取 ES/NQ/10Y/VIX/DXY 即時數據
+    2. 讀取今日 morning_market_overview（事件來源）
+    3. 呼叫 Gemini CLI 判讀
+    4. 儲存報告
+    """
+    from core.premarket import fetch_premarket_data, build_premarket_prompt
+
+    config      = load_config()
+    gemini_cli  = config.get("gemini_cli", "gemini")
+    gemini_model= config.get("gemini_model", "")
+    timeout     = config.get("claude_timeout_seconds", 180)
+    reports_dir = BASE_DIR / config.get("reports_dir", "reports")
+    logs_dir    = BASE_DIR / config.get("logs_dir", "logs")
+
+    setup_logging(logs_dir)
+    logger.info("=" * 55)
+    logger.info("  盤前晨檢（Pre-Market Check）")
+    logger.info("=" * 55)
+
+    now      = datetime.now(TST)
+    today    = now.strftime("%Y-%m-%d")
+    today_fn = now.strftime("%Y%m%d")
+    now_time = now.strftime("%H:%M")
+
+    # 讀取今日 morning market_overview（事件來源）
+    market_report_path = reports_dir / f"{today_fn}_morning_market_overview.md"
+    if market_report_path.exists():
+        market_overview = market_report_path.read_text(encoding="utf-8")
+        logger.info(f"  市場總覽：✅ {market_report_path.name}")
+    else:
+        market_overview = ""
+        logger.warning(f"  市場總覽：❌ 找不到 {market_report_path.name}，將略過事件來源")
+
+    # 抓取宏觀指標
+    logger.info("── 抓取宏觀指標 ──────────────────────")
+    data = fetch_premarket_data()
+
+    # 建立 prompt 並呼叫 Gemini
+    prompt = build_premarket_prompt(data, market_overview, today, now_time)
+    logger.info(f"   Prompt 長度：{len(prompt):,} 字元")
+
+    try:
+        result = call_gemini(prompt, gemini_cli, gemini_model, timeout)
+    except Exception as e:
+        logger.error(f"  Gemini 判讀失敗：{e}")
+        return
+
+    # 儲存報告
+    report_path = reports_dir / f"{today_fn}_premarket_check.md"
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(result + "\n", encoding="utf-8")
+    logger.info(f"  ✅ 報告儲存：{report_path.name}")
+
+    logger.info("=" * 55)
+    logger.info("✅ 盤前晨檢完成")
+    logger.info("=" * 55)
     logger.info("✅ Task 4 完成")
     logger.info("=" * 55)
 
@@ -746,6 +839,7 @@ def main():
     parser.add_argument("--enrich-thesis", action="store_true", help="對所有現有 thesis 補充深度質化分析")
     parser.add_argument("--research",       action="store_true", help="讀取今日已生成報告，單獨執行 Task 5 自動研究新標的")
     parser.add_argument("--update-thesis",  action="store_true", help="讀取今日已生成報告，單獨執行 Task 4 thesis 自動更新")
+    parser.add_argument("--premarket",       action="store_true", help="執行美股開盤前盤前晨檢（Gemini 判讀 ES/NQ/VIX/10Y/DXY）")
     parser.add_argument(
         "--enrich-ticker",
         nargs="+",
@@ -794,6 +888,10 @@ def main():
 
     if args.update_thesis:
         run_update_thesis(session=args.session)
+        return
+
+    if args.premarket:
+        run_premarket_check()
         return
 
     if args.portfolio and not args.market:
