@@ -11,11 +11,20 @@ TST = timezone(timedelta(hours=8))
 
 
 def load_all_theses(thesis_dir: Path) -> dict[str, str]:
-    """讀取 thesis_dir 下所有 .md 檔案，回傳 {stem: content}。"""
+    """遞迴讀取 thesis_dir 下所有 .md 檔案，回傳 {stem: content}，跳過 README。"""
+    _SKIP = {"README"}
     result = {}
-    for p in sorted(thesis_dir.glob("*.md")):
+    for p in sorted(thesis_dir.rglob("*.md")):
+        if p.stem in _SKIP:
+            continue
         result[p.stem] = p.read_text(encoding="utf-8")
     return result
+
+
+def find_thesis(thesis_dir: Path, ticker: str) -> Path | None:
+    """遞迴搜尋 thesis_dir 中 ticker 對應的 .md 檔案，找不到回傳 None。"""
+    matches = [p for p in thesis_dir.rglob(f"{ticker}.md") if p.stem != "README"]
+    return matches[0] if matches else None
 
 
 def build_update_prompt(
@@ -112,8 +121,8 @@ def parse_and_save(
     thesis_pattern = r"===THESIS:\s*(\S+)===\n([\s\S]*?)===END_THESIS==="
     for name, content in re.findall(thesis_pattern, response):
         name = name.strip()
-        target = thesis_dir / f"{name}.md"
-        if target.exists():
+        target = find_thesis(thesis_dir, name)
+        if target is not None:
             text = content.strip()
             # 移除舊的 last_updated 標記（避免重複）
             text = re.sub(r"\n<!-- last_updated: \d{4}-\d{2}-\d{2} -->", "", text)

@@ -34,7 +34,7 @@ from core.prices import fetch_current_prices, fetch_usd_twd_rate
 from core.prompts import build_portfolio_prompt, build_market_prompt
 import core.memory as mem
 import core.sync as sync
-from core.thesis import build_update_prompt as build_thesis_prompt, parse_and_save as save_theses
+from core.thesis import load_all_theses, find_thesis, build_update_prompt as build_thesis_prompt, parse_and_save as save_theses
 from core.fundamentals import fetch_fundamentals, update_snapshot_in_thesis
 from core.research import (
     build_enrich_prompt,
@@ -288,8 +288,8 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
         fundamentals = fetch_fundamentals(fundamental_tickers)
         update_time = datetime.now(TST).strftime("%Y-%m-%d %H:%M TST")
         for ticker, metrics in fundamentals.items():
-            tf = thesis_dir / f"{ticker}.md"
-            if tf.exists():
+            tf = find_thesis(thesis_dir, ticker)
+            if tf is not None:
                 update_snapshot_in_thesis(tf, metrics, update_time)
 
     # ── 載入歷史記憶 context ──
@@ -367,9 +367,9 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
         logger.info("── Task 4：Thesis 自動更新 ────────────────")
         try:
             theses = {
-                stem: (thesis_dir / f"{stem}.md").read_text(encoding="utf-8")
+                stem: tf.read_text(encoding="utf-8")
                 for stem in triggered_tickers
-                if (thesis_dir / f"{stem}.md").exists()
+                if (tf := find_thesis(thesis_dir, stem)) is not None
             }
             logger.info(
                 f"   THESIS_TRIGGER {len(triggered_tickers)} 個，"
@@ -404,7 +404,7 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
         logger.info("── Task 5：自動研究新標的 ────────────────")
         logger.info(f"  候選 {len(run_candidates)} 個：{', '.join(c['ticker'] for c in run_candidates)}")
         try:
-            existing_tickers = {f.stem for f in thesis_dir.glob("*.md")}
+            existing_tickers = {f.stem for f in thesis_dir.rglob("*.md")}
             today_str = datetime.now(TST).strftime("%Y-%m-%d")
             for c in run_candidates:
                 t_ticker = c["ticker"]
@@ -429,12 +429,13 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
                     )
                     logger.info(f"     Research Prompt 長度：{len(research_prompt):,} 字元")
                     research_content = call_claude(research_prompt, claude_cli, claude_model, timeout, stream=stream_output)
-                    saved_path = save_research_thesis(research_content, t_ticker, thesis_dir)
+                    t_sector = c.get("sector", "")
+                    saved_path = save_research_thesis(research_content, t_ticker, thesis_dir, sector=t_sector)
                     t_metrics = t_fund_data.get(t_ticker, {})
                     if t_metrics:
                         update_time = datetime.now(TST).strftime("%Y-%m-%d %H:%M TST")
                         update_snapshot_in_thesis(saved_path, t_metrics, update_time)
-                    logger.info(f"  ✅ 新 thesis 已建立：{saved_path.name}")
+                    logger.info(f"  ✅ 新 thesis 已建立：{saved_path.relative_to(thesis_dir)}")
                 except Exception as e:
                     logger.error(f"  研究 {t_ticker} 失敗：{e}")
         except Exception as e:
@@ -638,12 +639,13 @@ def run_research_only(session: str = "morning") -> None:
                     )
                     logger.info(f"     Research Prompt 長度：{len(research_prompt):,} 字元")
                     research_content = call_claude(research_prompt, claude_cli, claude_model, timeout, stream=stream_output)
-                    saved_path = save_research_thesis(research_content, t_ticker, thesis_dir)
+                    t_sector = c.get("sector", "")
+                    saved_path = save_research_thesis(research_content, t_ticker, thesis_dir, sector=t_sector)
                     t_metrics = t_fund_data.get(t_ticker, {})
                     if t_metrics:
                         update_time = datetime.now(TST).strftime("%Y-%m-%d %H:%M TST")
                         update_snapshot_in_thesis(saved_path, t_metrics, update_time)
-                    logger.info(f"  ✅ 新 thesis 已建立：{saved_path.name}")
+                    logger.info(f"  ✅ 新 thesis 已建立：{saved_path.relative_to(thesis_dir)}")
                 except Exception as e:
                     logger.error(f"  研究 {t_ticker} 失敗：{e}")
     except Exception as e:
@@ -699,9 +701,9 @@ def run_update_thesis(session: str = "morning") -> None:
             | set(cfg_news.get("market_extra_tickers", []))
         )
         theses = {
-            stem: (thesis_dir / f"{stem}.md").read_text(encoding="utf-8")
+            stem: tf.read_text(encoding="utf-8")
             for stem in report_tickers
-            if (thesis_dir / f"{stem}.md").exists()
+            if (tf := find_thesis(thesis_dir, stem)) is not None
         }
         logger.info(
             f"   今日分析 {len(report_tickers)} 個 ticker，"

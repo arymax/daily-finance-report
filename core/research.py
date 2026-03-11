@@ -9,6 +9,49 @@ import logging
 import re
 from pathlib import Path
 
+# Sector keyword → folder name mapping
+_SECTOR_MAP = [
+    ("半導體", "半導體"),
+    ("晶圓", "半導體"),
+    ("IC設計", "半導體"),
+    ("光通訊", "光通訊"),
+    ("光電", "光通訊"),
+    ("Photonics", "光通訊"),
+    ("資安", "資安"),
+    ("Cybersecurity", "資安"),
+    ("網路安全", "資安"),
+    ("AI應用", "AI應用"),
+    ("數據分析", "AI應用"),
+    ("AI基礎建設", "AI基礎建設"),
+    ("伺服器", "AI基礎建設"),
+    ("資料中心", "AI基礎建設"),
+    ("電力基礎", "AI基礎建設"),
+    ("企業軟體", "企業軟體"),
+    ("雲端", "企業軟體"),
+    ("ERP", "企業軟體"),
+    ("能源", "能源"),
+    ("油田", "能源"),
+    ("Midstream", "能源"),
+    ("航太", "航太國防"),
+    ("國防", "航太國防"),
+    ("Aerospace", "航太國防"),
+    ("Defense", "航太國防"),
+    ("航運", "航運"),
+    ("航空", "航運"),
+    ("Airlines", "航運"),
+    ("電子材料", "台股電子材料"),
+    ("銅箔", "台股電子材料"),
+    ("PCB", "台股電子材料"),
+]
+
+
+def sector_to_folder(sector: str) -> str:
+    """將產業描述字串對應到 thesis 子資料夾名稱，找不到時回傳 '其他'。"""
+    for keyword, folder in _SECTOR_MAP:
+        if keyword.lower() in sector.lower():
+            return folder
+    return "其他"
+
 logger = logging.getLogger(__name__)
 
 
@@ -220,6 +263,7 @@ ticker: <代碼，如 NVDA 或 2330>
 name: <公司全名>
 market: {market_code}
 exchange: <NASDAQ / NYSE / 上市 / 上櫃 / 等>
+sector: <產業類別，例如：半導體、資安、光通訊、AI應用、AI基礎建設、企業軟體、能源、航太國防、航運、台股電子材料>
 reason: <一句話說明觸發事件 + 為什麼值得研究>
 ===END_CANDIDATE===
 
@@ -369,9 +413,12 @@ def build_research_prompt(
 """
 
 
-def save_research_thesis(content: str, ticker: str, thesis_dir: Path) -> Path:
-    """儲存研究結果為 thesis/TICKER.md，回傳路徑。"""
-    target = thesis_dir / f"{ticker}.md"
+def save_research_thesis(content: str, ticker: str, thesis_dir: Path, sector: str = "") -> Path:
+    """儲存研究結果為 thesis/<sector>/TICKER.md，回傳路徑。"""
+    folder_name = sector_to_folder(sector) if sector else "其他"
+    target_dir = thesis_dir / folder_name
+    target_dir.mkdir(parents=True, exist_ok=True)
+    target = target_dir / f"{ticker}.md"
     target.write_text(content.strip() + "\n", encoding="utf-8")
     return target
 

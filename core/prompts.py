@@ -691,6 +691,7 @@ def build_market_prompt(
             "name: <公司全名>",
             "market: US",
             "exchange: <NASDAQ / NYSE 等>",
+            "sector: <產業，例如：半導體、資安、光通訊、AI應用、AI基礎建設、企業軟體、能源、航太國防、航運>",
             "reason: <觸發事件 + 為什麼值得研究>",
             "===END_RESEARCH_CANDIDATE===",
         ]
@@ -764,6 +765,7 @@ def build_market_prompt(
             "name: <公司全名>",
             "market: TW",
             "exchange: <上市 / 上櫃 等>",
+            "sector: <產業，例如：半導體、資安、光通訊、AI應用、AI基礎建設、企業軟體、能源、航太國防、航運、台股電子材料>",
             "reason: <觸發事件 + 為什麼值得研究>",
             "===END_RESEARCH_CANDIDATE===",
         ]
