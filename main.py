@@ -123,6 +123,36 @@ def call_claude(prompt: str, claude_cli: str, model: str, timeout: int, stream: 
         return result.stdout.strip()
 
 
+def call_gemini(prompt: str, gemini_cli: str, model: str, timeout: int) -> str:
+    """
+    透過 subprocess 呼叫本地 Gemini CLI（stdin + headless 模式）。
+    使用 -p "" 觸發非互動模式，prompt 經由 stdin 傳入。
+    """
+    cmd = [gemini_cli, "--yolo", "-o", "text", "-p", ""]
+    if model:
+        cmd += ["-m", model]
+
+    env = os.environ.copy()
+    env.pop("CLAUDECODE", None)
+    env.pop("CLAUDE_CODE", None)
+
+    result = subprocess.run(
+        cmd,
+        input=prompt,
+        capture_output=True,
+        text=True,
+        timeout=timeout,
+        encoding="utf-8",
+        errors="replace",
+        env=env,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            f"Gemini CLI 失敗 (exit {result.returncode})\n{result.stderr[:600].strip()}"
+        )
+    return result.stdout.strip()
+
+
 # ── 報告儲存 ──────────────────────────────────
 def save_report(content: str, report_type: str, reports_dir: Path) -> Path:
     reports_dir.mkdir(parents=True, exist_ok=True)
@@ -735,6 +765,67 @@ def run_update_thesis(session: str = "morning") -> None:
         logger.error(f"Task 4 執行失敗：{e}")
 
     logger.info("=" * 55)
+
+
+def run_premarket_check() -> None:
+    """
+    美股開盤前盤前晨檢：
+    1. 抓取 ES/NQ/10Y/VIX/DXY 即時數據
+    2. 讀取今日 morning_market_overview（事件來源）
+    3. 呼叫 Gemini CLI 判讀
+    4. 儲存報告
+    """
+    from core.premarket import fetch_premarket_data, build_premarket_prompt
+
+    config      = load_config()
+    gemini_cli  = config.get("gemini_cli", "gemini")
+    gemini_model= config.get("gemini_model", "")
+    timeout     = config.get("claude_timeout_seconds", 180)
+    reports_dir = BASE_DIR / config.get("reports_dir", "reports")
+    logs_dir    = BASE_DIR / config.get("logs_dir", "logs")
+
+    setup_logging(logs_dir)
+    logger.info("=" * 55)
+    logger.info("  盤前晨檢（Pre-Market Check）")
+    logger.info("=" * 55)
+
+    now      = datetime.now(TST)
+    today    = now.strftime("%Y-%m-%d")
+    today_fn = now.strftime("%Y%m%d")
+    now_time = now.strftime("%H:%M")
+
+    # 讀取今日 morning market_overview（事件來源）
+    market_report_path = reports_dir / f"{today_fn}_morning_market_overview.md"
+    if market_report_path.exists():
+        market_overview = market_report_path.read_text(encoding="utf-8")
+        logger.info(f"  市場總覽：✅ {market_report_path.name}")
+    else:
+        market_overview = ""
+        logger.warning(f"  市場總覽：❌ 找不到 {market_report_path.name}，將略過事件來源")
+
+    # 抓取宏觀指標
+    logger.info("── 抓取宏觀指標 ──────────────────────")
+    data = fetch_premarket_data()
+
+    # 建立 prompt 並呼叫 Gemini
+    prompt = build_premarket_prompt(data, market_overview, today, now_time)
+    logger.info(f"   Prompt 長度：{len(prompt):,} 字元")
+
+    try:
+        result = call_gemini(prompt, gemini_cli, gemini_model, timeout)
+    except Exception as e:
+        logger.error(f"  Gemini 判讀失敗：{e}")
+        return
+
+    # 儲存報告
+    report_path = reports_dir / f"{today_fn}_premarket_check.md"
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(result + "\n", encoding="utf-8")
+    logger.info(f"  ✅ 報告儲存：{report_path.name}")
+
+    logger.info("=" * 55)
+    logger.info("✅ 盤前晨檢完成")
+    logger.info("=" * 55)
     logger.info("✅ Task 4 完成")
     logger.info("=" * 55)
 
@@ -748,6 +839,7 @@ def main():
     parser.add_argument("--enrich-thesis", action="store_true", help="對所有現有 thesis 補充深度質化分析")
     parser.add_argument("--research",       action="store_true", help="讀取今日已生成報告，單獨執行 Task 5 自動研究新標的")
     parser.add_argument("--update-thesis",  action="store_true", help="讀取今日已生成報告，單獨執行 Task 4 thesis 自動更新")
+    parser.add_argument("--premarket",       action="store_true", help="執行美股開盤前盤前晨檢（Gemini 判讀 ES/NQ/VIX/10Y/DXY）")
     parser.add_argument(
         "--enrich-ticker",
         nargs="+",
@@ -796,6 +888,10 @@ def main():
 
     if args.update_thesis:
         run_update_thesis(session=args.session)
+        return
+
+    if args.premarket:
+        run_premarket_check()
         return
 
     if args.portfolio and not args.market:
