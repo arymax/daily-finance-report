@@ -39,18 +39,23 @@ _SECTOR_MAP = [
     ("航運", "航運"),
     ("航空", "航運"),
     ("Airlines", "航運"),
-    ("電子材料", "台股電子材料"),
-    ("銅箔", "台股電子材料"),
-    ("PCB", "台股電子材料"),
+    ("電子材料", "電子材料"),
+    ("銅箔", "電子材料"),
+    ("PCB", "電子材料"),
 ]
 
 
 def sector_to_folder(sector: str) -> str:
-    """將產業描述字串對應到 thesis 子資料夾名稱，找不到時回傳 '其他'。"""
+    """將產業描述字串對應到 thesis 子資料夾名稱。
+    找不到對應時直接使用 sector 原文作為資料夾名稱（自動建立）。
+    """
+    sector = sector.strip()
+    if not sector:
+        return "其他"
     for keyword, folder in _SECTOR_MAP:
         if keyword.lower() in sector.lower():
             return folder
-    return "其他"
+    return sector
 
 logger = logging.getLogger(__name__)
 
