@@ -127,7 +127,16 @@ def call_gemini(prompt: str, gemini_cli: str, model: str, timeout: int) -> str:
     """
     透過 subprocess 呼叫本地 Gemini CLI（stdin + headless 模式）。
     使用 -p "" 觸發非互動模式，prompt 經由 stdin 傳入。
+    Windows 上自動解析 .cmd 完整路徑。
     """
+    import shutil
+
+    # Windows 上 gemini 是 .cmd 檔案，需要找到完整路徑
+    resolved = shutil.which(gemini_cli)
+    if resolved is None:
+        raise RuntimeError(f"找不到 Gemini CLI：{gemini_cli!r}，請確認已安裝 npm i -g @google/gemini-cli")
+    gemini_cli = resolved
+
     cmd = [gemini_cli, "--yolo", "-o", "text", "-p", ""]
     if model:
         cmd += ["-m", model]
@@ -145,6 +154,7 @@ def call_gemini(prompt: str, gemini_cli: str, model: str, timeout: int) -> str:
         encoding="utf-8",
         errors="replace",
         env=env,
+        shell=True,  # Windows .cmd 檔案需要 shell=True
     )
     if result.returncode != 0:
         raise RuntimeError(
