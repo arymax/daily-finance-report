@@ -834,8 +834,19 @@ def run_premarket_check() -> None:
     logger.info(f"  ✅ 報告儲存：{report_path.name}")
 
     logger.info("=" * 55)
-    logger.info("✅ 盤前晨檢完成")
+    logger.info("✅ 盤前晨檢完成，開啟報告視窗…")
     logger.info("=" * 55)
+
+    # 開啟獨立報告視窗（關閉視窗後程式結束）
+    try:
+        from core.report_ui import open_report_window
+        open_report_window(
+            md_content=result,
+            title=f"盤前晨檢 {today}",
+            timestamp=f"產生時間：{now_time} TST　|　{report_path.name}",
+        )
+    except Exception as e:
+        logger.warning(f"  報告視窗開啟失敗（不影響報告儲存）：{e}")
     logger.info("✅ Task 4 完成")
     logger.info("=" * 55)
 

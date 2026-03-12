@@ -7,8 +7,10 @@ requires-python = ">=3.10"
 dependencies = [
     "feedparser>=6.0.10",
     "jsonschema>=4.23.0",
+    "markdown>=3.10.2",
     "Pillow>=10.0.0",
     "pystray>=0.19.0",
+    "pywebview>=6.1",
     "schedule>=1.2.0",
     "yfinance>=0.2.36",
 ]
