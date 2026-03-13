@@ -12,6 +12,9 @@ venv/
 # 執行日誌（本地就好，不需要同步）
 logs/
 
+# 執行鎖（runtime artifact，不應進 repo）
+main.lock
+
 # Windows 暫存
 Thumbs.db
 desktop.ini

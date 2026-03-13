@@ -1,15 +1,15 @@
 {
   "meta": {
-    "last_updated": "2026-03-11",
+    "last_updated": "2026-03-14",
     "base_currency": "TWD"
   },
   "cash": {
-    "total_twd": 331015,
+    "total_twd": 289388,
     "breakdown": {
-      "中信（日常生活備用）": 8396,
-      "玉山（投資扣款專用）": 45102,
-      "永豐（投資扣款專用）": 183309,
-      "Firstrade（美股帳戶，含CRWD持倉）": 94208
+      "中信（日常生活備用）": 5777,
+      "玉山（投資扣款專用）": 45125,
+      "永豐（投資扣款專用）": 215563,
+      "Firstrade（美股帳戶現金）": 22923
     },
     "note": "高現金比例保留市場大幅回調時的彈藥，購車計畫已暫取消，資金可更積極運用"
   },
@@ -29,7 +29,7 @@
         "note": "長期定期定額核心部位；損益平衡價 112.57 TWD（均價 112.25 + 手續費）"
       },
       {
-        "ticker": "00679B",
+        "ticker": "00719B",
         "name": "元大美債1-3",
         "type": "bond_etf",
         "market": "TW",
@@ -43,7 +43,7 @@
         "note": "月定額扣款，防禦部位核心；均價 31.14 TWD"
       },
       {
-        "ticker": "00864B",
+        "ticker": "00859B",
         "name": "群益0-1年美債",
         "type": "bond_etf",
         "market": "TW",
@@ -198,17 +198,17 @@
         "name": "德律科技",
         "type": "stock",
         "market": "TW",
-        "cost_twd": 41550,
-        "shares": 200,
+        "cost_twd": 69447,
+        "shares": 300,
         "sector": "半導體設備／AOI檢測",
         "theme": "AI先進封裝設備",
         "position_size": "full",
         "resistance_key": 217,
         "support_ref": 200,
-        "status": "已加倉至滿倉，均價 207.75 TWD",
+        "status": "已加倉至滿倉，均價 231.17 TWD",
         "strategy": "持滿倉觀察突破 217 元前高；若突破確認則考慮續抱；跌破 200 元重要支撐再評估減碼",
         "broker": "玉山證券",
-        "note": "合計均價 207.75 TWD / 合計損益平衡 208.97 TWD（含手續費）"
+        "note": "合計均價 231.17 TWD / 合計損益平衡 232.52 TWD（含手續費）"
       }
     ]
   },
@@ -219,45 +219,46 @@
         "name": "Tether USD",
         "exchange": "Bitget",
         "type": "stablecoin",
-        "cost_twd": 42491,
+        "cost_twd": 42985,
+        "quantity": 1337.78378259,
         "role": "合約保證金／現貨買入資金",
-        "note": "cost_twd 2026-03-11 更新"
+        "note": "cost_twd 2026-03-14 更新"
       },
       {
         "ticker": "USDT",
         "name": "Tether USD",
         "exchange": "Bitunix",
         "type": "contract",
-        "cost_twd": 38290,
+        "cost_twd": 43878,
         "role": "短線合約交易",
-        "note": "合約學習帳戶，操作策略為短線數小時內收倉；cost_twd 2026-03-11 更新"
+        "note": "合約學習帳戶，操作策略為短線數小時內收倉；不做隔夜部位；cost_twd 2026-03-14 更新"
       },
       {
         "ticker": "BTC",
         "name": "Bitcoin",
         "exchange": "Bitget",
         "type": "spot",
-        "cost_twd": 23774,
-        "quantity": 0.006537,
-        "note": "現貨長期持有；cost_twd 2026-03-11 更新"
+        "cost_twd": 25860,
+        "quantity": 0.0106787,
+        "note": "現貨長期持有；cost_twd 2026-03-14 更新"
       },
       {
         "ticker": "ETH",
         "name": "Ethereum",
         "exchange": "Bitget",
         "type": "spot",
-        "cost_twd": 9312,
-        "quantity": 0.1547,
-        "note": "現貨長期持有；cost_twd 2026-03-11 更新"
+        "cost_twd": 6839,
+        "quantity": 0.14348174,
+        "note": "現貨長期持有；cost_twd 2026-03-14 更新"
       },
       {
         "ticker": "XRP",
         "name": "XRP",
         "exchange": "Bitget",
         "type": "spot",
-        "cost_twd": 5134,
-        "quantity": 60.57,
-        "note": "現貨長期持有；cost_twd 2026-03-11 更新"
+        "cost_twd": 9626,
+        "quantity": 115.91467897,
+        "note": "現貨長期持有；cost_twd 2026-03-14 更新"
       }
     ]
   },

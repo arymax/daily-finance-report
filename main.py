@@ -56,8 +56,9 @@ def call_claude(prompt: str, claude_cli: str, model: str, timeout: int, stream: 
     透過 subprocess 呼叫本地 Claude CLI（stdin pipe 模式，無暫存檔）。
     移除 CLAUDECODE 環境變數，避免巢狀 session 錯誤。
     stream=True 時即時印出 Claude 的回應，同時仍捕捉並回傳完整文字。
+    使用 threading.Timer 確保超時後確實 kill 子進程（不受 readline 阻塞影響）。
     """
-    import time
+    import threading
 
     cmd = [claude_cli, "--print", "--dangerously-skip-permissions"]
     if model:
@@ -74,7 +75,6 @@ def call_claude(prompt: str, claude_cli: str, model: str, timeout: int, stream: 
 
     if stream:
         chunks: list[str] = []
-        start = time.monotonic()
         proc = subprocess.Popen(
             cmd,
             stdin=subprocess.PIPE,
@@ -85,20 +85,30 @@ def call_claude(prompt: str, claude_cli: str, model: str, timeout: int, stream: 
             errors="replace",
             env=env,
         )
+        # threading.Timer 在背景計時，到點直接 kill，不受 readline() 阻塞影響
+        _timed_out = threading.Event()
+
+        def _kill():
+            _timed_out.set()
+            proc.kill()
+
+        timer = threading.Timer(timeout, _kill)
+        timer.start()
         try:
             assert proc.stdin and proc.stdout
             proc.stdin.write(prompt)
             proc.stdin.close()
             for line in iter(proc.stdout.readline, ""):
-                if time.monotonic() - start > timeout:
-                    proc.kill()
-                    raise subprocess.TimeoutExpired(cmd, timeout)
                 print(line, end="", flush=True)
                 chunks.append(line)
             proc.wait()
         except Exception:
             proc.kill()
             raise
+        finally:
+            timer.cancel()
+        if _timed_out.is_set():
+            raise subprocess.TimeoutExpired(cmd, timeout)
         if proc.returncode != 0:
             stderr_out = proc.stderr.read() if proc.stderr else ""
             raise RuntimeError(
@@ -783,9 +793,10 @@ def run_premarket_check() -> None:
     1. 抓取 ES/NQ/10Y/VIX/DXY 即時數據
     2. 讀取今日 morning_market_overview（事件來源）
     3. 呼叫 Gemini CLI 判讀
-    4. 儲存報告
+    4. 立即 git push 同步（不存本地報告檔案）
     """
     from core.premarket import fetch_premarket_data, build_premarket_prompt
+    from core import sync
 
     config      = load_config()
     gemini_cli  = config.get("gemini_cli", "gemini")
@@ -793,6 +804,7 @@ def run_premarket_check() -> None:
     timeout     = config.get("claude_timeout_seconds", 180)
     reports_dir = BASE_DIR / config.get("reports_dir", "reports")
     logs_dir    = BASE_DIR / config.get("logs_dir", "logs")
+    sync_cfg    = config.get("sync", {})
 
     setup_logging(logs_dir)
     logger.info("=" * 55)
@@ -827,15 +839,14 @@ def run_premarket_check() -> None:
         logger.error(f"  Gemini 判讀失敗：{e}")
         return
 
-    # 儲存報告
-    report_path = reports_dir / f"{today_fn}_premarket_check.md"
-    reports_dir.mkdir(parents=True, exist_ok=True)
-    report_path.write_text(result + "\n", encoding="utf-8")
-    logger.info(f"  ✅ 報告儲存：{report_path.name}")
+    logger.info("=" * 55)
+    logger.info("✅ 盤前晨檢完成，立即推送並開啟報告視窗…")
+    logger.info("=" * 55)
 
-    logger.info("=" * 55)
-    logger.info("✅ 盤前晨檢完成，開啟報告視窗…")
-    logger.info("=" * 55)
+    # 立即 git push（不存本地報告檔案）
+    if sync_cfg.get("enabled") and sync_cfg.get("auto_push", True):
+        logger.info("── Git 同步（premarket push）───────────")
+        sync.push(BASE_DIR, f"premarket: {today}")
 
     # 開啟獨立報告視窗（關閉視窗後程式結束）
     try:
@@ -843,11 +854,10 @@ def run_premarket_check() -> None:
         open_report_window(
             md_content=result,
             title=f"盤前晨檢 {today}",
-            timestamp=f"產生時間：{now_time} TST　|　{report_path.name}",
+            timestamp=f"產生時間：{now_time} TST　|　未存本地檔案",
         )
     except Exception as e:
-        logger.warning(f"  報告視窗開啟失敗（不影響報告儲存）：{e}")
-    logger.info("✅ Task 4 完成")
+        logger.warning(f"  報告視窗開啟失敗（不影響推送）：{e}")
     logger.info("=" * 55)
 
 

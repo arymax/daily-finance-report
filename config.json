@@ -1,7 +1,7 @@
 {
   "claude_cli": "claude",
   "claude_model": "",
-  "claude_timeout_seconds": 300,
+  "claude_timeout_seconds": 600,
   "reports_dir": "reports",
   "logs_dir": "logs",
   "portfolio_file": "portfolio.json",
