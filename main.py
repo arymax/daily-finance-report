@@ -312,10 +312,13 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
     # ── 抓取新聞 ──
     logger.info("── 抓取個股新聞 ──────────────────────")
     news_by_ticker: dict = {}
+    failed_news_tickers: list[str] = []
     for ticker, market in news_tickers:
-        news_by_ticker[ticker] = fetch_stock_news(
-            ticker, market=market, max_articles=max_stock_articles
-        )
+        articles = fetch_stock_news(ticker, market=market, max_articles=max_stock_articles)
+        news_by_ticker[ticker] = articles
+        if not articles:
+            failed_news_tickers.append(ticker)
+            logger.warning(f"  [WARN] {ticker} 新聞抓取失敗或無結果")
 
     logger.info("── 抓取市場新聞 ──────────────────────")
     market_news = fetch_market_news(
@@ -376,6 +379,7 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
                 memory_context=memory_context,
                 thesis_dir=str(thesis_dir),
                 session=session,
+                fetch_warnings=failed_news_tickers or None,
             )
             logger.info(f"   Prompt 長度：{len(prompt):,} 字元")
             portfolio_content = call_claude(prompt, claude_cli, claude_model, timeout, stream=stream_output)
@@ -396,6 +400,7 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
                 session=session,
                 max_research_candidates=max_per_day,
                 existing_thesis_tickers=existing_thesis_tickers,
+                fetch_warnings=failed_news_tickers or None,
             )
             logger.info(f"   Prompt 長度：{len(prompt):,} 字元")
             market_content = call_claude(prompt, claude_cli, claude_model, timeout, stream=stream_output)
@@ -471,7 +476,8 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
             current_portfolio = load_portfolio(portfolio_path)
             current_watchlist = current_portfolio.get("watchlist", [])
             reeval_prompt = build_watchlist_reeval_prompt(
-                current_watchlist, news_by_ticker, prices, usd_twd, today_str
+                current_watchlist, news_by_ticker, prices, usd_twd, today_str,
+                market_content=market_content,
             )
             logger.info(f"   Prompt 長度：{len(reeval_prompt):,} 字元")
             reeval_response = call_claude(reeval_prompt, claude_cli, claude_model, timeout, stream=stream_output)

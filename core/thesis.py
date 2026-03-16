@@ -419,12 +419,26 @@ def sync_priority1_watchlist(thesis_dir: Path, portfolio_path: Path) -> list[str
     return added
 
 
+def _extract_watchlist_market_section(market_content: str) -> str:
+    """從 Task 2 市場總覽輸出中提取觀察清單相關段落（最多 1500 字元）。"""
+    if not market_content:
+        return ""
+    import re
+    # 嘗試比對 ## 五 開頭的段落（觀察清單速報）
+    for pattern in [r'(##\s*五[^\n]*\n.*?)(?=\n##\s|\Z)', r'(##\s*觀察清單[^\n]*\n.*?)(?=\n##\s|\Z)']:
+        m = re.search(pattern, market_content, re.DOTALL)
+        if m:
+            return m.group(1).strip()[:1500]
+    return ""
+
+
 def build_watchlist_reeval_prompt(
     watchlist: list[dict],
     news_by_ticker: dict[str, list[dict]],
     prices: dict[str, float],
     usd_twd: float,
     today: str,
+    market_content: str = "",
 ) -> str:
     """
     建立 watchlist 動態重評 prompt。
@@ -443,6 +457,18 @@ def build_watchlist_reeval_prompt(
         "## 各標的現況",
         "",
     ]
+
+    if market_content:
+        market_section = _extract_watchlist_market_section(market_content)
+        if market_section:
+            lines += [
+                "## 今日市場對觀察清單的速報（來自 Task 2）",
+                "",
+                market_section,
+                "",
+                "---",
+                "",
+            ]
 
     for w in watchlist:
         ticker = w["ticker"]

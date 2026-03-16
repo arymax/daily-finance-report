@@ -116,6 +116,103 @@ def _build_pnl_table(portfolio: dict, prices: dict, usd_twd: float) -> list:
     return lines
 
 
+def _build_concentration_section(portfolio: dict, prices: dict, usd_twd: float) -> list:
+    """
+    計算持倉集中度（類別、板塊、市場），回傳 Markdown 行列表。
+    供 build_portfolio_prompt 嵌入 prompt，輔助 Claude 輸出第六章節。
+    """
+    def _val(pos: dict, market: str) -> float | None:
+        p_info = prices.get(pos["ticker"])
+        qty = pos.get("shares") or pos.get("quantity")
+        cost = pos.get("cost_twd")
+        if p_info and qty:
+            price = p_info["price"]
+            return price * qty if market == "TW" else price * qty * usd_twd
+        return cost  # fallback to cost if no price
+
+    # ── 各類別市值 ──
+    category_vals: dict[str, float] = {}
+
+    for pos in portfolio.get("long_term", {}).get("positions", []):
+        v = _val(pos, pos["market"])
+        if v:
+            category_vals["長期ETF"] = category_vals.get("長期ETF", 0) + v
+
+    for pos in portfolio.get("tactical", {}).get("positions", []):
+        v = _val(pos, pos["market"])
+        if v:
+            category_vals["波段個股"] = category_vals.get("波段個股", 0) + v
+
+    for pos in portfolio.get("crypto", {}).get("positions", []):
+        if pos["type"] in ("spot", "stablecoin"):
+            v = _val(pos, "CRYPTO")
+            if v:
+                category_vals["加密貨幣"] = category_vals.get("加密貨幣", 0) + v
+
+    cash_twd = portfolio.get("cash", {}).get("total_twd", 0) or 0
+    if cash_twd:
+        category_vals["現金"] = cash_twd
+
+    total = sum(category_vals.values()) or 1
+
+    lines = [
+        "# 資產配置集中度（系統計算，請原樣引用至第六章節）",
+        "",
+        "## 類別分布",
+        "| 類別 | 估算市值(TWD) | 佔比 |",
+        "|------|-------------|------|",
+    ]
+    for cat, val in sorted(category_vals.items(), key=lambda x: -x[1]):
+        lines.append(f"| {cat} | {val:,.0f} | {val/total*100:.1f}% |")
+    lines.append(f"| **合計** | **{total:,.0f}** | **100%** |")
+    lines.append("")
+
+    # ── 波段個股板塊分布 ──
+    sector_vals: dict[str, float] = {}
+    for pos in portfolio.get("tactical", {}).get("positions", []):
+        v = _val(pos, pos["market"]) or 0
+        sector = pos.get("sector", "其他")
+        sector_vals[sector] = sector_vals.get(sector, 0) + v
+
+    if sector_vals:
+        ta_total = sum(sector_vals.values()) or 1
+        lines += [
+            "## 波段個股板塊分布",
+            "| 板塊 | 市值(TWD) | 佔波段% |",
+            "|------|-----------|---------|",
+        ]
+        for sect, val in sorted(sector_vals.items(), key=lambda x: -x[1]):
+            lines.append(f"| {sect} | {val:,.0f} | {val/ta_total*100:.1f}% |")
+        lines.append("")
+
+    # ── 市場分布（TW / US / CRYPTO）──
+    market_vals: dict[str, float] = {}
+    for pos in portfolio.get("long_term", {}).get("positions", []) + \
+               portfolio.get("tactical", {}).get("positions", []):
+        v = _val(pos, pos["market"]) or 0
+        mkt = pos["market"]
+        market_vals[mkt] = market_vals.get(mkt, 0) + v
+    for pos in portfolio.get("crypto", {}).get("positions", []):
+        if pos["type"] in ("spot", "stablecoin"):
+            v = _val(pos, "CRYPTO") or 0
+            market_vals["CRYPTO"] = market_vals.get("CRYPTO", 0) + v
+    if cash_twd:
+        market_vals["TWD現金"] = market_vals.get("TWD現金", 0) + cash_twd
+
+    if market_vals:
+        mkt_total = sum(market_vals.values()) or 1
+        lines += [
+            "## 市場分布",
+            "| 市場 | 市值(TWD) | 佔比 |",
+            "|------|-----------|------|",
+        ]
+        for mkt, val in sorted(market_vals.items(), key=lambda x: -x[1]):
+            lines.append(f"| {mkt} | {val:,.0f} | {val/mkt_total*100:.1f}% |")
+        lines.append("")
+
+    return lines
+
+
 # ─────────────────────────────────────────────
 # Task 1：持倉分析與操作建議
 # ─────────────────────────────────────────────
@@ -128,6 +225,7 @@ def build_portfolio_prompt(
     memory_context: str = "",
     thesis_dir: str = "",
     session: str = "morning",
+    fetch_warnings: list[str] = None,
 ) -> str:
     prices = prices or {}
     date_str = _date_header()
@@ -155,6 +253,13 @@ def build_portfolio_prompt(
         ]
 
     lines = session_intro + [""]
+
+    if fetch_warnings:
+        lines += [
+            "> [!WARNING]",
+            f"> 以下標的新聞抓取失敗，分析時請注意資訊缺口：{', '.join(fetch_warnings)}",
+            "",
+        ]
 
     if thesis_dir:
         lines += [
@@ -389,6 +494,8 @@ def build_portfolio_prompt(
     lines += _build_pnl_table(portfolio, prices, usd_twd)
     lines += [""]
 
+    lines += _build_concentration_section(portfolio, prices, usd_twd)
+
     # ── 輸出規範（依 session 切換）────────────────────────
     if session == "morning":
         output_spec = [
@@ -511,6 +618,7 @@ def build_market_prompt(
     session: str = "morning",
     existing_thesis_tickers: set | None = None,
     max_research_candidates: int = 3,
+    fetch_warnings: list[str] = None,
 ) -> str:
     date_str = _date_header()
 
@@ -530,6 +638,13 @@ def build_market_prompt(
         ]
 
     lines = market_intro
+
+    if fetch_warnings:
+        lines += [
+            "> [!WARNING]",
+            f"> 以下標的新聞抓取失敗，分析時請注意資訊缺口：{', '.join(fetch_warnings)}",
+            "",
+        ]
 
     if thesis_dir:
         lines += [
