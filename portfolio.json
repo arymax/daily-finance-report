@@ -327,6 +327,55 @@
         "52w_high_usd": 87.8,
         "decline_from_high": -0.3246
       }
+    },
+    {
+      "ticker": "2308",
+      "name": "台達電",
+      "exchange": "上市",
+      "market": "TW（TWSE）",
+      "sector": "電源管理 / 電子零組件 / AI 伺服器基礎建設",
+      "theme": "AI 伺服器電源密度升級的「隱形王者」——PSU 市佔率 ~40% 全球第一，每台機架電源需求倍增的最直接受益者",
+      "priority": 1,
+      "watch_reason": "AI 伺服器電源密度升級的「隱形王者」——PSU 市佔率 ~40% 全球第一，每台機架電源需求倍增的最直接受益者",
+      "entry_condition": "** 待 Task 4 更新",
+      "key_metrics": {
+        "52w_high_usd": 0,
+        "decline_from_high": 0
+      },
+      "note": "自動從 thesis 優先級 1 同步加入，請手動更新 key_metrics（52w_high_usd / decline_from_high）",
+      "priority_reason": "待 Task 4 更新"
+    },
+    {
+      "ticker": "MU",
+      "name": "Micron Technology Inc.",
+      "exchange": "NASDAQ",
+      "market": "US",
+      "sector": "半導體（DRAM / NAND / HBM）",
+      "theme": "AI 記憶體超級週期最直接受益者——HBM 寡頭、盈利槓桿尚未完全釋放",
+      "priority": 2,
+      "watch_reason": "AI 記憶體超級週期最直接受益者——HBM 寡頭、盈利槓桿尚未完全釋放",
+      "entry_condition": "** 待 Task 4 更新",
+      "key_metrics": {
+        "52w_high_usd": 455.5,
+        "decline_from_high": -0.0645
+      },
+      "priority_reason": "距 52 週高點僅 -6.5%，不符合 >25% 折價門檻；近期新聞出現「Wall Street Likes SanDisk More Than Micron」等負面比較；本週財報雖為近期催化劑，但當前估值已接近歷史高點，風險報酬比不符合 Priority 1 標準。下調至 Priority 2：護城河強（HBM/AI DRAM）但估值合理偏高，等財報確認 HBM 出貨量及毛利率指引後重新評估。"
+    },
+    {
+      "ticker": "OXY",
+      "name": "OXY",
+      "exchange": "NASDAQ",
+      "market": "US",
+      "sector": "",
+      "theme": "",
+      "priority": 2,
+      "watch_reason": "",
+      "entry_condition": "** 待 Task 4 更新",
+      "key_metrics": {
+        "52w_high_usd": 59.15,
+        "decline_from_high": -0.0215
+      },
+      "priority_reason": "距 52 週高點僅 -2.1%，實際上已接近歷史高位；「up 9% since Iran conflict」顯示地緣政治溢價已充分反映；Barclays 上調目標價至 $59 距現價上行空間有限。當前股價已 price-in 霍爾木茲風險，不符合 Priority 1 的估值安全墊要求。下調至 Priority 2：Buffett 背書護城河強，但進場性價比需等待回調至更具吸引力的估值區間。"
     }
   ],
   "strategy": {
