@@ -6,6 +6,8 @@ import re
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
+from .prices import fetch_current_prices, fetch_52w_high
+
 logger = logging.getLogger(__name__)
 
 TST = timezone(timedelta(hours=8))
@@ -173,18 +175,63 @@ def parse_and_save(
             # Section-diff 模式：只替換指定區塊，其餘內容保持不變
             original = target.read_text(encoding="utf-8")
             text = original
+            updated_sections: list[str] = []
+            missed_sections: list[str] = []
+
             for sec_name, sec_content in sections:
                 sec_name = sec_name.strip()
                 sec_content = sec_content.strip()
-                # 替換 ### SectionName 到下一個 --- 或 EOF
-                pat = rf"(### {re.escape(sec_name)}\n).*?(?=\n---\n|\Z)"
-                repl = rf"\g<1>{sec_content}"
-                text, n = re.subn(pat, repl, text, flags=re.DOTALL)
-                if n == 0:
-                    logger.warning(f"  Section 未找到，略過：{name}.md / {sec_name}")
+                if not sec_content:
+                    logger.warning(f"  Section 內容為空，略過：{name}.md / {sec_name}")
+                    continue
+
+                # 用 MULTILINE 找 section header（允許 header 後有空白）
+                header_pat = re.compile(
+                    rf"^### {re.escape(sec_name)}\s*$", re.MULTILINE
+                )
+                header_match = header_pat.search(text)
+
+                if not header_match:
+                    missed_sections.append(sec_name)
+                    logger.warning(f"  [WARN] Section 未找到：{name}.md / 「{sec_name}」")
+                    continue
+
+                # 找 section 內容的起終點（header 後一行到下一個 --- 或 EOF）
+                content_start = header_match.end() + 1  # +1 跳過 header 後的換行
+                end_match = re.search(r"\n---\s*\n", text[content_start:])
+                content_end = (
+                    content_start + end_match.start()
+                    if end_match
+                    else len(text)
+                )
+
+                # 替換：保留 header，替換 header 後到 --- 之間的內容
+                text = (
+                    text[:content_start]
+                    + sec_content
+                    + "\n"
+                    + text[content_end:]
+                )
+                updated_sections.append(sec_name)
+                logger.info(f"  [OK] Section 更新：{name}.md / 「{sec_name}」")
+
+            if not updated_sections:
+                # 所有 section 都沒找到，可能是 Claude 輸出格式偏移
+                logger.warning(
+                    f"  [WARN] {name}.md 所有 section 均未找到（{missed_sections}）"
+                    f"，可能是格式偏移，thesis 未更新。"
+                )
+                continue  # 不標記為 updated，也不寫檔
+
+            if missed_sections:
+                logger.warning(
+                    f"  ℹ️  {name}.md 部分 section 未更新：{missed_sections}"
+                )
+
             # 更新 last_updated 標記
             text = re.sub(r"\n<!-- last_updated: \d{4}-\d{2}-\d{2} -->", "", text)
             text = text.rstrip() + f"\n<!-- last_updated: {today} -->\n"
+
         else:
             # Full-thesis 模式（向後相容）
             text = thesis_body.strip()
@@ -301,6 +348,9 @@ def sync_priority1_watchlist(thesis_dir: Path, portfolio_path: Path) -> list[str
     """
     掃描所有 thesis .md 檔案，將優先級 1 且建議加入 watchlist 的標的
     自動寫入 portfolio.json（若尚未存在於 watchlist 或任何持倉中）。
+
+    同時補齊既有 watchlist 中 key_metrics 仍為 0 的條目（曾自動加入但未取得數據）。
+
     回傳新增的 ticker 列表。
     """
     with open(portfolio_path, "r", encoding="utf-8") as f:
@@ -315,6 +365,7 @@ def sync_priority1_watchlist(thesis_dir: Path, portfolio_path: Path) -> list[str
     existing = {w["ticker"] for w in portfolio.get("watchlist", [])} | held
     added: list[str] = []
 
+    # ── Step 1：新增 priority 1 thesis 至 watchlist ──
     for thesis_path in sorted(thesis_dir.rglob("*.md")):
         if thesis_path.stem == "README":
             continue
@@ -329,10 +380,41 @@ def sync_priority1_watchlist(thesis_dir: Path, portfolio_path: Path) -> list[str
             added.append(ticker)
             logger.info(f"  [watchlist] 自動加入優先級 1：{ticker}")
 
-    if added:
+    # ── Step 2：補齊 key_metrics（新增條目 + 既有 52w_high_usd == 0 的條目）──
+    needs_metrics = [
+        w for w in portfolio.get("watchlist", [])
+        if w.get("key_metrics", {}).get("52w_high_usd", 0) == 0
+    ]
+    if needs_metrics:
+        logger.info(f"  [watchlist] 補齊 {len(needs_metrics)} 個標的的 key_metrics...")
+        for w in needs_metrics:
+            ticker = w["ticker"]
+            market = w.get("market", "US")
+            try:
+                price_data = fetch_current_prices([(ticker, market)])
+                current_price = price_data.get(ticker, {}).get("price")
+                high_52w = fetch_52w_high(ticker, market)
+                if current_price and high_52w and high_52w > 0:
+                    decline = max(-1.0, min(0.0, round((current_price - high_52w) / high_52w, 4)))
+                    w["key_metrics"]["52w_high_usd"] = round(high_52w, 2)
+                    w["key_metrics"]["decline_from_high"] = decline
+                    # 移除 placeholder note（如果還在的話）
+                    if w.get("note", "").startswith("自動從 thesis"):
+                        w.pop("note", None)
+                    logger.info(
+                        f"  [watchlist] {ticker} key_metrics 已更新："
+                        f"52w高={high_52w:.2f}, 距高點={decline*100:.1f}%"
+                    )
+                else:
+                    logger.warning(f"  [watchlist] {ticker} 無法取得股價數據，key_metrics 維持 0")
+            except Exception as e:
+                logger.warning(f"  [watchlist] {ticker} key_metrics 更新失敗：{e}")
+
+    if added or needs_metrics:
         with open(portfolio_path, "w", encoding="utf-8") as f:
             json.dump(portfolio, f, ensure_ascii=False, indent=2)
-        logger.info(f"  [watchlist] portfolio.json 已更新，新增 {len(added)} 個標的：{added}")
+        if added:
+            logger.info(f"  [watchlist] portfolio.json 已更新，新增 {len(added)} 個標的：{added}")
 
     return added
 

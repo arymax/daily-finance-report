@@ -37,6 +37,24 @@ def fetch_usd_twd_rate() -> float:
     return 32.0
 
 
+def fetch_52w_high(ticker: str, market: str) -> float | None:
+    """
+    查詢單一標的的 52 週最高價。
+    使用 yfinance .info（fast_info 不含此數據）。
+    失敗時回傳 None。
+    """
+    yf_t = _yf_ticker(ticker, market)
+    try:
+        info = yf.Ticker(yf_t).info
+        high = info.get("fiftyTwoWeekHigh")
+        if high and float(high) > 0:
+            logger.info(f"  [52w] {ticker} 52週高點 = {high:.2f}")
+            return float(high)
+    except Exception as e:
+        logger.warning(f"  [52w] {ticker} 52週高點查詢失敗：{e}")
+    return None
+
+
 def fetch_current_prices(positions_with_market: list) -> dict:
     """
     批次查詢股票 / ETF / 加密貨幣即時價格。
