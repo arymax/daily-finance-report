@@ -31,6 +31,8 @@
         "theme":          { "type": "string", "description": "投資主題，如「台股核心配置」" },
         "dca_monthly":    { "type": "boolean" },
         "dca_amount_twd": { "type": "number", "minimum": 0, "description": "每月定期定額金額（dca_monthly=true 時必填）" },
+        "dca_auto":       { "type": "boolean", "description": "true = 已設定自動扣款（券商自動執行，不需人工操作）" },
+        "dca_day":        { "type": "integer", "minimum": 1, "maximum": 31, "description": "自動扣款日（幾號），dca_auto=true 時選填" },
         "broker":         { "type": "string", "description": "券商名稱" },
         "note":           { "type": "string" }
       },

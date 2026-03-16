@@ -39,6 +39,7 @@
         "theme": "防禦性部位",
         "dca_monthly": true,
         "dca_amount_twd": 2500,
+        "dca_auto": true,
         "broker": "玉山證券",
         "note": "月定額扣款，防禦部位核心；均價 31.14 TWD"
       },
@@ -53,6 +54,7 @@
         "theme": "防禦性部位/類現金",
         "dca_monthly": true,
         "dca_amount_twd": 2500,
+        "dca_auto": true,
         "broker": "玉山證券",
         "note": "月定額扣款，近現金特性；均價 41.54 TWD"
       },
@@ -67,6 +69,7 @@
         "theme": "核心長期持倉",
         "dca_monthly": true,
         "dca_amount_twd": 2500,
+        "dca_auto": true,
         "broker": "永豐大戶投",
         "note": "美股核心配置，長期定期定額；均價約 295 USD（依成本反推，匯率估算 32）"
       },
@@ -81,6 +84,7 @@
         "theme": "全球市場分散",
         "dca_monthly": true,
         "dca_amount_twd": 2500,
+        "dca_auto": true,
         "broker": "永豐大戶投",
         "note": "全球分散配置，與VTI有部分重疊；均價約 137 USD（依成本反推，匯率估算 32）"
       },
@@ -95,6 +99,7 @@
         "theme": "防禦性部位",
         "dca_monthly": true,
         "dca_amount_twd": 2500,
+        "dca_auto": true,
         "broker": "永豐大戶投",
         "note": "月定額扣款，美股帳戶防禦配置；均價約 58.5 USD（依成本反推，匯率估算 32）"
       }

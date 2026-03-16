@@ -325,7 +325,9 @@ def build_portfolio_prompt(
                 lines += [f"- 投入成本：{_fmt(cost)} TWD（無法取得即時市值）"]
             lines += [f"- 板塊：{pos.get('sector', '')}　主題：{pos.get('theme', '')}"]
             if pos.get("dca_monthly"):
-                lines += [f"- 月定額：{_fmt(pos.get('dca_amount_twd'))} TWD"]
+                dca_label = "自動扣款" if pos.get("dca_auto") else "手動定額"
+                dca_day = f"（每月 {pos['dca_day']} 日）" if pos.get("dca_day") else ""
+                lines += [f"- 月定額：{_fmt(pos.get('dca_amount_twd'))} TWD　[{dca_label}{dca_day}]"]
             if pos.get("note"):
                 lines += [f"- 備注：{pos['note']}"]
             lines += [""]
@@ -511,6 +513,7 @@ def build_portfolio_prompt(
             "針對每支 ETF，提供：",
             "- 近期市場動態（結合新聞，1-2 句）",
             "- 定額策略建議（粗體標示）：**維持定額 / 增加定額 / 暫停定額**，附理由",
+            "  ⚠️ 注意：標示「自動扣款」的 ETF 已由券商系統自動執行，**不需提醒手動扣款**，只需評估金額或策略是否需要調整。",
             "",
             "## 三、個股操作建議",
             "針對每支個股，提供：",
@@ -569,6 +572,7 @@ def build_portfolio_prompt(
             "針對每支 ETF，提供：",
             "- 今日價格表現（上漲 / 下跌 / 持平，幅度）",
             "- 定額策略是否需要調整（維持 / 考慮暫停 / 考慮加碼）",
+            "  ⚠️ 注意：標示「自動扣款」的 ETF 已由券商系統自動執行，**不需提醒手動扣款**。",
             "",
             "## 三、個股今日表現與明日操作計畫",
             "針對每支個股，提供：",
