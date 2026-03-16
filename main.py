@@ -34,7 +34,14 @@ from core.prices import fetch_current_prices, fetch_usd_twd_rate
 from core.prompts import build_portfolio_prompt, build_market_prompt
 import core.memory as mem
 import core.sync as sync
-from core.thesis import load_all_theses, find_thesis, build_update_prompt as build_thesis_prompt, parse_and_save as save_theses
+from core.thesis import (
+    load_all_theses, find_thesis,
+    build_update_prompt as build_thesis_prompt,
+    parse_and_save as save_theses,
+    sync_priority1_watchlist,
+    build_watchlist_reeval_prompt,
+    apply_reeval_results,
+)
 from core.fundamentals import fetch_fundamentals, update_snapshot_in_thesis
 from core.research import (
     build_enrich_prompt,
@@ -272,6 +279,14 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
     # ── Schema 驗證 ──
     validate_portfolio(portfolio_path)
 
+    # ── 自動同步 thesis 優先級 1 → watchlist ──
+    logger.info("── 同步 thesis 優先級 1 至 watchlist ────")
+    added_tickers = sync_priority1_watchlist(thesis_dir, portfolio_path)
+    if added_tickers:
+        logger.info(f"  新增 watchlist 標的：{added_tickers}")
+    else:
+        logger.info("  無新增標的")
+
     portfolio = load_portfolio(portfolio_path)
     long_term = portfolio.get("long_term", {})
     tactical  = portfolio.get("tactical", {})
@@ -377,7 +392,6 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
             existing_thesis_tickers = {f.stem for f in thesis_dir.glob("*.md")}
             prompt = build_market_prompt(
                 market_news, watchlist, extra_news_by_ticker,
-                memory_context=memory_context,
                 thesis_dir=str(thesis_dir),
                 session=session,
                 max_research_candidates=max_per_day,
@@ -446,6 +460,30 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
                 logger.info("  ℹ️ 今日無 thesis 需要質化更新")
         except Exception as e:
             logger.warning(f"Thesis 自動更新失敗（不影響主報告）：{e}")
+
+    # ── Task 4.5：Watchlist 優先級動態重評 ────────────────────────
+    reeval_changes: list[dict] = []
+    if watchlist and (portfolio_content or market_content):
+        logger.info("── Task 4.5：Watchlist 優先級重評 ─────────────")
+        try:
+            today_str = datetime.now(TST).strftime("%Y-%m-%d")
+            # 重新載入 portfolio（Task 4 可能已更新 thesis，但 watchlist 不變）
+            current_portfolio = load_portfolio(portfolio_path)
+            current_watchlist = current_portfolio.get("watchlist", [])
+            reeval_prompt = build_watchlist_reeval_prompt(
+                current_watchlist, news_by_ticker, prices, usd_twd, today_str
+            )
+            logger.info(f"   Prompt 長度：{len(reeval_prompt):,} 字元")
+            reeval_response = call_claude(reeval_prompt, claude_cli, claude_model, timeout, stream=stream_output)
+            reeval_changes = apply_reeval_results(reeval_response, portfolio_path)
+            if reeval_changes:
+                logger.info(f"  ✅ {len(reeval_changes)} 個標的優先級異動：")
+                for ch in reeval_changes:
+                    logger.info(f"     {ch['ticker']}：{ch['old']} → {ch['new']}　{ch['reason'][:60]}")
+            else:
+                logger.info("  ℹ️ 所有 watchlist 標的優先級維持不變")
+        except Exception as e:
+            logger.warning(f"Watchlist 重評失敗（不影響主報告）：{e}")
 
     # ── Task 5：自動研究新標的（直接使用 Task 2 解析的候選，無需額外 Claude call）──
     if candidates and (portfolio_content or market_content):

@@ -95,6 +95,8 @@
         "sector":          { "type": "string" },
         "theme":           { "type": "string" },
         "priority":        { "type": "integer", "minimum": 1, "description": "優先級，1 最高" },
+        "priority_reason": { "type": "string", "description": "優先級判斷理由（對應評分標準各條目）" },
+        "themes":          { "type": "array", "items": { "type": "string" }, "description": "對齊的市場敘事標籤，如 CPO / AI ASIC / 零信任" },
         "watch_reason":    { "type": "string", "description": "為何加入觀察清單" },
         "entry_condition": { "type": "string", "description": "進場條件（技術面 + 基本面）" },
         "key_metrics": {

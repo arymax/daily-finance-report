@@ -507,7 +507,6 @@ def build_market_prompt(
     market_news: list,
     watchlist: list,
     extra_news: dict = None,
-    memory_context: str = "",
     thesis_dir: str = "",
     session: str = "morning",
     existing_thesis_tickers: set | None = None,
@@ -546,18 +545,6 @@ def build_market_prompt(
             "",
         ]
 
-    if memory_context:
-        lines += [
-            "---",
-            "",
-            "# 歷史市場記憶（請參考以下分析，保持分析連貫性）",
-            "",
-            memory_context,
-            "",
-            "---",
-            "",
-        ]
-
     lines += [
         "# 市場總體新聞",
         "",
@@ -566,7 +553,7 @@ def build_market_prompt(
     for a in market_news[:20]:
         lines += [f"**{a['title']}**"]
         if a.get("summary"):
-            lines += [f"> {a['summary'][:350]}"]
+            lines += [f"> {a['summary'][:200]}"]
         lines += [f"*來源：{a.get('source', '—')}　{a.get('published', '')}*", ""]
 
     # ── 重要市場個股新聞（NVDA / AAPL / MSFT 等大盤權重股）──
@@ -582,7 +569,7 @@ def build_market_prompt(
                 src = a.get("publisher") or a.get("source", "—")
                 lines += [f"- {a['title']}　*{src} {pub_short}*"]
                 if a.get("summary"):
-                    lines += [f"  > {a['summary'][:200]}"]
+                    lines += [f"  > {a['summary'][:150]}"]
             lines += [""]
 
     if watchlist:
@@ -597,9 +584,11 @@ def build_market_prompt(
             lines += [f"### {w['name']}（{ticker}）　優先級 {w['priority']}"]
             lines += [f"- 52 週高點 USD {high}，距高點 {decline_str}"]
             if w.get("watch_reason"):
-                lines += [f"- 觀察原因：{w['watch_reason']}"]
+                lines += [f"- 觀察原因：{w['watch_reason'][:100]}"]
             if w.get("entry_condition"):
-                lines += [f"- 進場條件：{w['entry_condition']}"]
+                lines += [f"- 進場條件：{w['entry_condition'][:120]}"]
+            if w.get("themes"):
+                lines += [f"- 對齊議題：{' / '.join(w['themes'])}"]
 
             extra = km.get("additional", {})
             for k, v in list(extra.items())[:3]:
@@ -609,7 +598,7 @@ def build_market_prompt(
             if catalysts:
                 lines += ["- 催化劑：" + "、".join(catalysts[:3])]
             if w.get("note"):
-                lines += [f"- 策略：{w['note']}"]
+                lines += [f"- 策略：{w['note'][:80]}"]
 
             if thesis_dir:
                 lines += [f"- 📋 買入背景：請讀取 `{thesis_dir}/{ticker}.md`（若存在）"]
