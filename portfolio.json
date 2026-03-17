@@ -335,15 +335,14 @@
       "market": "TW",
       "sector": "電源管理 / 電子零組件 / AI 伺服器基礎建設",
       "theme": "AI 伺服器電源密度升級的「隱形王者」——PSU 市佔率 ~40% 全球第一，每台機架電源需求倍增的最直接受益者",
-      "priority": 1,
+      "priority": 2,
       "watch_reason": "AI 伺服器電源密度升級的「隱形王者」——PSU 市佔率 ~40% 全球第一，每台機架電源需求倍增的最直接受益者",
       "entry_condition": "** 待 Task 4 更新",
       "key_metrics": {
-        "52w_high_usd": 0,
-        "decline_from_high": 0
+        "52w_high_usd": 1480.0,
+        "decline_from_high": -0.0811
       },
-      "note": "自動從 thesis 優先級 1 同步加入，請手動更新 key_metrics（52w_high_usd / decline_from_high）",
-      "priority_reason": "待 Task 4 更新"
+      "priority_reason": "GTC 催化劑於 3/16 兌現，短線可能已 price in（距 52 週高點僅 -8.1%，不符合 >25% 折價門檻）；Forward P/E 25.83x 雖有 PEG ~0.2x 支撐，但在催化劑剛兌現、股價近高點的情況下，風險報酬比短線偏差。下修至 2（強護城河但當前估值無顯著折價），待股價回測 1,280–1,320 支撐區間後重新評估是否升回 1。"
     },
     {
       "ticker": "MU",
@@ -368,14 +367,14 @@
       "market": "US",
       "sector": "",
       "theme": "",
-      "priority": 2,
+      "priority": 3,
       "watch_reason": "",
       "entry_condition": "** 待 Task 4 更新",
       "key_metrics": {
         "52w_high_usd": 59.15,
         "decline_from_high": -0.0215
       },
-      "priority_reason": "距 52 週高點僅 -2.1%，實際上已接近歷史高位；「up 9% since Iran conflict」顯示地緣政治溢價已充分反映；Barclays 上調目標價至 $59 距現價上行空間有限。當前股價已 price-in 霍爾木茲風險，不符合 Priority 1 的估值安全墊要求。下調至 Priority 2：Buffett 背書護城河強，但進場性價比需等待回調至更具吸引力的估值區間。"
+      "priority_reason": "距 52 週高點僅 -2.1%，實質上處於歷史高位；「地緣政治溢價」在伊朗衝突爆發後已充分反映（+9%），Barclays 目標價 $59 對現價幾乎無上行空間。Forward P/E 24.3x 對應偏低 EPS 估算，若油價回落則估值支撐薄弱。由 2 下修至 3：事件邏輯尚存但進場條件（油價急跌後估值重置，或衝突升級推動二次定價）均未觸發，繼續追高風險報酬比不佳。"
     }
   ],
   "strategy": {
