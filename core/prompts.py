@@ -148,6 +148,11 @@ def _build_concentration_section(portfolio: dict, prices: dict, usd_twd: float) 
             v = _val(pos, "CRYPTO")
             if v:
                 category_vals["加密貨幣"] = category_vals.get("加密貨幣", 0) + v
+        elif pos["type"] == "contract":
+            # 合約保證金以成本計入總資產（不計浮動損益）
+            cost = pos.get("cost_twd") or 0
+            if cost:
+                category_vals["合約保證金"] = category_vals.get("合約保證金", 0) + cost
 
     cash_twd = portfolio.get("cash", {}).get("total_twd", 0) or 0
     if cash_twd:
@@ -196,6 +201,9 @@ def _build_concentration_section(portfolio: dict, prices: dict, usd_twd: float) 
         if pos["type"] in ("spot", "stablecoin"):
             v = _val(pos, "CRYPTO") or 0
             market_vals["CRYPTO"] = market_vals.get("CRYPTO", 0) + v
+        elif pos["type"] == "contract":
+            cost = pos.get("cost_twd") or 0
+            market_vals["合約保證金"] = market_vals.get("合約保證金", 0) + cost
     if cash_twd:
         market_vals["TWD現金"] = market_vals.get("TWD現金", 0) + cash_twd
 
