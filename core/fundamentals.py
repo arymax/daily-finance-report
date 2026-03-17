@@ -25,15 +25,17 @@ _METRICS: list[tuple[str, str]] = [
     ("trailingEps",             "EPS（TTM）"),
     ("forwardEps",              "預期 EPS"),
     ("priceToBook",             "股價淨值比（P/B）"),
-    ("grossMargins",            "毛利率"),
+    ("grossMargins",            "毛利率（最新季）"),
     ("operatingMargins",        "營業利益率"),
     ("revenueGrowth",           "營收成長率（YoY）"),
+    ("freeCashflow",            "自由現金流（FCF，TTM）"),
     ("marketCap",               "市值"),
     ("targetMeanPrice",         "分析師目標均價"),
     ("numberOfAnalystOpinions", "追蹤分析師數"),
 ]
 
 _PCT_FIELDS = {"grossMargins", "operatingMargins", "revenueGrowth"}
+_CASH_FIELDS = {"freeCashflow"}
 
 # thesis 快照區段的邊界標記
 _SNAPSHOT_RE = re.compile(
@@ -46,15 +48,69 @@ _SNAPSHOT_RE = re.compile(
 def _fmt(key: str, val, currency: str) -> str:
     if key in _PCT_FIELDS:
         return f"{val * 100:.1f}%"
-    if key == "marketCap":
+    if key in ("marketCap", "freeCashflow"):
         if currency == "TWD":
             return f"{val / 1e8:.1f} 億 TWD"
-        return f"{val / 1e9:.2f} B {currency}" if val >= 1e9 else f"{val / 1e6:.0f} M {currency}"
+        abs_val = abs(val)
+        sign = "-" if val < 0 else ""
+        s = f"{sign}{abs_val / 1e9:.2f} B {currency}" if abs_val >= 1e9 else f"{sign}{abs_val / 1e6:.0f} M {currency}"
+        return s
     if key in ("trailingEps", "forwardEps", "targetMeanPrice"):
         return f"{val:.2f} {currency}"
     if isinstance(val, float):
         return f"{val:.2f}"
     return str(val)
+
+
+# ── 抓取季度延伸指標（毛利率趨勢 + EPS Beat/Miss）────────
+def _fetch_extra_metrics(yf_sym: str) -> dict[str, str]:
+    """
+    抓取需要多期計算的進階指標，回傳 {中文標籤: 格式化數值}。
+    任何子項目失敗都安全跳過，不影響主流程。
+    """
+    import pandas as pd
+    extra: dict[str, str] = {}
+    t = yf.Ticker(yf_sym)
+
+    # 1. 毛利率趨勢（最近 4 季）
+    try:
+        qf = t.quarterly_financials
+        if not qf.empty and "Gross Profit" in qf.index and "Total Revenue" in qf.index:
+            segments = []
+            for col in qf.columns[:4]:
+                gp  = qf.loc["Gross Profit",  col]
+                rev = qf.loc["Total Revenue", col]
+                if pd.notna(gp) and pd.notna(rev) and rev != 0:
+                    q = f"{col.year}-Q{(col.month - 1) // 3 + 1}"
+                    segments.append(f"{q}:{gp / rev * 100:.1f}%")
+            if segments:
+                extra["毛利率趨勢（近4季）"] = " → ".join(segments)
+    except Exception as e:
+        logger.debug(f"  [extra] 毛利率趨勢抓取失敗：{e}")
+
+    # 2. EPS Beat/Miss（最近 4 季，需要 lxml）
+    try:
+        ed = t.get_earnings_dates(limit=12)
+        if ed is not None and not ed.empty:
+            past = ed[ed["Reported EPS"].notna()].head(4)
+            beats = []
+            for _, row in past.iterrows():
+                est  = row.get("EPS Estimate")
+                rep  = row.get("Reported EPS")
+                surp = row.get("Surprise(%)")
+                if pd.notna(rep):
+                    if pd.notna(est):
+                        tag = "Beat" if rep >= est else "Miss"
+                        surp_str = f"{surp:+.1f}%" if pd.notna(surp) else ""
+                        beats.append(f"{tag}({surp_str})" if surp_str else tag)
+                    else:
+                        beats.append(f"EPS {rep:.2f}")
+            if beats:
+                extra["近4季 EPS vs 預期"] = " | ".join(beats)
+    except Exception as e:
+        logger.debug(f"  [extra] EPS beat/miss 抓取失敗：{e}")
+
+    return extra
 
 
 # ── 抓取基本面資料 ────────────────────────────────────
@@ -75,6 +131,8 @@ def fetch_fundamentals(tickers: list[tuple[str, str]]) -> dict[str, dict]:
                 val = info.get(key)
                 if val is not None:
                     data[label] = _fmt(key, val, currency)
+            extra = _fetch_extra_metrics(yf_sym)
+            data.update(extra)
             result[ticker] = data
             logger.info(f"  [fundamentals] {ticker}: {len(data)} 項指標")
         except Exception as e:
