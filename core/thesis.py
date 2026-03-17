@@ -272,9 +272,11 @@ def parse_watchlist_suggestion(content: str, ticker: str) -> dict | None:
     name_match = re.search(r"^#\s+(.+?)(?:（" + re.escape(ticker) + r"）|\(" + re.escape(ticker) + r"\))", content, re.MULTILINE)
     name = name_match.group(1).strip() if name_match else ticker
 
-    # 解析市場
+    # 解析市場（正規化為 "TW" 或 "US"，防止 "TW（TWSE）"/"台灣上市" 等寫法通過 schema 驗證）
     market_match = re.search(r"\*\*市場[：:]\*\*\s*(\S+)", content)
-    market = market_match.group(1).strip() if market_match else "US"
+    raw_market = market_match.group(1).strip() if market_match else "US"
+    _rm_upper = raw_market.upper()
+    market = "TW" if (_rm_upper.startswith("TW") or raw_market.startswith("台")) else "US"
 
     # 解析產業
     sector_match = re.search(r"\*\*產業[：:]\*\*\s*(.+)", content)
