@@ -472,6 +472,7 @@ def generate_dashboard_data(
     reports_dir:       Path | None = None,
     thesis_dir:        Path | None = None,
     themes_dir:        Path | None = None,
+    frontend_data_dir: Path | None = None,
 ) -> None:
     """
     生成 docs/data.json（當日快照）並追加至 docs/history.json。
@@ -659,6 +660,23 @@ def generate_dashboard_data(
         if themes_dir and themes_dir.exists():
             themes_index = _sync_themes(themes_dir, docs_dir)
             logger.info(f"✅ 主題已同步：docs/themes/（{len(themes_index)} 個主題）")
+
+        # ── 同步至 frontend/src/data/ ──
+        if frontend_data_dir is not None:
+            frontend_data_dir.mkdir(parents=True, exist_ok=True)
+            (frontend_data_dir / "data.json").write_text(
+                json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+            (frontend_data_dir / "history.json").write_text(
+                json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+            for idx_name in ("reports_index.json", "thesis_index.json", "themes_index.json"):
+                src = docs_dir / idx_name
+                if src.exists():
+                    (frontend_data_dir / idx_name).write_text(
+                        src.read_text(encoding="utf-8"), encoding="utf-8"
+                    )
+            logger.info(f"✅ 已同步至 frontend/src/data/（{frontend_data_dir}）")
 
     except Exception as exc:
         logger.warning(f"看板資料生成失敗（不影響主報告）：{exc}", exc_info=True)

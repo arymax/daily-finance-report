@@ -1,0 +1,499 @@
+[
+  {
+    "date": "2026-03-20",
+    "session": "morning",
+    "type": "market_overview",
+    "filename": "20260320_morning_market_overview.md",
+    "label": "2026-03-20 早盤・市場總覽"
+  },
+  {
+    "date": "2026-03-20",
+    "session": "morning",
+    "type": "portfolio_analysis",
+    "filename": "20260320_morning_portfolio_analysis.md",
+    "label": "2026-03-20 早盤・持倉分析"
+  },
+  {
+    "date": "2026-03-20",
+    "session": "evening",
+    "type": "market_overview",
+    "filename": "20260320_evening_market_overview.md",
+    "label": "2026-03-20 收盤・市場總覽"
+  },
+  {
+    "date": "2026-03-20",
+    "session": "evening",
+    "type": "portfolio_analysis",
+    "filename": "20260320_evening_portfolio_analysis.md",
+    "label": "2026-03-20 收盤・持倉分析"
+  },
+  {
+    "date": "2026-03-19",
+    "session": "morning",
+    "type": "market_overview",
+    "filename": "20260319_morning_market_overview.md",
+    "label": "2026-03-19 早盤・市場總覽"
+  },
+  {
+    "date": "2026-03-19",
+    "session": "morning",
+    "type": "portfolio_analysis",
+    "filename": "20260319_morning_portfolio_analysis.md",
+    "label": "2026-03-19 早盤・持倉分析"
+  },
+  {
+    "date": "2026-03-19",
+    "session": "evening",
+    "type": "market_overview",
+    "filename": "20260319_evening_market_overview.md",
+    "label": "2026-03-19 收盤・市場總覽"
+  },
+  {
+    "date": "2026-03-19",
+    "session": "evening",
+    "type": "portfolio_analysis",
+    "filename": "20260319_evening_portfolio_analysis.md",
+    "label": "2026-03-19 收盤・持倉分析"
+  },
+  {
+    "date": "2026-03-18",
+    "session": "morning",
+    "type": "market_overview",
+    "filename": "20260318_morning_market_overview.md",
+    "label": "2026-03-18 早盤・市場總覽"
+  },
+  {
+    "date": "2026-03-18",
+    "session": "morning",
+    "type": "portfolio_analysis",
+    "filename": "20260318_morning_portfolio_analysis.md",
+    "label": "2026-03-18 早盤・持倉分析"
+  },
+  {
+    "date": "2026-03-18",
+    "session": "evening",
+    "type": "market_overview",
+    "filename": "20260318_evening_market_overview.md",
+    "label": "2026-03-18 收盤・市場總覽"
+  },
+  {
+    "date": "2026-03-18",
+    "session": "evening",
+    "type": "portfolio_analysis",
+    "filename": "20260318_evening_portfolio_analysis.md",
+    "label": "2026-03-18 收盤・持倉分析"
+  },
+  {
+    "date": "2026-03-17",
+    "session": "morning",
+    "type": "market_overview",
+    "filename": "20260317_morning_market_overview.md",
+    "label": "2026-03-17 早盤・市場總覽"
+  },
+  {
+    "date": "2026-03-17",
+    "session": "morning",
+    "type": "portfolio_analysis",
+    "filename": "20260317_morning_portfolio_analysis.md",
+    "label": "2026-03-17 早盤・持倉分析"
+  },
+  {
+    "date": "2026-03-17",
+    "session": "evening",
+    "type": "market_overview",
+    "filename": "20260317_evening_market_overview.md",
+    "label": "2026-03-17 收盤・市場總覽"
+  },
+  {
+    "date": "2026-03-17",
+    "session": "evening",
+    "type": "portfolio_analysis",
+    "filename": "20260317_evening_portfolio_analysis.md",
+    "label": "2026-03-17 收盤・持倉分析"
+  },
+  {
+    "date": "2026-03-16",
+    "session": "morning",
+    "type": "market_overview",
+    "filename": "20260316_morning_market_overview.md",
+    "label": "2026-03-16 早盤・市場總覽"
+  },
+  {
+    "date": "2026-03-16",
+    "session": "morning",
+    "type": "portfolio_analysis",
+    "filename": "20260316_morning_portfolio_analysis.md",
+    "label": "2026-03-16 早盤・持倉分析"
+  },
+  {
+    "date": "2026-03-16",
+    "session": "evening",
+    "type": "market_overview",
+    "filename": "20260316_evening_market_overview.md",
+    "label": "2026-03-16 收盤・市場總覽"
+  },
+  {
+    "date": "2026-03-16",
+    "session": "evening",
+    "type": "portfolio_analysis",
+    "filename": "20260316_evening_portfolio_analysis.md",
+    "label": "2026-03-16 收盤・持倉分析"
+  },
+  {
+    "date": "2026-03-14",
+    "session": "morning",
+    "type": "market_overview",
+    "filename": "20260314_morning_market_overview.md",
+    "label": "2026-03-14 早盤・市場總覽"
+  },
+  {
+    "date": "2026-03-14",
+    "session": "morning",
+    "type": "portfolio_analysis",
+    "filename": "20260314_morning_portfolio_analysis.md",
+    "label": "2026-03-14 早盤・持倉分析"
+  },
+  {
+    "date": "2026-03-14",
+    "session": "evening",
+    "type": "market_overview",
+    "filename": "20260314_evening_market_overview.md",
+    "label": "2026-03-14 收盤・市場總覽"
+  },
+  {
+    "date": "2026-03-14",
+    "session": "evening",
+    "type": "portfolio_analysis",
+    "filename": "20260314_evening_portfolio_analysis.md",
+    "label": "2026-03-14 收盤・持倉分析"
+  },
+  {
+    "date": "2026-03-13",
+    "session": "morning",
+    "type": "market_overview",
+    "filename": "20260313_morning_market_overview.md",
+    "label": "2026-03-13 早盤・市場總覽"
+  },
+  {
+    "date": "2026-03-13",
+    "session": "morning",
+    "type": "portfolio_analysis",
+    "filename": "20260313_morning_portfolio_analysis.md",
+    "label": "2026-03-13 早盤・持倉分析"
+  },
+  {
+    "date": "2026-03-13",
+    "session": "evening",
+    "type": "portfolio_analysis",
+    "filename": "20260313_evening_portfolio_analysis.md",
+    "label": "2026-03-13 收盤・持倉分析"
+  },
+  {
+    "date": "2026-03-13",
+    "session": "",
+    "type": "premarket_check",
+    "filename": "20260313_premarket_check.md",
+    "label": "2026-03-13 ・盤前晨檢"
+  },
+  {
+    "date": "2026-03-12",
+    "session": "morning",
+    "type": "market_overview",
+    "filename": "20260312_morning_market_overview.md",
+    "label": "2026-03-12 早盤・市場總覽"
+  },
+  {
+    "date": "2026-03-12",
+    "session": "morning",
+    "type": "portfolio_analysis",
+    "filename": "20260312_morning_portfolio_analysis.md",
+    "label": "2026-03-12 早盤・持倉分析"
+  },
+  {
+    "date": "2026-03-12",
+    "session": "",
+    "type": "premarket_check",
+    "filename": "20260312_premarket_check.md",
+    "label": "2026-03-12 ・盤前晨檢"
+  },
+  {
+    "date": "2026-03-11",
+    "session": "morning",
+    "type": "market_overview",
+    "filename": "20260311_morning_market_overview.md",
+    "label": "2026-03-11 早盤・市場總覽"
+  },
+  {
+    "date": "2026-03-11",
+    "session": "morning",
+    "type": "portfolio_analysis",
+    "filename": "20260311_morning_portfolio_analysis.md",
+    "label": "2026-03-11 早盤・持倉分析"
+  },
+  {
+    "date": "2026-03-11",
+    "session": "evening",
+    "type": "market_overview",
+    "filename": "20260311_evening_market_overview.md",
+    "label": "2026-03-11 收盤・市場總覽"
+  },
+  {
+    "date": "2026-03-11",
+    "session": "evening",
+    "type": "portfolio_analysis",
+    "filename": "20260311_evening_portfolio_analysis.md",
+    "label": "2026-03-11 收盤・持倉分析"
+  },
+  {
+    "date": "2026-03-10",
+    "session": "morning",
+    "type": "market_overview",
+    "filename": "20260310_morning_market_overview.md",
+    "label": "2026-03-10 早盤・市場總覽"
+  },
+  {
+    "date": "2026-03-10",
+    "session": "morning",
+    "type": "portfolio_analysis",
+    "filename": "20260310_morning_portfolio_analysis.md",
+    "label": "2026-03-10 早盤・持倉分析"
+  },
+  {
+    "date": "2026-03-10",
+    "session": "evening",
+    "type": "market_overview",
+    "filename": "20260310_evening_market_overview.md",
+    "label": "2026-03-10 收盤・市場總覽"
+  },
+  {
+    "date": "2026-03-10",
+    "session": "evening",
+    "type": "portfolio_analysis",
+    "filename": "20260310_evening_portfolio_analysis.md",
+    "label": "2026-03-10 收盤・持倉分析"
+  },
+  {
+    "date": "2026-03-09",
+    "session": "morning",
+    "type": "market_overview",
+    "filename": "20260309_morning_market_overview.md",
+    "label": "2026-03-09 早盤・市場總覽"
+  },
+  {
+    "date": "2026-03-09",
+    "session": "morning",
+    "type": "portfolio_analysis",
+    "filename": "20260309_morning_portfolio_analysis.md",
+    "label": "2026-03-09 早盤・持倉分析"
+  },
+  {
+    "date": "2026-03-09",
+    "session": "evening",
+    "type": "market_overview",
+    "filename": "20260309_evening_market_overview.md",
+    "label": "2026-03-09 收盤・市場總覽"
+  },
+  {
+    "date": "2026-03-09",
+    "session": "evening",
+    "type": "portfolio_analysis",
+    "filename": "20260309_evening_portfolio_analysis.md",
+    "label": "2026-03-09 收盤・持倉分析"
+  },
+  {
+    "date": "2026-03-07",
+    "session": "morning",
+    "type": "market_overview",
+    "filename": "20260307_morning_market_overview.md",
+    "label": "2026-03-07 早盤・市場總覽"
+  },
+  {
+    "date": "2026-03-07",
+    "session": "morning",
+    "type": "portfolio_analysis",
+    "filename": "20260307_morning_portfolio_analysis.md",
+    "label": "2026-03-07 早盤・持倉分析"
+  },
+  {
+    "date": "2026-03-07",
+    "session": "evening",
+    "type": "market_overview",
+    "filename": "20260307_evening_market_overview.md",
+    "label": "2026-03-07 收盤・市場總覽"
+  },
+  {
+    "date": "2026-03-07",
+    "session": "evening",
+    "type": "portfolio_analysis",
+    "filename": "20260307_evening_portfolio_analysis.md",
+    "label": "2026-03-07 收盤・持倉分析"
+  },
+  {
+    "date": "2026-03-06",
+    "session": "morning",
+    "type": "market_overview",
+    "filename": "20260306_morning_market_overview.md",
+    "label": "2026-03-06 早盤・市場總覽"
+  },
+  {
+    "date": "2026-03-06",
+    "session": "morning",
+    "type": "portfolio_analysis",
+    "filename": "20260306_morning_portfolio_analysis.md",
+    "label": "2026-03-06 早盤・持倉分析"
+  },
+  {
+    "date": "2026-03-06",
+    "session": "evening",
+    "type": "market_overview",
+    "filename": "20260306_evening_market_overview.md",
+    "label": "2026-03-06 收盤・市場總覽"
+  },
+  {
+    "date": "2026-03-06",
+    "session": "evening",
+    "type": "portfolio_analysis",
+    "filename": "20260306_evening_portfolio_analysis.md",
+    "label": "2026-03-06 收盤・持倉分析"
+  },
+  {
+    "date": "2026-03-05",
+    "session": "morning",
+    "type": "market_overview",
+    "filename": "20260305_morning_market_overview.md",
+    "label": "2026-03-05 早盤・市場總覽"
+  },
+  {
+    "date": "2026-03-05",
+    "session": "morning",
+    "type": "portfolio_analysis",
+    "filename": "20260305_morning_portfolio_analysis.md",
+    "label": "2026-03-05 早盤・持倉分析"
+  },
+  {
+    "date": "2026-03-05",
+    "session": "evening",
+    "type": "market_overview",
+    "filename": "20260305_evening_market_overview.md",
+    "label": "2026-03-05 收盤・市場總覽"
+  },
+  {
+    "date": "2026-03-05",
+    "session": "evening",
+    "type": "portfolio_analysis",
+    "filename": "20260305_evening_portfolio_analysis.md",
+    "label": "2026-03-05 收盤・持倉分析"
+  },
+  {
+    "date": "2026-03-04",
+    "session": "morning",
+    "type": "market_overview",
+    "filename": "20260304_morning_market_overview.md",
+    "label": "2026-03-04 早盤・市場總覽"
+  },
+  {
+    "date": "2026-03-04",
+    "session": "morning",
+    "type": "portfolio_analysis",
+    "filename": "20260304_morning_portfolio_analysis.md",
+    "label": "2026-03-04 早盤・持倉分析"
+  },
+  {
+    "date": "2026-03-04",
+    "session": "evening",
+    "type": "market_overview",
+    "filename": "20260304_evening_market_overview.md",
+    "label": "2026-03-04 收盤・市場總覽"
+  },
+  {
+    "date": "2026-03-04",
+    "session": "evening",
+    "type": "portfolio_analysis",
+    "filename": "20260304_evening_portfolio_analysis.md",
+    "label": "2026-03-04 收盤・持倉分析"
+  },
+  {
+    "date": "2026-03-03",
+    "session": "evening",
+    "type": "market_overview",
+    "filename": "20260303_evening_market_overview.md",
+    "label": "2026-03-03 收盤・市場總覽"
+  },
+  {
+    "date": "2026-03-03",
+    "session": "evening",
+    "type": "portfolio_analysis",
+    "filename": "20260303_evening_portfolio_analysis.md",
+    "label": "2026-03-03 收盤・持倉分析"
+  },
+  {
+    "date": "2026-03-03",
+    "session": "",
+    "type": "market_overview",
+    "filename": "20260303_market_overview.md",
+    "label": "2026-03-03 ・市場總覽"
+  },
+  {
+    "date": "2026-03-03",
+    "session": "",
+    "type": "portfolio_analysis",
+    "filename": "20260303_portfolio_analysis.md",
+    "label": "2026-03-03 ・持倉分析"
+  },
+  {
+    "date": "2026-03-01",
+    "session": "",
+    "type": "market_overview",
+    "filename": "20260301_market_overview.md",
+    "label": "2026-03-01 ・市場總覽"
+  },
+  {
+    "date": "2026-03-01",
+    "session": "",
+    "type": "portfolio_analysis",
+    "filename": "20260301_portfolio_analysis.md",
+    "label": "2026-03-01 ・持倉分析"
+  },
+  {
+    "date": "2026-02-26",
+    "session": "",
+    "type": "market_overview",
+    "filename": "20260226_market_overview.md",
+    "label": "2026-02-26 ・市場總覽"
+  },
+  {
+    "date": "2026-02-26",
+    "session": "",
+    "type": "portfolio_analysis",
+    "filename": "20260226_portfolio_analysis.md",
+    "label": "2026-02-26 ・持倉分析"
+  },
+  {
+    "date": "2026-02-25",
+    "session": "",
+    "type": "market_overview",
+    "filename": "20260225_market_overview.md",
+    "label": "2026-02-25 ・市場總覽"
+  },
+  {
+    "date": "2026-02-25",
+    "session": "",
+    "type": "portfolio_analysis",
+    "filename": "20260225_portfolio_analysis.md",
+    "label": "2026-02-25 ・持倉分析"
+  },
+  {
+    "date": "2026-02-24",
+    "session": "",
+    "type": "market_overview",
+    "filename": "20260224_market_overview.md",
+    "label": "2026-02-24 ・市場總覽"
+  },
+  {
+    "date": "2026-02-24",
+    "session": "",
+    "type": "portfolio_analysis",
+    "filename": "20260224_portfolio_analysis.md",
+    "label": "2026-02-24 ・持倉分析"
+  }
+]

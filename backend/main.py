@@ -583,6 +583,7 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
         reports_dir=reports_dir,
         thesis_dir=REPO_DIR / "thesis",
         themes_dir=REPO_DIR / "themes",
+        frontend_data_dir=REPO_DIR / "frontend" / "src" / "data",
     )
 
     # ── Git 同步（執行後 push）──
@@ -1009,8 +1010,9 @@ def run_dashboard_only(session: str | None = None) -> None:
         reports_dir=reports_dir,
         thesis_dir=REPO_DIR / "thesis",
         themes_dir=REPO_DIR / "themes",
+        frontend_data_dir=REPO_DIR / "frontend" / "src" / "data",
     )
-    logger.info("✅ 儀表板快照已更新（docs/data.json）")
+    logger.info("✅ 儀表板快照已更新（docs/data.json + frontend/src/data/）")
 
     # ── Git push（若設定啟用）──
     if sync_cfg.get("enabled") and sync_cfg.get("auto_push", True):
