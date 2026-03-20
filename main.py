@@ -44,6 +44,7 @@ from core.thesis import (
 )
 from core.fundamentals import fetch_fundamentals, update_snapshot_in_thesis
 from core.dashboard import generate_dashboard_data
+from core.themes_updater import build_theme_update_prompt, parse_and_save_themes, _load_themes
 from core.research import (
     build_enrich_prompt,
     build_candidate_prompt, parse_candidates,
@@ -466,6 +467,29 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
                 logger.info("  ℹ️ 今日無 thesis 需要質化更新")
         except Exception as e:
             logger.warning(f"Thesis 自動更新失敗（不影響主報告）：{e}")
+
+    # ── Task 4.6：Themes 燃料自動更新 ─────────────────────────────
+    themes_dir = BASE_DIR / "themes"
+    if themes_dir.exists() and market_content:
+        logger.info("── Task 4.6：Themes 燃料自動更新 ──────────────")
+        try:
+            themes_data = _load_themes(themes_dir)
+            logger.info(f"   載入 {len(themes_data)} 個活躍主題：{', '.join(sorted(themes_data)) or '無'}")
+            if themes_data:
+                theme_prompt = build_theme_update_prompt(
+                    themes_data, market_content, session=session
+                )
+                logger.info(f"   Prompt 長度：{len(theme_prompt):,} 字元")
+                theme_response = call_claude(theme_prompt, claude_cli, claude_model, timeout, stream=stream_output)
+                updated_themes = parse_and_save_themes(theme_response, themes_dir)
+                if updated_themes:
+                    logger.info(f"  ✅ 更新了 {len(updated_themes)} 個主題：{', '.join(updated_themes)}")
+                else:
+                    logger.info("  ℹ️ 今日無主題燃料更新")
+            else:
+                logger.info("  ℹ️ 無活躍主題可更新")
+        except Exception as e:
+            logger.warning(f"Themes 燃料更新失敗（不影響主報告）：{e}")
 
     # ── Task 4.5：Watchlist 優先級動態重評 ────────────────────────
     reeval_changes: list[dict] = []
