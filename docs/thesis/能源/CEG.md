@@ -148,13 +148,13 @@ CEG 積極申請延長核電廠運營至 80 年（NRC Subsequent License Renewal
 
 ### 即時市場指標（自動更新）
 <!-- snapshot:start -->
-*最後更新：2026-03-20 07:01 TST*
+*最後更新：2026-03-20 18:01 TST*
 
 | 指標 | 數值 |
 |------|------|
-| 本益比（Trailing P/E） | 42.82 |
+| 本益比（Trailing P/E） | 42.71 |
 | 預期本益比（Forward P/E） | 23.22 |
-| EPS（TTM） | 7.39 USD |
+| EPS（TTM） | 7.41 USD |
 | 預期 EPS | 13.63 USD |
 | 股價淨值比（P/B） | 6.81 |
 | 毛利率（最新季） | 18.4% |

@@ -829,12 +829,29 @@ const LivePrices = (() => {
   }
 
   async function fetchCrypto() {
-    const ids = Object.values(CRYPTO_MAP).join(',');
-    const r = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
-    const j = await r.json();
-    Object.entries(CRYPTO_MAP).forEach(([tk, id]) => {
-      if (j[id]?.usd) { liveData[tk] = j[id].usd; anySuccess = true; }
-    });
+    // 主要：Binance 公開 API（原生 CORS、無需 key、無限速問題）
+    const BINANCE_MAP = { BTC: 'BTCUSDT', ETH: 'ETHUSDT', XRP: 'XRPUSDT' };
+    try {
+      const symbols = encodeURIComponent(JSON.stringify(Object.values(BINANCE_MAP)));
+      const r = await fetch(`https://api.binance.com/api/v3/ticker/price?symbols=${symbols}`);
+      const arr = await r.json();
+      arr.forEach(item => {
+        const tk = Object.keys(BINANCE_MAP).find(k => BINANCE_MAP[k] === item.symbol);
+        const price = parseFloat(item.price);
+        if (tk && price > 0) { liveData[tk] = price; anySuccess = true; }
+      });
+    } catch {
+      // Fallback：CoinGecko via corsproxy
+      try {
+        const ids = Object.values(CRYPTO_MAP).join(',');
+        const cgUrl = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
+        const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(cgUrl)}`);
+        const j = await r.json();
+        Object.entries(CRYPTO_MAP).forEach(([tk, id]) => {
+          if (j[id]?.usd) { liveData[tk] = j[id].usd; anySuccess = true; }
+        });
+      } catch {}
+    }
   }
 
   async function fetchUS() {

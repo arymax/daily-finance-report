@@ -79,7 +79,8 @@
       "KLAC",
       "2330",
       "ASML",
-      "ONTO"
+      "ONTO",
+      "3030"
     ],
     "last_updated": "2026-03-20",
     "filename": "半導體去美化.md",
@@ -155,6 +156,23 @@
     "milestones_done": 3
   },
   {
+    "id": "記憶體週期",
+    "name": "記憶體週期復甦（DRAM／NAND 價格週期）",
+    "status": "active",
+    "fuel_pct": 65,
+    "tickers": [
+      "MU",
+      "000660",
+      "005930",
+      "AMAT",
+      "WDC"
+    ],
+    "last_updated": "2026-03-20",
+    "filename": "記憶體週期.md",
+    "milestones_total": 10,
+    "milestones_done": 5
+  },
+  {
     "id": "HBM先進封裝",
     "name": "HBM／先進封裝（CoWoS）",
     "status": "active",
@@ -164,7 +182,8 @@
       "AMAT",
       "ASML",
       "3034",
-      "2330"
+      "2330",
+      "3030"
     ],
     "last_updated": "2026-03-20",
     "filename": "HBM先進封裝.md",

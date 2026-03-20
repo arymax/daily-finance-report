@@ -1,23 +1,23 @@
 {
   "meta": {
-    "generated_at": "2026-03-20 11:43:55 TST",
+    "generated_at": "2026-03-20 23:56:20 TST",
     "date": "2026-03-20",
     "session": "morning",
     "usd_twd": 32.0
   },
   "summary": {
-    "total_value_twd": 695363,
-    "total_pnl_twd": 14215,
-    "total_pnl_pct": 4.3,
+    "total_value_twd": 690928,
+    "total_pnl_twd": 9780,
+    "total_pnl_pct": 2.9,
     "cash_twd": 303632,
-    "cash_pct": 43.7
+    "cash_pct": 43.9
   },
   "allocation": {
-    "現金": 43.7,
+    "現金": 43.9,
     "長期ETF": 17.6,
-    "波段個股": 20.7,
+    "波段個股": 20.3,
     "加密貨幣": 11.8,
-    "合約保證金": 6.3
+    "合約保證金": 6.4
   },
   "positions": [
     {
@@ -28,10 +28,10 @@
       "cost_twd": 5839,
       "shares": 52,
       "sector": "台灣大盤指數",
-      "current_value_twd": 9183,
-      "pnl_twd": 3344,
-      "pnl_pct": 57.3,
-      "current_price": "176.60 TWD"
+      "current_value_twd": 9162,
+      "pnl_twd": 3323,
+      "pnl_pct": 56.9,
+      "current_price": "176.20 TWD"
     },
     {
       "ticker": "00719B",
@@ -59,10 +59,10 @@
       "cost_twd": 39000,
       "shares": 4.12911,
       "sector": "美國全市場股票",
-      "current_value_twd": 43001,
-      "pnl_twd": 4001,
-      "pnl_pct": 10.3,
-      "current_price": "325.44 USD"
+      "current_value_twd": 42634,
+      "pnl_twd": 3634,
+      "pnl_pct": 9.3,
+      "current_price": "322.63 USD"
     },
     {
       "ticker": "VT",
@@ -72,10 +72,10 @@
       "cost_twd": 15000,
       "shares": 3.41164,
       "sector": "全球股票",
-      "current_value_twd": 15235,
-      "pnl_twd": 235,
-      "pnl_pct": 1.6,
-      "current_price": "139.55 USD"
+      "current_value_twd": 14994,
+      "pnl_twd": -6,
+      "pnl_pct": -0.0,
+      "current_price": "137.33 USD"
     },
     {
       "ticker": "VGIT",
@@ -85,10 +85,10 @@
       "cost_twd": 15000,
       "shares": 8.01501,
       "sector": "中期美國公債",
-      "current_value_twd": 15291,
-      "pnl_twd": 291,
-      "pnl_pct": 1.9,
-      "current_price": "59.62 USD"
+      "current_value_twd": 15203,
+      "pnl_twd": 203,
+      "pnl_pct": 1.4,
+      "current_price": "59.27 USD"
     },
     {
       "ticker": "MRVL",
@@ -98,10 +98,10 @@
       "cost_twd": 32000,
       "shares": 10.83658,
       "sector": "半導體（自訂 AI 晶片／資料中心網路／光學）",
-      "current_value_twd": 31046,
-      "pnl_twd": -954,
-      "pnl_pct": -3.0,
-      "current_price": "89.53 USD"
+      "current_value_twd": 30997,
+      "pnl_twd": -1003,
+      "pnl_pct": -3.1,
+      "current_price": "89.38 USD"
     },
     {
       "ticker": "CRWD",
@@ -111,10 +111,10 @@
       "cost_twd": 20277,
       "shares": 1.5,
       "sector": "資安軟體",
-      "current_value_twd": 20553,
-      "pnl_twd": 276,
-      "pnl_pct": 1.4,
-      "current_price": "428.18 USD"
+      "current_value_twd": 19735,
+      "pnl_twd": -542,
+      "pnl_pct": -2.7,
+      "current_price": "411.10 USD"
     },
     {
       "ticker": "ALAB",
@@ -124,10 +124,10 @@
       "cost_twd": 5923,
       "shares": 1.5,
       "sector": "半導體連接方案",
-      "current_value_twd": 6056,
-      "pnl_twd": 133,
-      "pnl_pct": 2.2,
-      "current_price": "126.16 USD"
+      "current_value_twd": 5712,
+      "pnl_twd": -211,
+      "pnl_pct": -3.6,
+      "current_price": "118.98 USD"
     },
     {
       "ticker": "NET",
@@ -137,10 +137,10 @@
       "cost_twd": 6483,
       "shares": 1,
       "sector": "網路基礎建設／資安",
-      "current_value_twd": 7104,
-      "pnl_twd": 621,
-      "pnl_pct": 9.6,
-      "current_price": "222.01 USD"
+      "current_value_twd": 7111,
+      "pnl_twd": 628,
+      "pnl_pct": 9.7,
+      "current_price": "222.20 USD"
     },
     {
       "ticker": "3030",
@@ -150,10 +150,10 @@
       "cost_twd": 69447,
       "shares": 300,
       "sector": "半導體設備／AOI檢測",
-      "current_value_twd": 79050,
-      "pnl_twd": 9603,
-      "pnl_pct": 13.8,
-      "current_price": "263.50 TWD"
+      "current_value_twd": 76650,
+      "pnl_twd": 7203,
+      "pnl_pct": 10.4,
+      "current_price": "255.50 TWD"
     }
   ],
   "crypto": [
@@ -164,8 +164,8 @@
       "exchange": "Bitget",
       "cost_twd": 42985,
       "quantity": 1337.78378259,
-      "current_value_twd": 42809,
-      "pnl_twd": -176,
+      "current_value_twd": 42813,
+      "pnl_twd": -172,
       "pnl_pct": -0.4,
       "current_price": "1.00 USD"
     },
@@ -176,10 +176,10 @@
       "exchange": "Bitget",
       "cost_twd": 25860,
       "quantity": 0.0106787,
-      "current_value_twd": 23968,
-      "pnl_twd": -1892,
-      "pnl_pct": -7.3,
-      "current_price": "70140.06 USD"
+      "current_value_twd": 23907,
+      "pnl_twd": -1953,
+      "pnl_pct": -7.6,
+      "current_price": "69953.52 USD"
     },
     {
       "ticker": "ETH",
@@ -188,10 +188,10 @@
       "exchange": "Bitget",
       "cost_twd": 6839,
       "quantity": 0.14348174,
-      "current_value_twd": 9820,
-      "pnl_twd": 2981,
-      "pnl_pct": 43.6,
-      "current_price": "2138.69 USD"
+      "current_value_twd": 9805,
+      "pnl_twd": 2966,
+      "pnl_pct": 43.4,
+      "current_price": "2135.24 USD"
     },
     {
       "ticker": "XRP",
@@ -200,10 +200,10 @@
       "exchange": "Bitget",
       "cost_twd": 9626,
       "quantity": 115.91467897,
-      "current_value_twd": 5378,
-      "pnl_twd": -4248,
-      "pnl_pct": -44.1,
-      "current_price": "1.45 USD"
+      "current_value_twd": 5336,
+      "pnl_twd": -4290,
+      "pnl_pct": -44.6,
+      "current_price": "1.44 USD"
     }
   ],
   "watchlist": [
@@ -225,17 +225,6 @@
       "market": "US",
       "sector": "半導體 + 企業基礎設施軟體（Diversified Semiconductor & Infrastructure Software）",
       "theme": "AI 基礎建設雙引擎——自訂 XPU ASIC 為超大型雲端客戶定製算力，VMware 軟體訂閱轉型提供高黏性現金流，共同構建最稀缺的「AI 算力 × 企業 I",
-      "status": "未達成",
-      "status_icon": "⏳",
-      "action": ""
-    },
-    {
-      "ticker": "2609",
-      "name": "陽明海運股份有限公司",
-      "priority": 1,
-      "market": "TW",
-      "sector": "貨櫃航運",
-      "theme": "霍爾木茲封鎖威脅觸發歐亞航線運費率非線性跳升，P/B 0.65x 提供下行保護，即期業績敏感度為台灣航運股最高",
       "status": "未達成",
       "status_icon": "⏳",
       "action": ""
@@ -280,6 +269,17 @@
       "market": "US",
       "sector": "AI 雲端基礎設施 / Neocloud GPU 算力租用",
       "theme": "Nvidia 欽點的歐洲 Neocloud 龍頭——獨立 GPU 雲的結構性稀缺標的，5GW 算力藍圖獲 $2B 戰略背書",
+      "status": "未達成",
+      "status_icon": "⏳",
+      "action": ""
+    },
+    {
+      "ticker": "2609",
+      "name": "陽明海運股份有限公司",
+      "priority": 2,
+      "market": "TW",
+      "sector": "貨櫃航運",
+      "theme": "霍爾木茲封鎖威脅觸發歐亞航線運費率非線性跳升，P/B 0.65x 提供下行保護，即期業績敏感度為台灣航運股最高",
       "status": "未達成",
       "status_icon": "⏳",
       "action": ""
@@ -361,6 +361,7 @@
       "FOMC 偏鷹疊加油價通膨：台灣科技股中高估值族群（AI 軟體應用）在通膨升溫環境中承壓，外資可能持續調整",
       "Trump",
       "3324 雙鴻資訊缺口：資料抓取失敗，今日需自行確認個股狀態後再操作"
-    ]
+    ],
+    "ripple": []
   }
 }

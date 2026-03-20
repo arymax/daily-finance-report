@@ -2,7 +2,7 @@
 name: HBM／先進封裝（CoWoS）
 status: active
 fuel_pct: 60
-tickers: [MU, AMAT, ASML, 3034, 2330]
+tickers: [MU, AMAT, ASML, 3034, 2330, 3030]
 last_updated: 2026-03-20
 ---
 
