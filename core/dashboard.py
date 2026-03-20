@@ -202,6 +202,71 @@ def _parse_watchlist_status(portfolio_content: str, watchlist: list) -> list[dic
     return result
 
 
+# ── 報告同步 ──────────────────────────────────────────────────────────────────
+
+def _sync_reports(reports_dir: Path, docs_dir: Path) -> list[dict]:
+    """
+    將 reports/*.md 複製到 docs/reports/，並生成 docs/reports_index.json。
+    回傳報告索引清單（最新在前）。
+    """
+    dest_dir = docs_dir / "reports"
+    dest_dir.mkdir(parents=True, exist_ok=True)
+
+    SESSION_LABEL = {"morning": "早盤", "evening": "收盤"}
+    TYPE_LABEL = {
+        "portfolio_analysis": "持倉分析",
+        "market_overview":    "市場總覽",
+        "premarket_check":    "盤前晨檢",
+    }
+
+    index: list[dict] = []
+    for md_file in sorted(reports_dir.glob("*.md")):
+        stem = md_file.stem  # e.g. "20260320_morning_portfolio_analysis"
+        # 格式：YYYYMMDD_session_type  或  YYYYMMDD_type
+        parts = stem.split("_", 1)
+        if len(parts) < 2 or len(parts[0]) != 8:
+            continue
+
+        date_raw = parts[0]
+        try:
+            date_str = f"{date_raw[:4]}-{date_raw[4:6]}-{date_raw[6:8]}"
+        except Exception:
+            continue
+
+        rest = parts[1]  # "morning_portfolio_analysis"
+        session = None
+        type_part = rest
+        for s in ("morning", "evening"):
+            if rest.startswith(s + "_"):
+                session   = s
+                type_part = rest[len(s) + 1:]
+                break
+
+        type_label    = TYPE_LABEL.get(type_part, type_part.replace("_", " "))
+        session_label = SESSION_LABEL.get(session, "") if session else ""
+        label = f"{date_str} {session_label}・{type_label}".strip("・ ")
+
+        # 複製到 docs/reports/
+        dest = dest_dir / md_file.name
+        dest.write_bytes(md_file.read_bytes())
+
+        index.append({
+            "date":     date_str,
+            "session":  session or "",
+            "type":     type_part,
+            "filename": md_file.name,
+            "label":    label,
+        })
+
+    # 最新在前
+    index.sort(key=lambda x: (x["date"], x["session"]), reverse=True)
+
+    (docs_dir / "reports_index.json").write_text(
+        json.dumps(index, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    return index
+
+
 # ── 主入口 ────────────────────────────────────────────────────────────────────
 
 def generate_dashboard_data(
@@ -212,6 +277,7 @@ def generate_dashboard_data(
     portfolio_content: str,
     market_content:    str,
     docs_dir:          Path,
+    reports_dir:       Path | None = None,
 ) -> None:
     """
     生成 docs/data.json（當日快照）並追加至 docs/history.json。
@@ -378,6 +444,11 @@ def generate_dashboard_data(
             json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8"
         )
         logger.info(f"✅ 歷史資料已更新：docs/history.json（{len(history)} 筆）")
+
+        # ── 同步報告 markdown ──
+        if reports_dir and reports_dir.exists():
+            report_index = _sync_reports(reports_dir, docs_dir)
+            logger.info(f"✅ 報告已同步：docs/reports/（{len(report_index)} 份）")
 
     except Exception as exc:
         logger.warning(f"看板資料生成失敗（不影響主報告）：{exc}", exc_info=True)

@@ -555,6 +555,7 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
         portfolio_content=portfolio_content,
         market_content=market_content,
         docs_dir=docs_dir,
+        reports_dir=reports_dir,
     )
 
     # ── Git 同步（執行後 push）──

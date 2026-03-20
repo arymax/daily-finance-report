@@ -6,35 +6,62 @@
   <title>Finance Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
   <style>
-    /* Tab indicator */
+    /* Tab */
     .tab-btn { border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; }
     .tab-btn.active { border-bottom-color: #3b82f6; color: #93c5fd; }
     .tab-btn:not(.active) { color: #64748b; }
     .tab-btn:not(.active):hover { color: #94a3b8; }
 
-    /* Priority badges */
+    /* Badges */
     .badge-p1 { background:#1e3a5f; color:#60a5fa; }
     .badge-p2 { background:#3b2e00; color:#fbbf24; }
     .badge-p3 { background:#1e2535; color:#64748b; }
-
-    /* Status badges */
-    .badge-pending  { background:#0f2137; color:#38bdf8; }
+    .badge-pending { background:#0f2137; color:#38bdf8; }
     .badge-partial  { background:#2d1f00; color:#facc15; }
     .badge-ready    { background:#052e16; color:#4ade80; }
 
-    /* P&L colours */
+    /* P&L */
     .gain { color: #4ade80; }
     .loss { color: #f87171; }
     .neutral { color: #94a3b8; }
 
-    /* Table row hover */
+    /* Table hover */
     tbody tr:hover td { background: rgba(51,65,85,.35); }
 
     /* Scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #0f172a; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+
+    /* Report list item */
+    .report-item { cursor:pointer; border-left: 2px solid transparent; transition: all .12s; }
+    .report-item:hover { background: rgba(51,65,85,.4); border-left-color: #475569; }
+    .report-item.selected { background: rgba(59,130,246,.15); border-left-color: #3b82f6; }
+
+    /* Markdown prose (dark) */
+    .prose { color: #cbd5e1; line-height: 1.75; }
+    .prose h1,.prose h2,.prose h3,.prose h4 { color:#f1f5f9; font-weight:600; margin-top:1.5em; margin-bottom:.5em; }
+    .prose h1 { font-size:1.4em; border-bottom:1px solid #334155; padding-bottom:.4em; }
+    .prose h2 { font-size:1.2em; }
+    .prose h3 { font-size:1.05em; }
+    .prose p  { margin:.75em 0; }
+    .prose strong { color:#f1f5f9; }
+    .prose em { color:#94a3b8; }
+    .prose a  { color:#60a5fa; text-decoration:underline; }
+    .prose hr { border-color:#334155; margin:1.5em 0; }
+    .prose blockquote { border-left:3px solid #475569; padding-left:1em; color:#94a3b8; margin:1em 0; }
+    .prose code { background:#0f172a; color:#86efac; padding:.15em .35em; border-radius:.25em; font-size:.85em; }
+    .prose pre  { background:#0f172a; padding:1em; border-radius:.5em; overflow-x:auto; border:1px solid #1e293b; }
+    .prose pre code { background:transparent; padding:0; color:#86efac; }
+    .prose ul,.prose ol { padding-left:1.5em; margin:.75em 0; }
+    .prose li { margin:.3em 0; }
+    .prose table { width:100%; border-collapse:collapse; font-size:.9em; margin:1em 0; }
+    .prose th { background:#1e293b; color:#94a3b8; font-weight:600; text-align:left; padding:.5em .75em; border:1px solid #334155; font-size:.8em; letter-spacing:.03em; }
+    .prose td { padding:.45em .75em; border:1px solid #1e293b; vertical-align:top; }
+    .prose tr:nth-child(even) td { background:rgba(30,41,59,.4); }
+    .prose tr:hover td { background:rgba(51,65,85,.35); }
   </style>
 </head>
 
@@ -42,20 +69,14 @@
 
 <!-- ══ Top Nav ══════════════════════════════════════════════════════════════ -->
 <header class="sticky top-0 z-50 bg-slate-800/95 backdrop-blur border-b border-slate-700">
-  <div class="max-w-7xl mx-auto px-5 h-14 flex items-center gap-6">
+  <div class="max-w-[1400px] mx-auto px-5 h-14 flex items-center gap-6">
     <span class="font-semibold text-white tracking-tight text-base shrink-0">📊 Finance Dashboard</span>
-
-    <!-- Tabs -->
     <nav class="flex gap-1 h-full">
-      <button id="tab-portfolio" onclick="switchTab('portfolio')"
-        class="tab-btn active px-4 text-sm font-medium">持倉總覽</button>
-      <button id="tab-watchlist" onclick="switchTab('watchlist')"
-        class="tab-btn px-4 text-sm font-medium">觀察清單</button>
-      <button id="tab-market"    onclick="switchTab('market')"
-        class="tab-btn px-4 text-sm font-medium">市場摘要</button>
+      <button id="tab-portfolio" onclick="switchTab('portfolio')" class="tab-btn active px-4 text-sm font-medium">持倉總覽</button>
+      <button id="tab-watchlist" onclick="switchTab('watchlist')" class="tab-btn px-4 text-sm font-medium">觀察清單</button>
+      <button id="tab-market"    onclick="switchTab('market')"    class="tab-btn px-4 text-sm font-medium">市場摘要</button>
+      <button id="tab-reports"   onclick="switchTab('reports')"   class="tab-btn px-4 text-sm font-medium">報告記錄</button>
     </nav>
-
-    <!-- Meta info -->
     <div class="ml-auto text-right text-xs leading-5 text-slate-400 shrink-0">
       <div id="meta-date">—</div>
       <div id="meta-usd" class="text-slate-500">USD/TWD —</div>
@@ -64,14 +85,10 @@
 </header>
 
 <!-- ══ Main ═════════════════════════════════════════════════════════════════ -->
-<main class="max-w-7xl mx-auto px-5 py-6 space-y-6">
+<main class="max-w-[1400px] mx-auto px-5 py-6 space-y-6">
 
-  <!-- ────────────────────────────────────────────────────────────────────── -->
-  <!-- TAB: 持倉總覽                                                         -->
-  <!-- ────────────────────────────────────────────────────────────────────── -->
+  <!-- ─── 持倉總覽 ─────────────────────────────────────────────────────── -->
   <div id="panel-portfolio">
-
-    <!-- Summary Cards -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
       <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
         <p class="text-xs text-slate-400 mb-1">總資產</p>
@@ -95,10 +112,7 @@
       </div>
     </div>
 
-    <!-- Positions Table + Donut Chart -->
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
-
-      <!-- Positions table -->
       <div class="lg:col-span-3 bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
         <div class="px-5 py-3 border-b border-slate-700 text-sm font-medium">持倉明細</div>
         <div class="overflow-x-auto">
@@ -107,8 +121,8 @@
               <tr class="text-xs text-slate-400 border-b border-slate-700">
                 <th class="text-left px-4 py-2 font-medium">標的</th>
                 <th class="text-right px-4 py-2 font-medium">現價</th>
-                <th class="text-right px-4 py-2 font-medium">市值(TWD)</th>
-                <th class="text-right px-4 py-2 font-medium">損益(TWD)</th>
+                <th class="text-right px-4 py-2 font-medium">市值 TWD</th>
+                <th class="text-right px-4 py-2 font-medium">損益 TWD</th>
                 <th class="text-right px-4 py-2 font-medium">損益%</th>
               </tr>
             </thead>
@@ -118,8 +132,6 @@
           </table>
         </div>
       </div>
-
-      <!-- Donut chart -->
       <div class="lg:col-span-2 bg-slate-800 rounded-xl border border-slate-700 p-5 flex flex-col">
         <p class="text-sm font-medium mb-4">資產分布</p>
         <div class="flex-1 flex items-center justify-center">
@@ -129,38 +141,29 @@
       </div>
     </div>
 
-    <!-- History Chart -->
     <div class="bg-slate-800 rounded-xl border border-slate-700 p-5">
-      <p class="text-sm font-medium mb-4">資產歷史走勢（最近 90 筆）</p>
+      <p class="text-sm font-medium mb-4">資產歷史走勢</p>
       <canvas id="history-chart" style="max-height:200px;"></canvas>
     </div>
   </div>
 
-  <!-- ────────────────────────────────────────────────────────────────────── -->
-  <!-- TAB: 觀察清單                                                         -->
-  <!-- ────────────────────────────────────────────────────────────────────── -->
+  <!-- ─── 觀察清單 ─────────────────────────────────────────────────────── -->
   <div id="panel-watchlist" class="hidden">
     <p class="text-xs text-slate-500 mb-4">
-      <span class="badge-p1 text-xs px-2 py-0.5 rounded font-semibold mr-2">P1</span>高優先 —
-      <span class="badge-p2 text-xs px-2 py-0.5 rounded font-semibold mx-2">P2</span>中優先 —
-      <span class="badge-p3 text-xs px-2 py-0.5 rounded font-semibold mx-2">P3</span>持續追蹤
+      <span class="badge-p1 text-xs px-2 py-0.5 rounded font-semibold mr-1">P1</span>高優先 —
+      <span class="badge-p2 text-xs px-2 py-0.5 rounded font-semibold mx-1">P2</span>中優先 —
+      <span class="badge-p3 text-xs px-2 py-0.5 rounded font-semibold mx-1">P3</span>持續追蹤
     </p>
     <div id="watchlist-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
       <div class="text-slate-500 text-center py-10 col-span-3">載入中…</div>
     </div>
   </div>
 
-  <!-- ────────────────────────────────────────────────────────────────────── -->
-  <!-- TAB: 市場摘要                                                         -->
-  <!-- ────────────────────────────────────────────────────────────────────── -->
+  <!-- ─── 市場摘要 ─────────────────────────────────────────────────────── -->
   <div id="panel-market" class="hidden">
-
-    <!-- Indices -->
     <div id="indices-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
       <div class="text-slate-500 text-center py-10 col-span-3">載入中…</div>
     </div>
-
-    <!-- Sectors -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
       <div class="bg-slate-800 rounded-xl border border-slate-700 p-5">
         <p class="text-sm font-medium text-green-400 mb-3">📈 強勢板塊</p>
@@ -171,308 +174,328 @@
         <div id="weak-sectors" class="space-y-2"></div>
       </div>
     </div>
-
-    <!-- Key Events -->
     <div class="bg-slate-800 rounded-xl border border-slate-700 p-5 mb-6">
       <p class="text-sm font-medium mb-3">🔔 市場重要事件</p>
       <div id="key-events" class="divide-y divide-slate-700/50"></div>
     </div>
-
-    <!-- Risks -->
     <div class="bg-slate-800 rounded-xl border border-slate-700 p-5">
       <p class="text-sm font-medium text-yellow-400 mb-3">⚠️ 風險提示</p>
       <div id="risk-alerts" class="divide-y divide-slate-700/50"></div>
     </div>
   </div>
 
+  <!-- ─── 報告記錄 ─────────────────────────────────────────────────────── -->
+  <div id="panel-reports" class="hidden">
+    <div class="flex gap-5 min-h-[70vh]">
+
+      <!-- Left: report list -->
+      <aside class="w-64 shrink-0 flex flex-col gap-2">
+        <!-- Search / filter -->
+        <input id="report-search" type="text" placeholder="搜尋日期 / 類型…"
+          oninput="filterReports()"
+          class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-500 outline-none focus:border-slate-500 w-full" />
+
+        <!-- Type filter chips -->
+        <div class="flex gap-1.5 flex-wrap">
+          <button onclick="setTypeFilter('')"                  id="chip-all"       class="chip-btn active text-xs px-2.5 py-1 rounded-full border">全部</button>
+          <button onclick="setTypeFilter('portfolio_analysis')" id="chip-portfolio" class="chip-btn text-xs px-2.5 py-1 rounded-full border">持倉</button>
+          <button onclick="setTypeFilter('market_overview')"    id="chip-market"    class="chip-btn text-xs px-2.5 py-1 rounded-full border">市場</button>
+        </div>
+
+        <!-- Report list -->
+        <div id="report-list" class="flex-1 overflow-y-auto space-y-0.5 pr-1" style="max-height:72vh;">
+          <div class="text-slate-500 text-sm text-center py-10">載入中…</div>
+        </div>
+      </aside>
+
+      <!-- Right: markdown viewer -->
+      <div class="flex-1 min-w-0">
+        <div id="report-viewer" class="bg-slate-800 rounded-xl border border-slate-700 h-full flex flex-col">
+          <div id="report-viewer-header" class="px-6 py-3 border-b border-slate-700 flex items-center justify-between shrink-0">
+            <span id="report-viewer-title" class="text-sm font-medium text-slate-300">← 選擇左側報告</span>
+            <span id="report-viewer-date"  class="text-xs text-slate-500"></span>
+          </div>
+          <div id="report-content" class="flex-1 overflow-y-auto px-7 py-5 prose text-sm">
+            <div class="text-slate-500 text-center py-20">請從左側選擇日期與報告</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
 </main>
+
+<!-- ── Chip button styles (cannot use @apply in CDN) ─── -->
+<style>
+  .chip-btn { background:#1e293b; color:#64748b; border-color:#334155; cursor:pointer; transition:all .12s; }
+  .chip-btn:hover { background:#273548; color:#94a3b8; }
+  .chip-btn.active { background:#1d4ed8; color:#bfdbfe; border-color:#2563eb; }
+</style>
 
 <!-- ══ Script ════════════════════════════════════════════════════════════════ -->
 <script>
 // ── Constants ────────────────────────────────────────────────────────────────
 const ALLOC_COLORS = {
-  '現金':      '#3b82f6',
-  '長期ETF':   '#22c55e',
-  '波段個股':  '#a855f7',
-  '加密貨幣':  '#f97316',
-  '合約保證金':'#6b7280',
+  '現金':      '#3b82f6', '長期ETF':'#22c55e', '波段個股':'#a855f7',
+  '加密貨幣':  '#f97316', '合約保證金':'#6b7280',
 };
-const PRIORITY_CLASS = { 1: 'badge-p1', 2: 'badge-p2', 3: 'badge-p3' };
+const PRIORITY_CLASS = { 1:'badge-p1', 2:'badge-p2', 3:'badge-p3' };
 const STATUS_CFG = {
-  '未達成':  { cls: 'badge-pending', icon: '⏳' },
-  '部分達成': { cls: 'badge-partial', icon: '🔄' },
-  '已達成':  { cls: 'badge-ready',   icon: '✅' },
+  '未達成':  { cls:'badge-pending', icon:'⏳' },
+  '部分達成': { cls:'badge-partial', icon:'🔄' },
+  '已達成':  { cls:'badge-ready',   icon:'✅' },
 };
+const TYPE_LABEL = {
+  portfolio_analysis: '持倉分析',
+  market_overview:    '市場總覽',
+  premarket_check:    '盤前晨檢',
+};
+const SESSION_LABEL = { morning:'早盤', evening:'收盤' };
 
-let allocChart = null;
-let histChart  = null;
+let allocChart = null, histChart = null;
+let allReports = [];     // full index from reports_index.json
+let activeType = '';     // '' = all
 
 // ── Tab switching ─────────────────────────────────────────────────────────────
 function switchTab(name) {
-  ['portfolio', 'watchlist', 'market'].forEach(t => {
+  ['portfolio','watchlist','market','reports'].forEach(t => {
     document.getElementById(`panel-${t}`).classList.toggle('hidden', t !== name);
-    const btn = document.getElementById(`tab-${t}`);
-    btn.classList.toggle('active', t === name);
+    document.getElementById(`tab-${t}`).classList.toggle('active', t === name);
   });
 }
 
 // ── Formatters ────────────────────────────────────────────────────────────────
-const fmt    = (n, d = 0) => n == null ? '—' : n.toLocaleString('zh-TW', { minimumFractionDigits: d, maximumFractionDigits: d });
-const fmtPct = n => n == null ? '—' : `${n >= 0 ? '+' : ''}${n.toFixed(1)}%`;
-const pnlCls = n => n == null || n === 0 ? 'neutral' : n > 0 ? 'gain' : 'loss';
+const fmt    = (n, d=0) => n==null ? '—' : n.toLocaleString('zh-TW',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtPct = n => n==null ? '—' : `${n>=0?'+':''}${n.toFixed(1)}%`;
+const pnlCls = n => !n ? 'neutral' : n>0 ? 'gain' : 'loss';
 
-// ── Render: summary ───────────────────────────────────────────────────────────
+// ── Summary ───────────────────────────────────────────────────────────────────
 function renderSummary(d) {
-  const s = d.summary, m = d.meta;
-
-  document.getElementById('s-total').textContent    = fmt(s.total_value_twd);
-
-  const pnlEl  = document.getElementById('s-pnl');
-  const pctEl  = document.getElementById('s-pnl-pct');
-  pnlEl.textContent = (s.total_pnl_twd >= 0 ? '+' : '') + fmt(s.total_pnl_twd);
-  pnlEl.className   = `text-2xl font-bold ${pnlCls(s.total_pnl_twd)}`;
-  pctEl.textContent = fmtPct(s.total_pnl_pct);
-  pctEl.className   = `text-sm mt-0.5 ${pnlCls(s.total_pnl_twd)}`;
-
-  document.getElementById('s-cash-pct').textContent = s.cash_pct + '%';
-  document.getElementById('s-cash-twd').textContent = fmt(s.cash_twd) + ' TWD';
+  const s=d.summary, m=d.meta;
+  document.getElementById('s-total').textContent = fmt(s.total_value_twd);
+  const pe=document.getElementById('s-pnl'), ppe=document.getElementById('s-pnl-pct');
+  pe.textContent  = (s.total_pnl_twd>=0?'+':'')+fmt(s.total_pnl_twd);
+  pe.className    = `text-2xl font-bold ${pnlCls(s.total_pnl_twd)}`;
+  ppe.textContent = fmtPct(s.total_pnl_pct);
+  ppe.className   = `text-sm mt-0.5 ${pnlCls(s.total_pnl_twd)}`;
+  document.getElementById('s-cash-pct').textContent = s.cash_pct+'%';
+  document.getElementById('s-cash-twd').textContent = fmt(s.cash_twd)+' TWD';
   document.getElementById('s-usdtwd').textContent   = m.usd_twd;
-
-  const session = m.session === 'morning' ? '早盤' : '收盤';
-  document.getElementById('meta-date').textContent = `${m.date} ${session} · ${m.generated_at.slice(11, 16)} TST`;
+  const sess = m.session==='morning'?'早盤':'收盤';
+  document.getElementById('meta-date').textContent = `${m.date} ${sess} · ${m.generated_at.slice(11,16)} TST`;
   document.getElementById('meta-usd').textContent  = `USD/TWD ${m.usd_twd}`;
   document.title = `Finance Dashboard ${m.date}`;
 }
 
-// ── Render: positions table ───────────────────────────────────────────────────
+// ── Positions table ───────────────────────────────────────────────────────────
 function renderPositions(d) {
-  const tbody = document.getElementById('positions-tbody');
-  const TYPE_LABEL = { '長期ETF': '長期 ETF', '個股': '波段個股', 'spot': '加密現貨', 'stablecoin': '穩定幣' };
-  const TYPE_COLOR = { '長期ETF': 'text-blue-400', '個股': 'text-purple-400', 'spot': 'text-orange-400', 'stablecoin': 'text-slate-500' };
-  const ORDER = ['長期ETF', '個股', 'spot', 'stablecoin'];
-
-  const all = [...d.positions, ...d.crypto];
-  let html = '';
-
-  ORDER.forEach(type => {
-    const group = all.filter(p => p.type === type);
-    if (!group.length) return;
-
-    html += `<tr><td colspan="5" class="px-4 py-1.5 text-xs font-semibold ${TYPE_COLOR[type] || 'text-slate-400'} uppercase tracking-wider bg-slate-900/60">${TYPE_LABEL[type] || type}</td></tr>`;
-
-    group.forEach(p => {
-      const has  = p.current_value_twd != null;
-      const pc   = pnlCls(p.pnl_pct);
-      const sign = has && p.pnl_twd >= 0 ? '+' : '';
-      html += `
-        <tr class="border-t border-slate-700/40 transition-colors">
-          <td class="px-4 py-2.5">
-            <div class="font-medium text-slate-100">${p.ticker}</div>
-            <div class="text-xs text-slate-400 mt-0.5 truncate max-w-[14rem]">${p.name || ''}</div>
-          </td>
-          <td class="text-right px-4 py-2.5 text-xs text-slate-400">${p.current_price || '—'}</td>
-          <td class="text-right px-4 py-2.5 text-slate-200">${has ? fmt(p.current_value_twd) : '—'}</td>
-          <td class="text-right px-4 py-2.5 ${pc}">${has ? sign + fmt(p.pnl_twd) : '—'}</td>
-          <td class="text-right px-4 py-2.5 font-semibold ${pc}">${has ? fmtPct(p.pnl_pct) : '—'}</td>
-        </tr>`;
+  const TL={'長期ETF':'長期 ETF','個股':'波段個股','spot':'加密現貨','stablecoin':'穩定幣'};
+  const TC={'長期ETF':'text-blue-400','個股':'text-purple-400','spot':'text-orange-400','stablecoin':'text-slate-500'};
+  const ORDER=['長期ETF','個股','spot','stablecoin'];
+  const all=[...d.positions,...d.crypto];
+  let html='';
+  ORDER.forEach(type=>{
+    const g=all.filter(p=>p.type===type);
+    if(!g.length) return;
+    html+=`<tr><td colspan="5" class="px-4 py-1.5 text-xs font-semibold ${TC[type]||'text-slate-400'} uppercase tracking-wider bg-slate-900/60">${TL[type]||type}</td></tr>`;
+    g.forEach(p=>{
+      const has=p.current_value_twd!=null, pc=pnlCls(p.pnl_pct), sign=has&&p.pnl_twd>=0?'+':'';
+      html+=`<tr class="border-t border-slate-700/40 transition-colors">
+        <td class="px-4 py-2.5"><div class="font-medium text-slate-100">${p.ticker}</div><div class="text-xs text-slate-400 mt-0.5 truncate max-w-[14rem]">${p.name||''}</div></td>
+        <td class="text-right px-4 py-2.5 text-xs text-slate-400">${p.current_price||'—'}</td>
+        <td class="text-right px-4 py-2.5 text-slate-200">${has?fmt(p.current_value_twd):'—'}</td>
+        <td class="text-right px-4 py-2.5 ${pc}">${has?sign+fmt(p.pnl_twd):'—'}</td>
+        <td class="text-right px-4 py-2.5 font-semibold ${pc}">${has?fmtPct(p.pnl_pct):'—'}</td>
+      </tr>`;
     });
   });
-
-  tbody.innerHTML = html || '<tr><td colspan="5" class="text-center py-8 text-slate-500">無持倉資料</td></tr>';
+  document.getElementById('positions-tbody').innerHTML = html||'<tr><td colspan="5" class="text-center py-8 text-slate-500">無持倉資料</td></tr>';
 }
 
-// ── Render: allocation donut ──────────────────────────────────────────────────
+// ── Allocation donut ──────────────────────────────────────────────────────────
 function renderAllocation(allocation) {
-  const labels = Object.keys(allocation);
-  const values = Object.values(allocation);
-  const colors = labels.map(l => ALLOC_COLORS[l] || '#6b7280');
-
-  if (allocChart) allocChart.destroy();
-  allocChart = new Chart(document.getElementById('alloc-chart'), {
-    type: 'doughnut',
-    data: {
-      labels,
-      datasets: [{ data: values, backgroundColor: colors, borderWidth: 2, borderColor: '#1e293b', hoverBorderColor: '#0f172a' }],
-    },
-    options: {
-      cutout: '70%',
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}%` },
-        },
-      },
-    },
+  const labels=Object.keys(allocation), values=Object.values(allocation);
+  const colors=labels.map(l=>ALLOC_COLORS[l]||'#6b7280');
+  if(allocChart) allocChart.destroy();
+  allocChart=new Chart(document.getElementById('alloc-chart'),{
+    type:'doughnut',
+    data:{ labels, datasets:[{ data:values, backgroundColor:colors, borderWidth:2, borderColor:'#1e293b' }] },
+    options:{ cutout:'70%', plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: c=>` ${c.label}: ${c.parsed}%` } } } },
   });
-
-  document.getElementById('alloc-legend').innerHTML = labels.map((l, i) => `
+  document.getElementById('alloc-legend').innerHTML=labels.map((l,i)=>`
     <div class="flex items-center justify-between gap-2">
-      <div class="flex items-center gap-2">
-        <span class="inline-block w-2.5 h-2.5 rounded-full shrink-0" style="background:${colors[i]}"></span>
-        <span class="text-slate-300">${l}</span>
-      </div>
+      <div class="flex items-center gap-2"><span class="inline-block w-2.5 h-2.5 rounded-full shrink-0" style="background:${colors[i]}"></span><span class="text-slate-300">${l}</span></div>
       <span class="text-slate-400 tabular-nums">${values[i]}%</span>
     </div>`).join('');
 }
 
-// ── Render: history chart ─────────────────────────────────────────────────────
+// ── History chart ─────────────────────────────────────────────────────────────
 function renderHistory(history) {
-  if (!history?.length) return;
-
-  // One entry per day (prefer evening for completeness, else morning)
-  const byDate = {};
-  history.forEach(h => {
-    if (!byDate[h.date] || h.session === 'evening') byDate[h.date] = h;
-  });
-  const rows = Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date));
-
-  const labels = rows.map(h => h.date.slice(5));           // MM-DD
-  const values = rows.map(h => h.total_value_twd);
-  const pnls   = rows.map(h => h.total_pnl_pct);
-
-  if (histChart) histChart.destroy();
-  histChart = new Chart(document.getElementById('history-chart'), {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: '總資產 (TWD)',
-          data: values,
-          borderColor: '#3b82f6',
-          backgroundColor: 'rgba(59,130,246,.12)',
-          fill: true,
-          tension: 0.3,
-          pointRadius: 2,
-          pointHoverRadius: 5,
-          yAxisID: 'yVal',
-        },
-        {
-          label: '損益%',
-          data: pnls,
-          borderColor: '#4ade80',
-          backgroundColor: 'transparent',
-          borderDash: [5, 3],
-          tension: 0.3,
-          pointRadius: 2,
-          pointHoverRadius: 5,
-          yAxisID: 'yPct',
-        },
-      ],
-    },
-    options: {
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { labels: { color: '#94a3b8', boxWidth: 10, padding: 16, font: { size: 11 } } },
-        tooltip: {
-          callbacks: {
-            label: ctx => ctx.datasetIndex === 0
-              ? ` ${(ctx.parsed.y / 1000).toFixed(0)}K TWD`
-              : ` ${ctx.parsed.y.toFixed(1)}%`,
-          },
-        },
-      },
-      scales: {
-        x:    { ticks: { color: '#475569', maxTicksLimit: 12, font: { size: 10 } }, grid: { color: '#1e293b' } },
-        yVal: { position: 'left',  ticks: { color: '#475569', font: { size: 10 }, callback: v => (v / 1000).toFixed(0) + 'K' }, grid: { color: '#1e293b' } },
-        yPct: { position: 'right', ticks: { color: '#475569', font: { size: 10 }, callback: v => v.toFixed(1) + '%' }, grid: { drawOnChartArea: false } },
+  if(!history?.length) return;
+  const byDate={};
+  history.forEach(h=>{ if(!byDate[h.date]||h.session==='evening') byDate[h.date]=h; });
+  const rows=Object.values(byDate).sort((a,b)=>a.date.localeCompare(b.date));
+  const labels=rows.map(h=>h.date.slice(5));
+  const values=rows.map(h=>h.total_value_twd);
+  const pnls  =rows.map(h=>h.total_pnl_pct);
+  if(histChart) histChart.destroy();
+  histChart=new Chart(document.getElementById('history-chart'),{
+    type:'line',
+    data:{ labels, datasets:[
+      { label:'總資產 (TWD)', data:values, borderColor:'#3b82f6', backgroundColor:'rgba(59,130,246,.1)', fill:true, tension:.3, pointRadius:2, pointHoverRadius:5, yAxisID:'yVal' },
+      { label:'損益%',        data:pnls,   borderColor:'#4ade80', backgroundColor:'transparent', borderDash:[5,3], tension:.3, pointRadius:2, pointHoverRadius:5, yAxisID:'yPct' },
+    ]},
+    options:{
+      interaction:{mode:'index',intersect:false},
+      plugins:{ legend:{labels:{color:'#94a3b8',boxWidth:10,padding:16,font:{size:11}}}, tooltip:{callbacks:{label:c=>c.datasetIndex===0?` ${(c.parsed.y/1000).toFixed(0)}K TWD`:` ${c.parsed.y.toFixed(1)}%`}} },
+      scales:{
+        x:    { ticks:{color:'#475569',maxTicksLimit:12,font:{size:10}}, grid:{color:'#1e293b'} },
+        yVal: { position:'left',  ticks:{color:'#475569',font:{size:10},callback:v=>(v/1000).toFixed(0)+'K'}, grid:{color:'#1e293b'} },
+        yPct: { position:'right', ticks:{color:'#475569',font:{size:10},callback:v=>v.toFixed(1)+'%'}, grid:{drawOnChartArea:false} },
       },
     },
   });
 }
 
-// ── Render: watchlist ─────────────────────────────────────────────────────────
+// ── Watchlist ─────────────────────────────────────────────────────────────────
 function renderWatchlist(watchlist) {
-  const grid = document.getElementById('watchlist-grid');
-  if (!watchlist?.length) {
-    grid.innerHTML = '<div class="text-slate-500 text-center py-10 col-span-3">無觀察清單資料</div>';
-    return;
-  }
-
-  grid.innerHTML = watchlist.map(w => {
-    const sc = STATUS_CFG[w.status] || STATUS_CFG['未達成'];
-    const pc = PRIORITY_CLASS[w.priority] || 'badge-p3';
-    const theme = w.theme ? `<p class="text-xs text-slate-400 leading-relaxed line-clamp-2">${w.theme}</p>` : '';
-    const action = w.action
-      ? `<div class="text-xs text-slate-300 leading-relaxed border-l-2 border-slate-600 pl-2.5 mt-1">${w.action}</div>`
-      : '';
-    return `
-      <div class="bg-slate-800 rounded-xl border border-slate-700 p-4 flex flex-col gap-3 hover:border-slate-600 transition-colors">
-        <div class="flex items-start justify-between gap-2">
-          <div class="min-w-0">
-            <div class="flex flex-wrap items-center gap-1.5 mb-0.5">
-              <span class="font-bold text-white">${w.ticker}</span>
-              <span class="text-xs px-1.5 py-0.5 rounded font-semibold ${pc}">P${w.priority}</span>
-              <span class="text-xs px-1.5 py-0.5 rounded ${sc.cls}">${sc.icon} ${w.status}</span>
-            </div>
-            <p class="text-sm text-slate-300 truncate">${w.name}</p>
+  const grid=document.getElementById('watchlist-grid');
+  if(!watchlist?.length){ grid.innerHTML='<div class="text-slate-500 text-center py-10 col-span-3">無觀察清單資料</div>'; return; }
+  grid.innerHTML=watchlist.map(w=>{
+    const sc=STATUS_CFG[w.status]||STATUS_CFG['未達成'], pc=PRIORITY_CLASS[w.priority]||'badge-p3';
+    return `<div class="bg-slate-800 rounded-xl border border-slate-700 p-4 flex flex-col gap-3 hover:border-slate-600 transition-colors">
+      <div class="flex items-start justify-between gap-2">
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center gap-1.5 mb-0.5">
+            <span class="font-bold text-white">${w.ticker}</span>
+            <span class="text-xs px-1.5 py-0.5 rounded font-semibold ${pc}">P${w.priority}</span>
+            <span class="text-xs px-1.5 py-0.5 rounded ${sc.cls}">${sc.icon} ${w.status}</span>
           </div>
-          <span class="text-xs text-slate-500 shrink-0 mt-0.5">${w.market}</span>
+          <p class="text-sm text-slate-300 truncate">${w.name}</p>
         </div>
-        ${w.sector ? `<div class="text-xs text-slate-400 bg-slate-700/40 rounded px-2.5 py-1.5 leading-relaxed">${w.sector.slice(0,60)}</div>` : ''}
-        ${theme}
-        ${action}
-      </div>`;
+        <span class="text-xs text-slate-500 shrink-0 mt-0.5">${w.market}</span>
+      </div>
+      ${w.sector?`<div class="text-xs text-slate-400 bg-slate-700/40 rounded px-2.5 py-1.5 leading-relaxed">${w.sector.slice(0,60)}</div>`:''}
+      ${w.theme?`<p class="text-xs text-slate-400 leading-relaxed line-clamp-2">${w.theme}</p>`:''}
+      ${w.action?`<div class="text-xs text-slate-300 leading-relaxed border-l-2 border-slate-600 pl-2.5">${w.action}</div>`:''}
+    </div>`;
   }).join('');
 }
 
-// ── Render: market ────────────────────────────────────────────────────────────
+// ── Market ────────────────────────────────────────────────────────────────────
 function renderMarket(market) {
-  // Indices
-  const grid = document.getElementById('indices-grid');
-  if (market.indices?.length) {
-    grid.innerHTML = market.indices.map(idx => {
-      const pos = idx.change_pct >= 0;
-      const cls = pos ? 'gain' : 'loss';
-      const bg  = pos ? 'border-green-500/25 bg-green-950/20' : 'border-red-500/25 bg-red-950/20';
-      return `
-        <div class="rounded-xl border ${bg} p-5">
-          <p class="text-sm text-slate-400 mb-1">${idx.name}</p>
-          <p class="text-3xl font-bold ${cls}">${idx.change_str}</p>
-        </div>`;
+  const grid=document.getElementById('indices-grid');
+  if(market.indices?.length){
+    grid.innerHTML=market.indices.map(idx=>{
+      const pos=idx.change_pct>=0, cls=pos?'gain':'loss', bg=pos?'border-green-500/25 bg-green-950/20':'border-red-500/25 bg-red-950/20';
+      return `<div class="rounded-xl border ${bg} p-5"><p class="text-sm text-slate-400 mb-1">${idx.name}</p><p class="text-3xl font-bold ${cls}">${idx.change_str}</p></div>`;
     }).join('');
-  } else {
-    grid.innerHTML = '<div class="text-slate-500 text-center py-8 col-span-3">無指數資料</div>';
-  }
+  } else { grid.innerHTML='<div class="text-slate-500 text-center py-8 col-span-3">無指數資料</div>'; }
 
-  // Sectors helper
-  const renderSectorList = (id, list, color) => {
-    const el = document.getElementById(id);
-    el.innerHTML = list?.length
-      ? list.map(s => `<div class="flex items-center gap-2 text-sm py-1.5 border-b border-slate-700/40 last:border-0"><span class="text-${color}-400 text-xs">▶</span><span class="text-slate-300">${s}</span></div>`).join('')
+  const sectorList=(id,list,color)=>{
+    const el=document.getElementById(id);
+    el.innerHTML=list?.length
+      ? list.map(s=>`<div class="flex items-center gap-2 text-sm py-1.5 border-b border-slate-700/40 last:border-0"><span class="text-${color}-400 text-xs">▶</span><span class="text-slate-300">${s}</span></div>`).join('')
       : '<p class="text-slate-500 text-sm">無資料</p>';
   };
-  renderSectorList('strong-sectors', market.sectors?.strong, 'green');
-  renderSectorList('weak-sectors',   market.sectors?.weak,   'red');
+  sectorList('strong-sectors',market.sectors?.strong,'green');
+  sectorList('weak-sectors',  market.sectors?.weak,  'red');
 
-  // Key events
-  const evEl = document.getElementById('key-events');
-  evEl.innerHTML = market.key_events?.length
-    ? market.key_events.map(e => `
-        <div class="flex gap-3 py-2.5">
-          <span class="text-blue-400 mt-0.5 shrink-0">•</span>
-          <span class="text-sm text-slate-300">${e}</span>
-        </div>`).join('')
-    : '<p class="text-slate-500 text-sm py-2">無資料</p>';
+  const listEl=(id,items,icon,cls)=>{
+    const el=document.getElementById(id);
+    el.innerHTML=items?.length
+      ? items.map(e=>`<div class="flex gap-3 py-2.5"><span class="${cls} mt-0.5 shrink-0">${icon}</span><span class="text-sm text-slate-300">${e}</span></div>`).join('')
+      : '<p class="text-slate-500 text-sm py-2">無資料</p>';
+  };
+  listEl('key-events',  market.key_events,'•','text-blue-400');
+  listEl('risk-alerts', market.risks,     '⚡','text-yellow-400');
+}
 
-  // Risks
-  const riskEl = document.getElementById('risk-alerts');
-  riskEl.innerHTML = market.risks?.length
-    ? market.risks.map(r => `
-        <div class="flex gap-3 py-2.5">
-          <span class="text-yellow-400 mt-0.5 shrink-0">⚡</span>
-          <span class="text-sm text-slate-300">${r}</span>
-        </div>`).join('')
-    : '<p class="text-slate-500 text-sm py-2">無資料</p>';
+// ── Reports ───────────────────────────────────────────────────────────────────
+function setTypeFilter(type) {
+  activeType = type;
+  ['all','portfolio','market'].forEach(k=>{
+    const map={all:'',portfolio:'portfolio_analysis',market:'market_overview'};
+    document.getElementById(`chip-${k}`).classList.toggle('active', map[k]===type);
+  });
+  renderReportList();
+}
+
+function filterReports() { renderReportList(); }
+
+function renderReportList() {
+  const q   = document.getElementById('report-search').value.trim().toLowerCase();
+  const list= document.getElementById('report-list');
+
+  const filtered = allReports.filter(r => {
+    const matchType = !activeType || r.type === activeType;
+    const matchQ    = !q || r.label.toLowerCase().includes(q) || r.date.includes(q);
+    return matchType && matchQ;
+  });
+
+  if (!filtered.length) {
+    list.innerHTML='<div class="text-slate-500 text-sm text-center py-6">無符合的報告</div>';
+    return;
+  }
+
+  // Group by date
+  const byDate = {};
+  filtered.forEach(r => { (byDate[r.date] = byDate[r.date]||[]).push(r); });
+
+  list.innerHTML = Object.keys(byDate).sort((a,b)=>b.localeCompare(a)).map(date => {
+    const items = byDate[date];
+    const itemsHtml = items.map(r => {
+      const sessLabel = SESSION_LABEL[r.session] || '';
+      const typeLabel = TYPE_LABEL[r.type]       || r.type;
+      return `<div class="report-item px-3 py-1.5 rounded text-xs text-slate-400 hover:text-slate-200"
+                   onclick="loadReport('${r.filename}','${r.label}','${r.date}')">
+                <span class="text-slate-500 mr-1">${sessLabel}</span>${typeLabel}
+              </div>`;
+    }).join('');
+    return `<div class="mb-1">
+      <div class="text-xs text-slate-500 px-3 py-1 font-semibold">${date}</div>
+      ${itemsHtml}
+    </div>`;
+  }).join('');
+}
+
+async function loadReport(filename, label, date) {
+  // Highlight selected
+  document.querySelectorAll('.report-item').forEach(el => {
+    el.classList.toggle('selected', el.onclick?.toString().includes(filename));
+  });
+
+  document.getElementById('report-viewer-title').textContent = label;
+  document.getElementById('report-viewer-date').textContent  = date;
+  document.getElementById('report-content').innerHTML =
+    '<div class="text-slate-500 text-center py-10">載入中…</div>';
+
+  try {
+    const res  = await fetch(`reports/${filename}?t=${Date.now()}`);
+    if (!res.ok) throw new Error(res.status);
+    const text = await res.text();
+    document.getElementById('report-content').innerHTML =
+      `<div class="prose">${marked.parse(text)}</div>`;
+  } catch(e) {
+    document.getElementById('report-content').innerHTML =
+      `<div class="text-red-400 py-10 text-center text-sm">無法載入報告：${e.message}</div>`;
+  }
+}
+
+function renderReportsTab(index) {
+  allReports = index || [];
+  renderReportList();
 }
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
 async function loadDashboard() {
   try {
     const bust = `?t=${Date.now()}`;
-    const [data, history] = await Promise.all([
-      fetch(`data.json${bust}`).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }),
-      fetch(`history.json${bust}`).then(r => r.ok ? r.json() : []).catch(() => []),
+    const [data, history, reportIndex] = await Promise.all([
+      fetch(`data.json${bust}`).then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); }),
+      fetch(`history.json${bust}`).then(r=>r.ok?r.json():[]).catch(()=>[]),
+      fetch(`reports_index.json${bust}`).then(r=>r.ok?r.json():[]).catch(()=>[]),
     ]);
 
     renderSummary(data);
@@ -481,15 +504,16 @@ async function loadDashboard() {
     renderHistory(history);
     renderWatchlist(data.watchlist);
     renderMarket(data.market);
+    renderReportsTab(reportIndex);
 
-  } catch (err) {
+  } catch(err) {
     console.error('Dashboard load failed:', err);
-    document.querySelector('main').innerHTML = `
+    document.querySelector('main').innerHTML=`
       <div class="flex flex-col items-center justify-center min-h-[50vh] text-center gap-4">
         <div class="text-5xl">📭</div>
         <p class="text-slate-400">尚無看板資料</p>
         <p class="text-xs text-slate-600">請先執行 <code class="bg-slate-800 px-2 py-0.5 rounded">python main.py</code> 生成報告後重新整理</p>
-        <p class="text-xs text-slate-700">（本機開啟需用 <code class="bg-slate-800 px-1 rounded">python -m http.server 8080 --directory docs</code>）</p>
+        <p class="text-xs text-slate-700 mt-1">（本機預覽需用 <code class="bg-slate-800 px-1 rounded">python -m http.server 8080 --directory docs</code>）</p>
       </div>`;
   }
 }
