@@ -132,7 +132,9 @@ export async function POST(req: NextRequest) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           contents: [{ parts: [{ text: buildPrompt(quotes, date) }] }],
-          generationConfig: { maxOutputTokens: 2048, temperature: 0.4 },
+          generationConfig: { maxOutputTokens: 8192, temperature: 0.4 },
+          // Disable thinking to get a single clean text response
+          thinkingConfig: { thinkingBudget: 0 },
         }),
       }
     );
@@ -143,7 +145,14 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await res.json();
-    const text: string = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+    // Gemini 2.5 Flash may return multiple parts (thinking + response)
+    // Collect all non-thought text parts
+    const parts: Array<{ text?: string; thought?: boolean }> =
+      data?.candidates?.[0]?.content?.parts ?? [];
+    const text: string = parts
+      .filter((p) => !p.thought && p.text)
+      .map((p) => p.text)
+      .join("") ?? "";
     return NextResponse.json({ report: text });
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 502 });
