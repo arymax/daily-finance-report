@@ -587,6 +587,8 @@ const LivePrices = (() => {
   }
 
   async function fetchTW() {
+    // TWSE does not support CORS from external origins — only attempt on localhost
+    if (!['localhost', '127.0.0.1'].includes(location.hostname)) return;
     const codes = TW_TICKERS.map(t => `tse_${t}.tw`).join('|');
     const r = await fetch(`https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=${encodeURIComponent(codes)}&json=1&delay=0`);
     const j = await r.json();
