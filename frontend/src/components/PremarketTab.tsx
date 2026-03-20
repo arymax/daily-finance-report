@@ -1,6 +1,7 @@
 "use client";
 
 import { usePremarket, PREMARKET_GROUPS } from "@/hooks/usePremarket";
+import type { QuoteData } from "@/hooks/usePremarket";
 import type { ReportEntry } from "@/types/indices";
 import { rawUrl } from "@/lib/github";
 import MarkdownViewer from "./MarkdownViewer";
@@ -44,6 +45,12 @@ export default function PremarketTab({ reports }: Props) {
   const [reportLoading, setReportLoading]   = useState(false);
   const [reportLoaded,  setReportLoaded]    = useState(false);
 
+  // AI analysis
+  const [aiReport,   setAiReport]   = useState<string | null>(null);
+  const [aiLoading,  setAiLoading]  = useState(false);
+  const [aiError,    setAiError]    = useState<string | null>(null);
+  const [aiGenTime,  setAiGenTime]  = useState<Date | null>(null);
+
   async function loadReport() {
     if (!latestPremarket || reportLoaded) return;
     setReportLoading(true);
@@ -53,6 +60,36 @@ export default function PremarketTab({ reports }: Props) {
     } finally {
       setReportLoading(false);
       setReportLoaded(true);
+    }
+  }
+
+  async function generateAiReport() {
+    setAiLoading(true);
+    setAiError(null);
+    const quoteList = Object.values(quotes as Record<string, QuoteData>).map((q) => ({
+      symbol: q.symbol, label: q.label,
+      price: q.price, change: q.change, changePct: q.changePct,
+    }));
+    const date = new Date().toLocaleDateString("zh-TW", {
+      year: "numeric", month: "2-digit", day: "2-digit",
+    });
+    try {
+      const res = await fetch("/api/premarket-report", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ quotes: quoteList, date }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setAiError(data.error ?? "未知錯誤");
+      } else {
+        setAiReport(data.report);
+        setAiGenTime(new Date());
+      }
+    } catch (e) {
+      setAiError(String(e));
+    } finally {
+      setAiLoading(false);
     }
   }
 
@@ -171,6 +208,48 @@ export default function PremarketTab({ reports }: Props) {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* AI 盤前分析報告 */}
+      <div className="rounded-xl bg-zinc-900 border border-zinc-800">
+        <div className="px-6 py-4 border-b border-zinc-800 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-zinc-200">AI 盤前深度分析</p>
+            <p className="text-xs text-zinc-500 mt-0.5">
+              基於即時數據 · Gemini 生成 · 殖利率曲線 / 期貨強弱 / 跨資產信號
+            </p>
+          </div>
+          <button
+            onClick={generateAiReport}
+            disabled={aiLoading || loading}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium text-white transition-colors"
+          >
+            {aiLoading ? (
+              <><span className="animate-spin">⟳</span> 生成中…</>
+            ) : (
+              <><span>✦</span> {aiReport ? "重新生成" : "生成分析報告"}</>
+            )}
+          </button>
+        </div>
+        {aiError && (
+          <div className="px-6 py-4 text-red-400 text-sm">⚠ {aiError}</div>
+        )}
+        {aiReport && !aiLoading && (
+          <div className="px-7 py-5">
+            {aiGenTime && (
+              <p className="text-xs text-zinc-600 mb-4">
+                生成時間：{aiGenTime.toLocaleTimeString("zh-TW")}
+                {lastUpdated && ` · 資料截至 ${lastUpdated.toLocaleTimeString("zh-TW")}`}
+              </p>
+            )}
+            <MarkdownViewer content={aiReport} />
+          </div>
+        )}
+        {!aiReport && !aiLoading && !aiError && (
+          <div className="px-6 py-8 text-center text-zinc-600 text-sm">
+            點擊「生成分析報告」，系統將分析即時盤前數據並產出報告
+          </div>
+        )}
       </div>
 
       {/* Latest premarket report */}

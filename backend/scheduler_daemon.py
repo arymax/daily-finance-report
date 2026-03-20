@@ -4,7 +4,6 @@ scheduler_daemon.py — 每日財務報告背景排程（含系統匣圖示）
 每日兩個時段自動觸發 main.py：
   07:00 — 早盤（台股盤前／美股盤後）
   18:00 — 收盤（台股盤後／美股盤前）
-  21:15 — 盤前晨檢（美股開盤前 5 分鐘晨檢）
 
 啟動方式：
   python scheduler_daemon.py          # 前景執行（有 console）
@@ -106,28 +105,9 @@ def _trigger(session: str) -> None:
         logger.error(f"觸發失敗：{e}")
 
 
-def _trigger_premarket() -> None:
-    if not _is_enabled():
-        now = datetime.now(TST).strftime("%Y-%m-%d %H:%M")
-        logger.info(f"[{now}] 排程已停用，略過 premarket")
-        return
-
-    now = datetime.now(TST).strftime("%Y-%m-%d %H:%M")
-    logger.info(f"[{now}] 觸發 main.py --premarket")
-    try:
-        # 不使用 CREATE_NO_WINDOW，保留 pywebview 視窗可見
-        subprocess.Popen(
-            [_find_python(), str(BASE_DIR / "main.py"), "--premarket"],
-            cwd=str(BASE_DIR),
-        )
-    except Exception as e:
-        logger.error(f"盤前晨檢觸發失敗：{e}")
-
-
 # ── 排程設定 ───────────────────────────────────────────────
 schedule.every().day.at("07:00").do(_trigger, session="morning")
 schedule.every().day.at("18:00").do(_trigger, session="evening")
-schedule.every().day.at("21:15").do(_trigger_premarket)
 
 
 # ── 系統匣圖示 ─────────────────────────────────────────────
@@ -192,7 +172,7 @@ def _run_tray() -> None:
         _tooltip(),
         menu=pystray.Menu(
             pystray.MenuItem("Daily Finance Report", None, enabled=False),
-            pystray.MenuItem("07:00 早盤  ·  18:00 收盤  ·  21:15 盤前晨檢", None, enabled=False),
+            pystray.MenuItem("07:00 早盤  ·  18:00 收盤", None, enabled=False),
             pystray.Menu.SEPARATOR,
             pystray.MenuItem("啟用／停用排程", _toggle),
             pystray.MenuItem("查看今日 Log", _open_log),
@@ -222,7 +202,7 @@ def _run_tray() -> None:
 def main() -> None:
     logger.info("=" * 50)
     logger.info("  Daily Finance Report Scheduler 啟動")
-    logger.info("  07:00 → morning  |  18:00 → evening  |  21:15 → premarket")
+    logger.info("  07:00 → morning  |  18:00 → evening")
     logger.info("=" * 50)
 
     # 排程迴圈在背景執行緒

@@ -60,9 +60,12 @@ export default function Dashboard({ data, history, reports, thesis, themes }: Pr
         liveValue += (pos as { current_value_twd?: number }).current_value_twd ?? pos.cost_twd;
       }
     }
+    const contractMargin = (data.summary as { contract_margin_twd?: number }).contract_margin_twd ?? 0;
+    liveValue += contractMargin;
     const totalCost = data.positions.reduce((s, p) => s + p.cost_twd, 0)
                     + data.crypto.reduce((s, p) => s + p.cost_twd, 0)
-                    + data.summary.cash_twd;
+                    + data.summary.cash_twd
+                    + contractMargin;
     const pnlTwd = liveValue - totalCost;
     const pnlPct = totalCost > 0 ? (pnlTwd / totalCost) * 100 : 0;
     return {
