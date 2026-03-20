@@ -4,7 +4,7 @@
   "claude_timeout_seconds": 600,
   "reports_dir": "reports",
   "logs_dir": "logs",
-  "portfolio_file": "portfolio.json",
+  "portfolio_file": "../portfolio.json",
   "max_articles_per_stock": 5,
   "max_market_articles": 20,
   "max_articles_per_extra_ticker": 3,

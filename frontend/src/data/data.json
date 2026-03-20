@@ -1,23 +1,24 @@
 {
   "meta": {
-    "generated_at": "2026-03-21 00:16:43 TST",
+    "generated_at": "2026-03-21 04:21:03 TST",
     "date": "2026-03-21",
     "session": "morning",
-    "usd_twd": 31.97
+    "usd_twd": 32.01
   },
   "summary": {
-    "total_value_twd": 691054,
-    "total_pnl_twd": 9906,
-    "total_pnl_pct": 3.0,
+    "total_value_twd": 689674,
+    "total_pnl_twd": 8526,
+    "total_pnl_pct": 2.6,
     "cash_twd": 303632,
-    "cash_pct": 43.9
+    "cash_pct": 44.0,
+    "contract_margin_twd": 43878
   },
   "allocation": {
-    "現金": 43.9,
-    "長期ETF": 17.6,
-    "波段個股": 20.3,
-    "加密貨幣": 11.8,
-    "合約保證金": 6.3
+    "現金": 44.0,
+    "長期ETF": 17.5,
+    "波段個股": 20.2,
+    "加密貨幣": 11.9,
+    "合約保證金": 6.4
   },
   "positions": [
     {
@@ -59,10 +60,10 @@
       "cost_twd": 39000,
       "shares": 4.12911,
       "sector": "美國全市場股票",
-      "current_value_twd": 42612,
-      "pnl_twd": 3612,
-      "pnl_pct": 9.3,
-      "current_price": "322.76 USD"
+      "current_value_twd": 42352,
+      "pnl_twd": 3352,
+      "pnl_pct": 8.6,
+      "current_price": "320.40 USD"
     },
     {
       "ticker": "VT",
@@ -72,10 +73,10 @@
       "cost_twd": 15000,
       "shares": 3.41164,
       "sector": "全球股票",
-      "current_value_twd": 14988,
-      "pnl_twd": -12,
-      "pnl_pct": -0.1,
-      "current_price": "137.40 USD"
+      "current_value_twd": 14888,
+      "pnl_twd": -112,
+      "pnl_pct": -0.7,
+      "current_price": "136.32 USD"
     },
     {
       "ticker": "VGIT",
@@ -85,10 +86,10 @@
       "cost_twd": 15000,
       "shares": 8.01501,
       "sector": "中期美國公債",
-      "current_value_twd": 15198,
-      "pnl_twd": 198,
-      "pnl_pct": 1.3,
-      "current_price": "59.31 USD"
+      "current_value_twd": 15208,
+      "pnl_twd": 208,
+      "pnl_pct": 1.4,
+      "current_price": "59.27 USD"
     },
     {
       "ticker": "MRVL",
@@ -98,10 +99,10 @@
       "cost_twd": 32000,
       "shares": 10.83658,
       "sector": "半導體（自訂 AI 晶片／資料中心網路／光學）",
-      "current_value_twd": 31077,
-      "pnl_twd": -923,
-      "pnl_pct": -2.9,
-      "current_price": "89.69 USD"
+      "current_value_twd": 30497,
+      "pnl_twd": -1503,
+      "pnl_pct": -4.7,
+      "current_price": "87.91 USD"
     },
     {
       "ticker": "CRWD",
@@ -111,10 +112,10 @@
       "cost_twd": 20277,
       "shares": 1.5,
       "sector": "資安軟體",
-      "current_value_twd": 19797,
-      "pnl_twd": -480,
-      "pnl_pct": -2.4,
-      "current_price": "412.77 USD"
+      "current_value_twd": 19640,
+      "pnl_twd": -637,
+      "pnl_pct": -3.1,
+      "current_price": "409.00 USD"
     },
     {
       "ticker": "ALAB",
@@ -124,10 +125,10 @@
       "cost_twd": 5923,
       "shares": 1.5,
       "sector": "半導體連接方案",
-      "current_value_twd": 5728,
-      "pnl_twd": -195,
-      "pnl_pct": -3.3,
-      "current_price": "119.42 USD"
+      "current_value_twd": 5572,
+      "pnl_twd": -351,
+      "pnl_pct": -5.9,
+      "current_price": "116.04 USD"
     },
     {
       "ticker": "NET",
@@ -137,10 +138,10 @@
       "cost_twd": 6483,
       "shares": 1,
       "sector": "網路基礎建設／資安",
-      "current_value_twd": 7144,
-      "pnl_twd": 661,
-      "pnl_pct": 10.2,
-      "current_price": "223.42 USD"
+      "current_value_twd": 6896,
+      "pnl_twd": 413,
+      "pnl_pct": 6.4,
+      "current_price": "215.42 USD"
     },
     {
       "ticker": "3030",
@@ -164,9 +165,9 @@
       "exchange": "Bitget",
       "cost_twd": 42985,
       "quantity": 1337.78378259,
-      "current_value_twd": 42774,
-      "pnl_twd": -211,
-      "pnl_pct": -0.5,
+      "current_value_twd": 42826,
+      "pnl_twd": -159,
+      "pnl_pct": -0.4,
       "current_price": "1.00 USD"
     },
     {
@@ -176,10 +177,10 @@
       "exchange": "Bitget",
       "cost_twd": 25860,
       "quantity": 0.0106787,
-      "current_value_twd": 23908,
-      "pnl_twd": -1952,
-      "pnl_pct": -7.5,
-      "current_price": "70021.69 USD"
+      "current_value_twd": 23988,
+      "pnl_twd": -1872,
+      "pnl_pct": -7.2,
+      "current_price": "70169.56 USD"
     },
     {
       "ticker": "ETH",
@@ -188,10 +189,10 @@
       "exchange": "Bitget",
       "cost_twd": 6839,
       "quantity": 0.14348174,
-      "current_value_twd": 9820,
-      "pnl_twd": 2981,
-      "pnl_pct": 43.6,
-      "current_price": "2140.44 USD"
+      "current_value_twd": 9800,
+      "pnl_twd": 2961,
+      "pnl_pct": 43.3,
+      "current_price": "2133.49 USD"
     },
     {
       "ticker": "XRP",
@@ -200,8 +201,8 @@
       "exchange": "Bitget",
       "cost_twd": 9626,
       "quantity": 115.91467897,
-      "current_value_twd": 5327,
-      "pnl_twd": -4299,
+      "current_value_twd": 5326,
+      "pnl_twd": -4300,
       "pnl_pct": -44.7,
       "current_price": "1.44 USD"
     }
@@ -319,49 +320,13 @@
     }
   ],
   "market": {
-    "indices": [
-      {
-        "name": "道瓊工業",
-        "change_pct": -0.4,
-        "change_str": "-0.4%"
-      },
-      {
-        "name": "S&P 500",
-        "change_pct": -0.3,
-        "change_str": "-0.3%"
-      },
-      {
-        "name": "納斯達克",
-        "change_pct": -0.3,
-        "change_str": "-0.3%"
-      }
-    ],
+    "indices": [],
     "sectors": {
-      "strong": [
-        "能源",
-        "航運",
-        "衛星"
-      ],
-      "weak": [
-        "高估值成長科技",
-        "貴金屬與工業金屬",
-        "電動車"
-      ]
+      "strong": [],
+      "weak": []
     },
-    "key_events": [
-      "WTI 突破 $119 / 伊朗攻擊卡達 LNG 設施",
-      "Micron 財報超預期但股價重挫 — Deutsche Bank 指出表現如同 Nvidia AI 爆發初期",
-      "Nvidia 將售出 100 萬顆 GPU 予 Amazon 雲端（至 2027 年底）",
-      "Uber 投資 Rivian $12.5 億，5 萬輛 Robotaxi 合作",
-      "Blue Origin「Project Sunrise」計劃部署 51,600 顆衛星，為 AI 提供太空算力"
-    ],
-    "risks": [
-      "中東地緣衝突升級",
-      "Micron 股價重挫的情緒蔓延：台灣半導體記憶體相關供應鏈（南亞科、華邦電）可能跟跌；需觀察是否從「個股事件」擴散至板塊情緒",
-      "FOMC 偏鷹疊加油價通膨：台灣科技股中高估值族群（AI 軟體應用）在通膨升溫環境中承壓，外資可能持續調整",
-      "Trump",
-      "3324 雙鴻資訊缺口：資料抓取失敗，今日需自行確認個股狀態後再操作"
-    ],
+    "key_events": [],
+    "risks": [],
     "ripple": []
   }
 }
