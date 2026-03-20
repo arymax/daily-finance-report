@@ -838,6 +838,18 @@ const LivePrices = (() => {
   }
 
   async function fetchUS() {
+    // 主要：Yahoo Finance chart API（免費、無需 key）透過 corsproxy
+    try {
+      await Promise.all(US_TICKERS.map(async tk => {
+        const yfUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${tk}?range=1d&interval=1d`;
+        const url   = `https://corsproxy.io/?${encodeURIComponent(yfUrl)}`;
+        const r = await fetch(url);
+        const j = await r.json();
+        const price = j.chart?.result?.[0]?.meta?.regularMarketPrice;
+        if (price > 0) { liveData[tk] = price; anySuccess = true; }
+      }));
+    } catch {}
+    // 補充：若有 Finnhub key，以更即時的報價覆蓋
     const key = window.FINNHUB_KEY;
     if (!key) return;
     await Promise.all(US_TICKERS.map(async tk => {
@@ -859,7 +871,8 @@ const LivePrices = (() => {
     const r = await fetch(url);
     const j = await r.json();
     j.msgArray?.forEach(item => {
-      const price = parseFloat(item.z);
+      // item.z = 即時成交價（非交易時段為 "-"），fallback 到 item.y（昨收）
+      const price = parseFloat(item.z !== '-' ? item.z : item.y);
       if (item.c && price > 0) { liveData[item.c] = price; anySuccess = true; }
     });
   }
