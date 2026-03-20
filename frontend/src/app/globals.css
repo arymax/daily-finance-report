@@ -24,3 +24,82 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ── Markdown prose (dark theme) ─────────────────────────────── */
+.md-prose {
+  color: #cbd5e1;
+  line-height: 1.75;
+  font-size: 0.875rem;
+}
+.md-prose h1, .md-prose h2, .md-prose h3, .md-prose h4 {
+  color: #f1f5f9;
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+.md-prose h1 {
+  font-size: 1.25rem;
+  border-bottom: 1px solid #334155;
+  padding-bottom: 0.4em;
+}
+.md-prose h2 { font-size: 1.1rem; }
+.md-prose h3 { font-size: 1rem; }
+.md-prose p  { margin: 0.75em 0; }
+.md-prose strong { color: #f1f5f9; }
+.md-prose em     { color: #94a3b8; }
+.md-prose a      { color: #60a5fa; text-decoration: underline; }
+.md-prose hr     { border-color: #334155; margin: 1.5em 0; }
+.md-prose blockquote {
+  border-left: 3px solid #475569;
+  padding-left: 1em;
+  color: #94a3b8;
+  margin: 1em 0;
+}
+.md-prose code {
+  background: #0f172a;
+  color: #86efac;
+  padding: 0.15em 0.35em;
+  border-radius: 0.25em;
+  font-size: 0.8rem;
+}
+.md-prose pre {
+  background: #0f172a;
+  padding: 1em;
+  border-radius: 0.5em;
+  overflow-x: auto;
+  border: 1px solid #1e293b;
+  margin: 1em 0;
+}
+.md-prose pre code {
+  background: transparent;
+  padding: 0;
+  color: #86efac;
+}
+.md-prose ul, .md-prose ol {
+  padding-left: 1.5em;
+  margin: 0.75em 0;
+}
+.md-prose li   { margin: 0.3em 0; }
+.md-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin: 1em 0;
+}
+.md-prose th {
+  background: #1e293b;
+  color: #94a3b8;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.5em 0.75em;
+  border: 1px solid #334155;
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+}
+.md-prose td {
+  padding: 0.45em 0.75em;
+  border: 1px solid #1e293b;
+  vertical-align: top;
+}
+.md-prose tr:nth-child(even) td { background: rgba(30,41,59,0.4); }
+.md-prose tr:hover td           { background: rgba(51,65,85,0.35); }
