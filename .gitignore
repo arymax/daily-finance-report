@@ -9,6 +9,9 @@ venv/
 .env
 *.env
 
+# 看板 API key（本地生成，不進 repo）
+docs/config.js
+
 # 執行日誌（本地就好，不需要同步）
 logs/
 

@@ -267,6 +267,37 @@ def _sync_reports(reports_dir: Path, docs_dir: Path) -> list[dict]:
     return index
 
 
+def _write_config_js(docs_dir: Path) -> None:
+    """
+    讀取 .env 中的 FINNHUB_API_KEY，生成 docs/config.js。
+    docs/config.js 被 .gitignore 排除，僅本機使用。
+    """
+    import os
+    from pathlib import Path as _Path
+
+    # 嘗試從 .env 讀取（相對於專案根目錄）
+    env_path = _Path(__file__).parent.parent / ".env"
+    key = ""
+    if env_path.exists():
+        for line in env_path.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line.startswith("FINNHUB_API_KEY="):
+                key = line.split("=", 1)[1].strip()
+                break
+
+    # 如果 .env 沒有，也接受環境變數
+    if not key:
+        key = os.environ.get("FINNHUB_API_KEY", "")
+
+    config_js = docs_dir / "config.js"
+    config_js.write_text(
+        f'// 本地 API key 設定（由 dashboard.py 自動生成，已加入 .gitignore）\n'
+        f'window.FINNHUB_KEY = "{key}";\n',
+        encoding="utf-8",
+    )
+    logger.info("✅ docs/config.js 已生成（本機用）")
+
+
 # ── 主入口 ────────────────────────────────────────────────────────────────────
 
 def generate_dashboard_data(
@@ -444,6 +475,9 @@ def generate_dashboard_data(
             json.dumps(history, ensure_ascii=False, indent=2), encoding="utf-8"
         )
         logger.info(f"✅ 歷史資料已更新：docs/history.json（{len(history)} 筆）")
+
+        # ── 生成本地 config.js（含 Finnhub API key）──
+        _write_config_js(docs_dir)
 
         # ── 同步報告 markdown ──
         if reports_dir and reports_dir.exists():
