@@ -14,22 +14,17 @@ export interface QuoteData {
 
 const REFRESH_MS = 60_000;
 
-// Yahoo Finance v8 via corsproxy
+// Yahoo Finance via server-side Next.js proxy (/api/yf-quote)
 async function fetchYahooQuote(symbol: string): Promise<{ price: number; change: number; changePct: number; prev: number } | null> {
   try {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=2d`;
-    const proxied = `https://corsproxy.io/?${encodeURIComponent(url)}`;
-    const res = await fetch(proxied, { signal: AbortSignal.timeout(8000) });
+    const res = await fetch(
+      `/api/yf-quote?symbol=${encodeURIComponent(symbol)}`,
+      { signal: AbortSignal.timeout(10000) }
+    );
     if (!res.ok) return null;
-    const json = await res.json();
-    const meta = json?.chart?.result?.[0]?.meta;
-    if (!meta) return null;
-    const price  = meta.regularMarketPrice ?? meta.previousClose ?? null;
-    const prev   = meta.chartPreviousClose ?? meta.previousClose ?? null;
-    if (price == null || prev == null) return null;
-    const change    = price - prev;
-    const changePct = prev !== 0 ? (change / prev) * 100 : 0;
-    return { price, change, changePct, prev };
+    const data = await res.json();
+    if (data.price == null) return null;
+    return { price: data.price, change: data.change, changePct: data.changePct, prev: data.prev };
   } catch {
     return null;
   }

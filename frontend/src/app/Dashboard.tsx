@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { DashboardData, HistoryEntry } from "@/types/dashboard";
 import type { ReportEntry, ThesisCategory, ThemeEntry } from "@/types/indices";
 import { useLivePrices } from "@/hooks/useLivePrices";
@@ -38,6 +38,40 @@ interface Props {
 export default function Dashboard({ data, history, reports, thesis, themes }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>("portfolio");
   const { prices, lastUpdated } = useLivePrices(data.positions, data.crypto, data.meta.usd_twd);
+
+  // Recompute total portfolio value from live prices
+  const liveSummary = useMemo(() => {
+    if (Object.keys(prices).length === 0) return null;
+    const usd = data.meta.usd_twd;
+    let liveValue = data.summary.cash_twd;
+    for (const pos of data.positions) {
+      const lp = prices[pos.ticker];
+      if (lp && pos.shares) {
+        liveValue += pos.market === "US" ? lp * pos.shares * usd : lp * pos.shares;
+      } else {
+        liveValue += (pos as { current_value_twd?: number }).current_value_twd ?? pos.cost_twd;
+      }
+    }
+    for (const pos of data.crypto) {
+      const lp = prices[pos.ticker];
+      if (lp && pos.shares) {
+        liveValue += lp * pos.shares; // hook already converted to TWD
+      } else {
+        liveValue += (pos as { current_value_twd?: number }).current_value_twd ?? pos.cost_twd;
+      }
+    }
+    const totalCost = data.positions.reduce((s, p) => s + p.cost_twd, 0)
+                    + data.crypto.reduce((s, p) => s + p.cost_twd, 0)
+                    + data.summary.cash_twd;
+    const pnlTwd = liveValue - totalCost;
+    const pnlPct = totalCost > 0 ? (pnlTwd / totalCost) * 100 : 0;
+    return {
+      ...data.summary,
+      total_value_twd: liveValue,
+      total_pnl_twd: pnlTwd,
+      total_pnl_pct: pnlPct,
+    };
+  }, [prices, data]);
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -91,10 +125,11 @@ export default function Dashboard({ data, history, reports, thesis, themes }: Pr
         {activeTab === "portfolio" && (
           <div className="space-y-6">
             <SummaryCard
-              summary={data.summary}
+              summary={liveSummary ?? data.summary}
               usdTwd={data.meta.usd_twd}
               generatedAt={data.meta.generated_at}
               lastUpdated={lastUpdated}
+              isLive={liveSummary != null}
             />
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
               <div className="lg:col-span-3">
