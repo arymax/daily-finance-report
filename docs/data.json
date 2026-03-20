@@ -6,16 +6,16 @@
     "usd_twd": 32.0
   },
   "summary": {
-    "total_value_twd": 695266,
-    "total_pnl_twd": 15397,
-    "total_pnl_pct": 4.4,
-    "cash_twd": 289388,
-    "cash_pct": 41.6
+    "total_value_twd": 695363,
+    "total_pnl_twd": 14215,
+    "total_pnl_pct": 4.3,
+    "cash_twd": 303632,
+    "cash_pct": 43.7
   },
   "allocation": {
-    "現金": 41.6,
+    "現金": 43.7,
     "長期ETF": 17.6,
-    "波段個股": 22.7,
+    "波段個股": 20.7,
     "加密貨幣": 11.8,
     "合約保證金": 6.3
   },
@@ -134,13 +134,13 @@
       "name": "Cloudflare Inc.",
       "type": "個股",
       "market": "US",
-      "cost_twd": 19448,
-      "shares": 3,
+      "cost_twd": 6483,
+      "shares": 1,
       "sector": "網路基礎建設／資安",
-      "current_value_twd": 21251,
-      "pnl_twd": 1803,
-      "pnl_pct": 9.3,
-      "current_price": "221.36 USD"
+      "current_value_twd": 7104,
+      "pnl_twd": 621,
+      "pnl_pct": 9.6,
+      "current_price": "222.01 USD"
     },
     {
       "ticker": "3030",
