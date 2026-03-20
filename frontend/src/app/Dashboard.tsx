@@ -13,13 +13,15 @@ import MarketTab      from "@/components/MarketTab";
 import ReportsTab     from "@/components/ReportsTab";
 import ThesisTab      from "@/components/ThesisTab";
 import ThemesTab      from "@/components/ThemesTab";
+import PremarketTab   from "@/components/PremarketTab";
 
-type Tab = "portfolio" | "watchlist" | "market" | "reports" | "themes" | "thesis";
+type Tab = "portfolio" | "watchlist" | "market" | "reports" | "themes" | "thesis" | "premarket";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "portfolio", label: "持倉總覽" },
   { id: "watchlist", label: "觀察清單" },
   { id: "market",    label: "市場摘要" },
+  { id: "premarket", label: "盤前監控" },
   { id: "reports",   label: "報告記錄" },
   { id: "themes",    label: "主題催化劑" },
   { id: "thesis",    label: "產業研究" },
@@ -134,6 +136,11 @@ export default function Dashboard({ data, history, reports, thesis, themes }: Pr
         {/* 產業研究 */}
         {activeTab === "thesis" && (
           <ThesisTab thesis={thesis} />
+        )}
+
+        {/* 盤前監控 */}
+        {activeTab === "premarket" && (
+          <PremarketTab reports={reports} />
         )}
       </main>
     </div>
