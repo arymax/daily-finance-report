@@ -1,0 +1,367 @@
+{
+  "meta": {
+    "generated_at": "2026-03-21 00:16:43 TST",
+    "date": "2026-03-21",
+    "session": "morning",
+    "usd_twd": 31.97
+  },
+  "summary": {
+    "total_value_twd": 691054,
+    "total_pnl_twd": 9906,
+    "total_pnl_pct": 3.0,
+    "cash_twd": 303632,
+    "cash_pct": 43.9
+  },
+  "allocation": {
+    "現金": 43.9,
+    "長期ETF": 17.6,
+    "波段個股": 20.3,
+    "加密貨幣": 11.8,
+    "合約保證金": 6.3
+  },
+  "positions": [
+    {
+      "ticker": "006208",
+      "name": "富邦台50",
+      "type": "長期ETF",
+      "market": "TW",
+      "cost_twd": 5839,
+      "shares": 52,
+      "sector": "台灣大盤指數",
+      "current_value_twd": 9162,
+      "pnl_twd": 3323,
+      "pnl_pct": 56.9,
+      "current_price": "176.20 TWD"
+    },
+    {
+      "ticker": "00719B",
+      "name": "元大美債1-3",
+      "type": "長期ETF",
+      "market": "TW",
+      "cost_twd": 23611,
+      "shares": 758,
+      "sector": "短期美國公債"
+    },
+    {
+      "ticker": "00859B",
+      "name": "群益0-1年美債",
+      "type": "長期ETF",
+      "market": "TW",
+      "cost_twd": 15748,
+      "shares": 379,
+      "sector": "超短期美國公債"
+    },
+    {
+      "ticker": "VTI",
+      "name": "Vanguard Total Stock Market ETF",
+      "type": "長期ETF",
+      "market": "US",
+      "cost_twd": 39000,
+      "shares": 4.12911,
+      "sector": "美國全市場股票",
+      "current_value_twd": 42612,
+      "pnl_twd": 3612,
+      "pnl_pct": 9.3,
+      "current_price": "322.76 USD"
+    },
+    {
+      "ticker": "VT",
+      "name": "Vanguard Total World Stock ETF",
+      "type": "長期ETF",
+      "market": "US",
+      "cost_twd": 15000,
+      "shares": 3.41164,
+      "sector": "全球股票",
+      "current_value_twd": 14988,
+      "pnl_twd": -12,
+      "pnl_pct": -0.1,
+      "current_price": "137.40 USD"
+    },
+    {
+      "ticker": "VGIT",
+      "name": "Vanguard Intermediate-Term Treasury ETF",
+      "type": "長期ETF",
+      "market": "US",
+      "cost_twd": 15000,
+      "shares": 8.01501,
+      "sector": "中期美國公債",
+      "current_value_twd": 15198,
+      "pnl_twd": 198,
+      "pnl_pct": 1.3,
+      "current_price": "59.31 USD"
+    },
+    {
+      "ticker": "MRVL",
+      "name": "Marvell Technology Inc.",
+      "type": "個股",
+      "market": "US",
+      "cost_twd": 32000,
+      "shares": 10.83658,
+      "sector": "半導體（自訂 AI 晶片／資料中心網路／光學）",
+      "current_value_twd": 31077,
+      "pnl_twd": -923,
+      "pnl_pct": -2.9,
+      "current_price": "89.69 USD"
+    },
+    {
+      "ticker": "CRWD",
+      "name": "CrowdStrike Holdings",
+      "type": "個股",
+      "market": "US",
+      "cost_twd": 20277,
+      "shares": 1.5,
+      "sector": "資安軟體",
+      "current_value_twd": 19797,
+      "pnl_twd": -480,
+      "pnl_pct": -2.4,
+      "current_price": "412.77 USD"
+    },
+    {
+      "ticker": "ALAB",
+      "name": "Astera Labs Inc.",
+      "type": "個股",
+      "market": "US",
+      "cost_twd": 5923,
+      "shares": 1.5,
+      "sector": "半導體連接方案",
+      "current_value_twd": 5728,
+      "pnl_twd": -195,
+      "pnl_pct": -3.3,
+      "current_price": "119.42 USD"
+    },
+    {
+      "ticker": "NET",
+      "name": "Cloudflare Inc.",
+      "type": "個股",
+      "market": "US",
+      "cost_twd": 6483,
+      "shares": 1,
+      "sector": "網路基礎建設／資安",
+      "current_value_twd": 7144,
+      "pnl_twd": 661,
+      "pnl_pct": 10.2,
+      "current_price": "223.42 USD"
+    },
+    {
+      "ticker": "3030",
+      "name": "德律科技",
+      "type": "個股",
+      "market": "TW",
+      "cost_twd": 69447,
+      "shares": 300,
+      "sector": "半導體設備／AOI檢測",
+      "current_value_twd": 76650,
+      "pnl_twd": 7203,
+      "pnl_pct": 10.4,
+      "current_price": "255.50 TWD"
+    }
+  ],
+  "crypto": [
+    {
+      "ticker": "USDT",
+      "name": "Tether USD",
+      "type": "stablecoin",
+      "exchange": "Bitget",
+      "cost_twd": 42985,
+      "quantity": 1337.78378259,
+      "current_value_twd": 42774,
+      "pnl_twd": -211,
+      "pnl_pct": -0.5,
+      "current_price": "1.00 USD"
+    },
+    {
+      "ticker": "BTC",
+      "name": "Bitcoin",
+      "type": "spot",
+      "exchange": "Bitget",
+      "cost_twd": 25860,
+      "quantity": 0.0106787,
+      "current_value_twd": 23908,
+      "pnl_twd": -1952,
+      "pnl_pct": -7.5,
+      "current_price": "70021.69 USD"
+    },
+    {
+      "ticker": "ETH",
+      "name": "Ethereum",
+      "type": "spot",
+      "exchange": "Bitget",
+      "cost_twd": 6839,
+      "quantity": 0.14348174,
+      "current_value_twd": 9820,
+      "pnl_twd": 2981,
+      "pnl_pct": 43.6,
+      "current_price": "2140.44 USD"
+    },
+    {
+      "ticker": "XRP",
+      "name": "XRP",
+      "type": "spot",
+      "exchange": "Bitget",
+      "cost_twd": 9626,
+      "quantity": 115.91467897,
+      "current_value_twd": 5327,
+      "pnl_twd": -4299,
+      "pnl_pct": -44.7,
+      "current_price": "1.44 USD"
+    }
+  ],
+  "watchlist": [
+    {
+      "ticker": "2330",
+      "name": "台灣積體電路製造股份有限公司（台積電）",
+      "priority": 1,
+      "market": "TW",
+      "sector": "半導體（純晶圓代工 / 先進封裝 / AI 算力基礎設施）",
+      "theme": "全球 AI 算力的物理基礎——所有 AI 晶片最終都必須在台積電晶圓廠中被製造出來，無可替代性構成史上最強的科技護城河",
+      "status": "未達成",
+      "status_icon": "⏳",
+      "action": ""
+    },
+    {
+      "ticker": "AVGO",
+      "name": "Broadcom Inc.",
+      "priority": 1,
+      "market": "US",
+      "sector": "半導體 + 企業基礎設施軟體（Diversified Semiconductor & Infrastructure Software）",
+      "theme": "AI 基礎建設雙引擎——自訂 XPU ASIC 為超大型雲端客戶定製算力，VMware 軟體訂閱轉型提供高黏性現金流，共同構建最稀缺的「AI 算力 × 企業 I",
+      "status": "未達成",
+      "status_icon": "⏳",
+      "action": ""
+    },
+    {
+      "ticker": "MU",
+      "name": "Micron Technology Inc.",
+      "priority": 1,
+      "market": "US",
+      "sector": "半導體（DRAM / NAND / HBM）",
+      "theme": "AI 記憶體超級週期最直接受益者——HBM 寡頭、盈利槓桿尚未完全釋放",
+      "status": "未達成",
+      "status_icon": "⏳",
+      "action": ""
+    },
+    {
+      "ticker": "3017",
+      "name": "奇鋐科技股份有限公司",
+      "priority": 1,
+      "market": "TW",
+      "sector": "散熱模組 / AI 伺服器熱管理 / AI 基礎建設",
+      "theme": "液冷散熱從可選到必選——AI 機架功耗突破 120kW 的「熱管理唯一解」，Forward P/E 17x 對應 EPS 三倍成長，估值嚴重低估",
+      "status": "未達成",
+      "status_icon": "⏳",
+      "action": ""
+    },
+    {
+      "ticker": "CEG",
+      "name": "Constellation Energy Corporation",
+      "priority": 1,
+      "market": "US",
+      "sector": "獨立電力生產商（IPP）／核能發電",
+      "theme": "美國最大核電營運商，24/7 無碳基載電力稀缺資產，AI 資料中心電力飢渴驅動 PPAs 溢價重估，Forward EPS $13.61 僅反映起點，Calpi",
+      "status": "未達成",
+      "status_icon": "⏳",
+      "action": ""
+    },
+    {
+      "ticker": "NBIS",
+      "name": "Nebius Group N.V.",
+      "priority": 2,
+      "market": "US",
+      "sector": "AI 雲端基礎設施 / Neocloud GPU 算力租用",
+      "theme": "Nvidia 欽點的歐洲 Neocloud 龍頭——獨立 GPU 雲的結構性稀缺標的，5GW 算力藍圖獲 $2B 戰略背書",
+      "status": "未達成",
+      "status_icon": "⏳",
+      "action": ""
+    },
+    {
+      "ticker": "2609",
+      "name": "陽明海運股份有限公司",
+      "priority": 2,
+      "market": "TW",
+      "sector": "貨櫃航運",
+      "theme": "霍爾木茲封鎖威脅觸發歐亞航線運費率非線性跳升，P/B 0.65x 提供下行保護，即期業績敏感度為台灣航運股最高",
+      "status": "未達成",
+      "status_icon": "⏳",
+      "action": ""
+    },
+    {
+      "ticker": "2308",
+      "name": "台達電",
+      "priority": 2,
+      "market": "TW",
+      "sector": "電源管理 / 電子零組件 / AI 伺服器基礎建設",
+      "theme": "AI 伺服器電源密度升級的「隱形王者」——PSU 市佔率 ~40% 全球第一，每台機架電源需求倍增的最直接受益者",
+      "status": "未達成",
+      "status_icon": "⏳",
+      "action": ""
+    },
+    {
+      "ticker": "3324",
+      "name": "双鴻企業股份有限公司",
+      "priority": 2,
+      "market": "TW",
+      "sector": "熱管理 / 液冷散熱（AI 伺服器基礎建設）",
+      "theme": "台股液冷純度最高的代表性標的——自製冷卻板技術壁壘深、客戶結構直連雲端 AI 供應鏈，受益於 GPU 功耗密度持續提升與液冷滲透率加速的十年大週期",
+      "status": "未達成",
+      "status_icon": "⏳",
+      "action": ""
+    },
+    {
+      "ticker": "OXY",
+      "name": "OXY",
+      "priority": 3,
+      "market": "US",
+      "sector": "",
+      "theme": "",
+      "status": "未達成",
+      "status_icon": "⏳",
+      "action": ""
+    }
+  ],
+  "market": {
+    "indices": [
+      {
+        "name": "道瓊工業",
+        "change_pct": -0.4,
+        "change_str": "-0.4%"
+      },
+      {
+        "name": "S&P 500",
+        "change_pct": -0.3,
+        "change_str": "-0.3%"
+      },
+      {
+        "name": "納斯達克",
+        "change_pct": -0.3,
+        "change_str": "-0.3%"
+      }
+    ],
+    "sectors": {
+      "strong": [
+        "能源",
+        "航運",
+        "衛星"
+      ],
+      "weak": [
+        "高估值成長科技",
+        "貴金屬與工業金屬",
+        "電動車"
+      ]
+    },
+    "key_events": [
+      "WTI 突破 $119 / 伊朗攻擊卡達 LNG 設施",
+      "Micron 財報超預期但股價重挫 — Deutsche Bank 指出表現如同 Nvidia AI 爆發初期",
+      "Nvidia 將售出 100 萬顆 GPU 予 Amazon 雲端（至 2027 年底）",
+      "Uber 投資 Rivian $12.5 億，5 萬輛 Robotaxi 合作",
+      "Blue Origin「Project Sunrise」計劃部署 51,600 顆衛星，為 AI 提供太空算力"
+    ],
+    "risks": [
+      "中東地緣衝突升級",
+      "Micron 股價重挫的情緒蔓延：台灣半導體記憶體相關供應鏈（南亞科、華邦電）可能跟跌；需觀察是否從「個股事件」擴散至板塊情緒",
+      "FOMC 偏鷹疊加油價通膨：台灣科技股中高估值族群（AI 軟體應用）在通膨升溫環境中承壓，外資可能持續調整",
+      "Trump",
+      "3324 雙鴻資訊缺口：資料抓取失敗，今日需自行確認個股狀態後再操作"
+    ],
+    "ripple": []
+  }
+}

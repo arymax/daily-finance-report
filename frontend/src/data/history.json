@@ -1,0 +1,50 @@
+[
+  {
+    "date": "2026-03-20",
+    "session": "morning",
+    "timestamp": "2026-03-20T23:56:20.512234+08:00",
+    "total_value_twd": 690928,
+    "total_pnl_twd": 9780,
+    "total_pnl_pct": 2.9,
+    "cash_pct": 43.9,
+    "positions_pnl": {
+      "006208": 56.9,
+      "VTI": 9.3,
+      "VT": -0.0,
+      "VGIT": 1.4,
+      "MRVL": -3.1,
+      "CRWD": -2.7,
+      "ALAB": -3.6,
+      "NET": 9.7,
+      "3030": 10.4,
+      "USDT": -0.4,
+      "BTC": -7.6,
+      "ETH": 43.4,
+      "XRP": -44.6
+    }
+  },
+  {
+    "date": "2026-03-21",
+    "session": "morning",
+    "timestamp": "2026-03-21T00:16:43.452923+08:00",
+    "total_value_twd": 691054,
+    "total_pnl_twd": 9906,
+    "total_pnl_pct": 3.0,
+    "cash_pct": 43.9,
+    "positions_pnl": {
+      "006208": 56.9,
+      "VTI": 9.3,
+      "VT": -0.1,
+      "VGIT": 1.3,
+      "MRVL": -2.9,
+      "CRWD": -2.4,
+      "ALAB": -3.3,
+      "NET": 10.2,
+      "3030": 10.4,
+      "USDT": -0.5,
+      "BTC": -7.5,
+      "ETH": 43.6,
+      "XRP": -44.7
+    }
+  }
+]
