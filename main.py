@@ -945,6 +945,78 @@ def run_premarket_check() -> None:
     logger.info("=" * 55)
 
 
+# ── Dashboard 快速更新 ────────────────────────
+def run_dashboard_only(session: str | None = None) -> None:
+    """
+    快速重生成 docs/data.json，不呼叫 Claude API。
+    適用於：手動更新 portfolio.json 後快速同步儀表板。
+    """
+    config        = load_config()
+    logs_dir      = BASE_DIR / config.get("logs_dir", "logs")
+    portfolio_path = BASE_DIR / config.get("portfolio_file", "portfolio.json")
+    reports_dir   = BASE_DIR / config.get("reports_dir", "reports")
+    sync_cfg      = config.get("sync", {})
+
+    setup_logging(logs_dir)
+    logger.info("=" * 55)
+    logger.info("   Dashboard 快速更新模式（不呼叫 Claude）")
+    logger.info("=" * 55)
+
+    # ── Schema 驗證 ──
+    validate_portfolio(portfolio_path)
+    portfolio    = load_portfolio(portfolio_path)
+    lt_positions = portfolio.get("long_term", {}).get("positions", [])
+    ta_positions = portfolio.get("tactical",  {}).get("positions", [])
+    cr_positions = portfolio.get("crypto",    {}).get("positions", [])
+
+    # ── 收集所有標的（含市場）──
+    positions_with_market: list[tuple[str, str]] = []
+    for pos in lt_positions + ta_positions:
+        positions_with_market.append((pos["ticker"], pos["market"]))
+    for pos in cr_positions:
+        if pos.get("type") != "contract":
+            positions_with_market.append((pos["ticker"], "CRYPTO"))
+
+    # ── 即時股價 & 匯率 ──
+    logger.info("── 抓取即時股價 ────────────────────────")
+    usd_twd = fetch_usd_twd_rate()
+    prices  = fetch_current_prices(positions_with_market)
+
+    # ── 嘗試讀取最新報告（供 watchlist 狀態解析用，非必要）──
+    portfolio_content = ""
+    market_content    = ""
+    if reports_dir.exists():
+        def _latest(pattern: str) -> str:
+            files = sorted(reports_dir.glob(pattern))
+            return files[-1].read_text(encoding="utf-8") if files else ""
+        portfolio_content = _latest("*portfolio_analysis.md")
+        market_content    = _latest("*market_overview.md")
+
+    # ── Session 自動判斷 ──
+    if session is None:
+        session = "morning" if datetime.now(TST).hour < 15 else "evening"
+
+    # ── 生成 data.json ──
+    generate_dashboard_data(
+        portfolio=portfolio,
+        prices=prices,
+        usd_twd=usd_twd,
+        session=session,
+        portfolio_content=portfolio_content,
+        market_content=market_content,
+        docs_dir=BASE_DIR / "docs",
+        reports_dir=reports_dir,
+        thesis_dir=BASE_DIR / "thesis",
+        themes_dir=BASE_DIR / "themes",
+    )
+    logger.info("✅ 儀表板快照已更新（docs/data.json）")
+
+    # ── Git push（若設定啟用）──
+    if sync_cfg.get("enabled") and sync_cfg.get("auto_push", True):
+        logger.info("── Git 同步（push）─────────────────────")
+        sync.push(BASE_DIR, f"dashboard: {datetime.now(TST).strftime('%Y-%m-%d')}")
+
+
 # ── CLI 入口 ──────────────────────────────────
 def main():
     parser = argparse.ArgumentParser(description="每日財務報告生成器")
@@ -955,6 +1027,7 @@ def main():
     parser.add_argument("--research",       action="store_true", help="讀取今日已生成報告，單獨執行 Task 5 自動研究新標的")
     parser.add_argument("--update-thesis",  action="store_true", help="讀取今日已生成報告，單獨執行 Task 4 thesis 自動更新")
     parser.add_argument("--premarket",       action="store_true", help="執行美股開盤前盤前晨檢（Gemini 判讀 ES/NQ/VIX/10Y/DXY）")
+    parser.add_argument("--dashboard",       action="store_true", help="快速重生成 docs/data.json（不呼叫 Claude，適合手動更新持倉後同步儀表板）")
     parser.add_argument(
         "--enrich-ticker",
         nargs="+",
@@ -1007,6 +1080,10 @@ def main():
 
     if args.premarket:
         run_premarket_check()
+        return
+
+    if args.dashboard:
+        run_dashboard_only(session=args.session)
         return
 
     if args.portfolio and not args.market:
