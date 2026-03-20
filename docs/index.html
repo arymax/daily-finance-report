@@ -79,6 +79,7 @@
       <button id="tab-watchlist" onclick="switchTab('watchlist')" class="tab-btn px-4 text-sm font-medium">觀察清單</button>
       <button id="tab-market"    onclick="switchTab('market')"    class="tab-btn px-4 text-sm font-medium">市場摘要</button>
       <button id="tab-reports"   onclick="switchTab('reports')"   class="tab-btn px-4 text-sm font-medium">報告記錄</button>
+      <button id="tab-thesis"    onclick="switchTab('thesis')"    class="tab-btn px-4 text-sm font-medium">產業研究</button>
     </nav>
     <div class="ml-auto flex items-center gap-4 shrink-0">
       <!-- LIVE badge + last-updated -->
@@ -199,6 +200,36 @@
     </div>
   </div>
 
+  <!-- ─── 產業研究 ─────────────────────────────────────────────────────── -->
+  <div id="panel-thesis" class="hidden">
+    <div class="flex gap-5 min-h-[70vh]">
+
+      <!-- Left: category + ticker list -->
+      <aside class="w-56 shrink-0 flex flex-col gap-2">
+        <input id="thesis-search" type="text" placeholder="搜尋 ticker / 板塊…"
+          oninput="filterThesis()"
+          class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-500 outline-none focus:border-slate-500 w-full" />
+        <div id="thesis-category-list" class="flex-1 overflow-y-auto space-y-0.5 pr-1" style="max-height:72vh;">
+          <div class="text-slate-500 text-sm text-center py-10">載入中…</div>
+        </div>
+      </aside>
+
+      <!-- Right: markdown viewer -->
+      <div class="flex-1 min-w-0">
+        <div class="bg-slate-800 rounded-xl border border-slate-700 h-full flex flex-col">
+          <div class="px-6 py-3 border-b border-slate-700 flex items-center justify-between shrink-0">
+            <span id="thesis-viewer-title" class="text-sm font-medium text-slate-300">← 選擇左側標的</span>
+            <span id="thesis-viewer-cat"   class="text-xs text-slate-500"></span>
+          </div>
+          <div id="thesis-content" class="flex-1 overflow-y-auto px-7 py-5 prose text-sm">
+            <div class="text-slate-500 text-center py-20">請從左側選擇產業板塊與標的</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ─── 報告記錄 ─────────────────────────────────────────────────────── -->
   <div id="panel-reports" class="hidden">
     <div class="flex gap-5 min-h-[70vh]">
@@ -275,7 +306,7 @@ let _staticTwd = { cash: 0, contract: 0 };  // non-position TWD values for live 
 
 // ── Tab switching ─────────────────────────────────────────────────────────────
 function switchTab(name) {
-  ['portfolio','watchlist','market','reports'].forEach(t => {
+  ['portfolio','watchlist','market','reports','thesis'].forEach(t => {
     document.getElementById(`panel-${t}`).classList.toggle('hidden', t !== name);
     document.getElementById(`tab-${t}`).classList.toggle('active', t === name);
   });
@@ -540,10 +571,11 @@ function renderReportsTab(index) {
 async function loadDashboard() {
   try {
     const bust = `?t=${Date.now()}`;
-    const [data, history, reportIndex] = await Promise.all([
+    const [data, history, reportIndex, thesisIndex] = await Promise.all([
       fetch(`data.json${bust}`).then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); }),
       fetch(`history.json${bust}`).then(r=>r.ok?r.json():[]).catch(()=>[]),
       fetch(`reports_index.json${bust}`).then(r=>r.ok?r.json():[]).catch(()=>[]),
+      fetch(`thesis_index.json${bust}`).then(r=>r.ok?r.json():[]).catch(()=>[]),
     ]);
 
     renderSummary(data);
@@ -553,6 +585,7 @@ async function loadDashboard() {
     renderWatchlist(data.watchlist);
     renderMarket(data.market);
     renderReportsTab(reportIndex);
+    renderThesisTab(thesisIndex);
     LivePrices.start();
 
   } catch(err) {
@@ -564,6 +597,78 @@ async function loadDashboard() {
         <p class="text-xs text-slate-600">請先執行 <code class="bg-slate-800 px-2 py-0.5 rounded">python main.py</code> 生成報告後重新整理</p>
         <p class="text-xs text-slate-700 mt-1">（本機預覽需用 <code class="bg-slate-800 px-1 rounded">python -m http.server 8080 --directory docs</code>）</p>
       </div>`;
+  }
+}
+
+// ── Thesis ────────────────────────────────────────────────────────────────────
+let allThesis = [];   // [{category, files:[{ticker, filename}]}]
+
+const CATEGORY_COLORS = {
+  'AI基礎建設':'text-violet-400', 'AI應用':'text-purple-400',
+  '半導體':'text-blue-400',       '光通訊':'text-cyan-400',
+  '企業軟體':'text-indigo-400',   '資安':'text-green-400',
+  '能源':'text-amber-400',        '航太國防':'text-orange-400',
+  '航運':'text-sky-400',          '電動車':'text-emerald-400',
+  '生技醫療':'text-pink-400',     '消費電子':'text-rose-400',
+};
+
+function renderThesisTab(index) {
+  allThesis = index || [];
+  renderThesisList();
+}
+
+function filterThesis() { renderThesisList(); }
+
+function renderThesisList() {
+  const q   = (document.getElementById('thesis-search').value || '').trim().toLowerCase();
+  const el  = document.getElementById('thesis-category-list');
+
+  const filtered = allThesis.map(cat => ({
+    category: cat.category,
+    files: cat.files.filter(f =>
+      !q || f.ticker.toLowerCase().includes(q) || cat.category.toLowerCase().includes(q)
+    ),
+  })).filter(cat => cat.files.length > 0);
+
+  if (!filtered.length) {
+    el.innerHTML = '<div class="text-slate-500 text-sm text-center py-6">無符合結果</div>';
+    return;
+  }
+
+  el.innerHTML = filtered.map(cat => {
+    const cc = CATEGORY_COLORS[cat.category] || 'text-slate-400';
+    const tickers = cat.files.map(f => `
+      <button class="thesis-item w-full text-left px-3 py-1.5 rounded text-xs text-slate-400
+                     hover:bg-slate-700/50 hover:text-slate-200 transition-colors font-mono tracking-wide"
+              onclick="loadThesis('${f.filename}','${f.ticker}','${cat.category}')">
+        ${f.ticker}
+      </button>`).join('');
+    return `<div class="mb-2">
+      <div class="flex items-center justify-between px-2 py-1.5 text-xs font-semibold ${cc} tracking-wider">
+        <span>${cat.category}</span>
+        <span class="text-slate-600 font-normal">${cat.files.length}</span>
+      </div>
+      <div class="space-y-0.5">${tickers}</div>
+    </div>`;
+  }).join('');
+}
+
+async function loadThesis(filename, ticker, category) {
+  document.querySelectorAll('.thesis-item').forEach(el =>
+    el.classList.toggle('bg-blue-500/20', el.textContent.trim() === ticker)
+  );
+  document.getElementById('thesis-viewer-title').textContent = ticker;
+  document.getElementById('thesis-viewer-cat').textContent   = category;
+  document.getElementById('thesis-content').innerHTML =
+    '<div class="text-slate-500 text-center py-10">載入中…</div>';
+  try {
+    const r = await fetch(`thesis/${filename}?t=${Date.now()}`);
+    if (!r.ok) throw new Error(r.status);
+    document.getElementById('thesis-content').innerHTML =
+      `<div class="prose">${marked.parse(await r.text())}</div>`;
+  } catch(e) {
+    document.getElementById('thesis-content').innerHTML =
+      `<div class="text-red-400 py-10 text-center text-sm">無法載入：${e.message}</div>`;
   }
 }
 

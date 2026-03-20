@@ -298,6 +298,48 @@ def _write_config_js(docs_dir: Path) -> None:
     logger.info("✅ docs/config.js 已生成（本機用）")
 
 
+def _sync_thesis(thesis_dir: Path, docs_dir: Path) -> list[dict]:
+    """
+    Sync thesis/{Category}/*.md → docs/thesis/{Category}/*.md
+    Generate docs/thesis_index.json grouped by category.
+    """
+    out_dir = docs_dir / "thesis"
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    categories: dict[str, list[dict]] = {}
+
+    for md_file in sorted(thesis_dir.rglob("*.md")):
+        if md_file.name == "README.md":
+            continue
+        category = md_file.parent.name
+        if category == thesis_dir.name:   # root-level files, skip
+            continue
+
+        ticker = md_file.stem
+
+        # Copy preserving category subdir
+        cat_dir = out_dir / category
+        cat_dir.mkdir(exist_ok=True)
+        (cat_dir / md_file.name).write_bytes(md_file.read_bytes())
+
+        if category not in categories:
+            categories[category] = []
+        categories[category].append({
+            "ticker":   ticker,
+            "filename": f"{category}/{md_file.name}",
+        })
+
+    index = [
+        {"category": cat, "files": sorted(files, key=lambda f: f["ticker"])}
+        for cat, files in sorted(categories.items())
+    ]
+
+    (docs_dir / "thesis_index.json").write_text(
+        json.dumps(index, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    return index
+
+
 # ── 主入口 ────────────────────────────────────────────────────────────────────
 
 def generate_dashboard_data(
@@ -309,6 +351,7 @@ def generate_dashboard_data(
     market_content:    str,
     docs_dir:          Path,
     reports_dir:       Path | None = None,
+    thesis_dir:        Path | None = None,
 ) -> None:
     """
     生成 docs/data.json（當日快照）並追加至 docs/history.json。
@@ -483,6 +526,12 @@ def generate_dashboard_data(
         if reports_dir and reports_dir.exists():
             report_index = _sync_reports(reports_dir, docs_dir)
             logger.info(f"✅ 報告已同步：docs/reports/（{len(report_index)} 份）")
+
+        # ── 同步 thesis markdown ──
+        if thesis_dir and thesis_dir.exists():
+            thesis_index = _sync_thesis(thesis_dir, docs_dir)
+            total = sum(len(c["files"]) for c in thesis_index)
+            logger.info(f"✅ Thesis 已同步：docs/thesis/（{len(thesis_index)} 板塊，{total} 份）")
 
     except Exception as exc:
         logger.warning(f"看板資料生成失敗（不影響主報告）：{exc}", exc_info=True)

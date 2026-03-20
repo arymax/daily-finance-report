@@ -1,0 +1,333 @@
+[
+  {
+    "category": "AI基礎建設",
+    "files": [
+      {
+        "ticker": "2308",
+        "filename": "AI基礎建設/2308.md"
+      },
+      {
+        "ticker": "2317",
+        "filename": "AI基礎建設/2317.md"
+      },
+      {
+        "ticker": "2382",
+        "filename": "AI基礎建設/2382.md"
+      },
+      {
+        "ticker": "3017",
+        "filename": "AI基礎建設/3017.md"
+      },
+      {
+        "ticker": "3037",
+        "filename": "AI基礎建設/3037.md"
+      },
+      {
+        "ticker": "3231",
+        "filename": "AI基礎建設/3231.md"
+      },
+      {
+        "ticker": "3324",
+        "filename": "AI基礎建設/3324.md"
+      },
+      {
+        "ticker": "CRWV",
+        "filename": "AI基礎建設/CRWV.md"
+      },
+      {
+        "ticker": "ETN",
+        "filename": "AI基礎建設/ETN.md"
+      },
+      {
+        "ticker": "HPE",
+        "filename": "AI基礎建設/HPE.md"
+      },
+      {
+        "ticker": "NBIS",
+        "filename": "AI基礎建設/NBIS.md"
+      },
+      {
+        "ticker": "PL",
+        "filename": "AI基礎建設/PL.md"
+      },
+      {
+        "ticker": "SMCI",
+        "filename": "AI基礎建設/SMCI.md"
+      },
+      {
+        "ticker": "VRT",
+        "filename": "AI基礎建設/VRT.md"
+      },
+      {
+        "ticker": "WULF",
+        "filename": "AI基礎建設/WULF.md"
+      }
+    ]
+  },
+  {
+    "category": "AI應用",
+    "files": [
+      {
+        "ticker": "PLTR",
+        "filename": "AI應用/PLTR.md"
+      },
+      {
+        "ticker": "UBER",
+        "filename": "AI應用/UBER.md"
+      }
+    ]
+  },
+  {
+    "category": "企業軟體",
+    "files": [
+      {
+        "ticker": "ADBE",
+        "filename": "企業軟體/ADBE.md"
+      },
+      {
+        "ticker": "ORCL",
+        "filename": "企業軟體/ORCL.md"
+      },
+      {
+        "ticker": "TEAM",
+        "filename": "企業軟體/TEAM.md"
+      }
+    ]
+  },
+  {
+    "category": "光通訊",
+    "files": [
+      {
+        "ticker": "3081",
+        "filename": "光通訊/3081.md"
+      },
+      {
+        "ticker": "4977",
+        "filename": "光通訊/4977.md"
+      },
+      {
+        "ticker": "COHR",
+        "filename": "光通訊/COHR.md"
+      },
+      {
+        "ticker": "LITE",
+        "filename": "光通訊/LITE.md"
+      }
+    ]
+  },
+  {
+    "category": "半導體",
+    "files": [
+      {
+        "ticker": "2330",
+        "filename": "半導體/2330.md"
+      },
+      {
+        "ticker": "3030",
+        "filename": "半導體/3030.md"
+      },
+      {
+        "ticker": "ALAB",
+        "filename": "半導體/ALAB.md"
+      },
+      {
+        "ticker": "AMD",
+        "filename": "半導體/AMD.md"
+      },
+      {
+        "ticker": "AVGO",
+        "filename": "半導體/AVGO.md"
+      },
+      {
+        "ticker": "CRDO",
+        "filename": "半導體/CRDO.md"
+      },
+      {
+        "ticker": "MRVL",
+        "filename": "半導體/MRVL.md"
+      },
+      {
+        "ticker": "MTSI",
+        "filename": "半導體/MTSI.md"
+      },
+      {
+        "ticker": "MU",
+        "filename": "半導體/MU.md"
+      }
+    ]
+  },
+  {
+    "category": "消費零售",
+    "files": [
+      {
+        "ticker": "FIVE",
+        "filename": "消費零售/FIVE.md"
+      }
+    ]
+  },
+  {
+    "category": "消費零售（折扣）",
+    "files": [
+      {
+        "ticker": "FIVE",
+        "filename": "消費零售（折扣）/FIVE.md"
+      }
+    ]
+  },
+  {
+    "category": "消費電子",
+    "files": [
+      {
+        "ticker": "AAPL",
+        "filename": "消費電子/AAPL.md"
+      }
+    ]
+  },
+  {
+    "category": "生技醫療",
+    "files": [
+      {
+        "ticker": "GPCR",
+        "filename": "生技醫療/GPCR.md"
+      }
+    ]
+  },
+  {
+    "category": "能源",
+    "files": [
+      {
+        "ticker": "CEG",
+        "filename": "能源/CEG.md"
+      },
+      {
+        "ticker": "COP",
+        "filename": "能源/COP.md"
+      },
+      {
+        "ticker": "ET",
+        "filename": "能源/ET.md"
+      },
+      {
+        "ticker": "HAL",
+        "filename": "能源/HAL.md"
+      },
+      {
+        "ticker": "LNG",
+        "filename": "能源/LNG.md"
+      },
+      {
+        "ticker": "OXY",
+        "filename": "能源/OXY.md"
+      },
+      {
+        "ticker": "SLB",
+        "filename": "能源/SLB.md"
+      },
+      {
+        "ticker": "VST",
+        "filename": "能源/VST.md"
+      },
+      {
+        "ticker": "XOM",
+        "filename": "能源/XOM.md"
+      }
+    ]
+  },
+  {
+    "category": "航太國防",
+    "files": [
+      {
+        "ticker": "2208",
+        "filename": "航太國防/2208.md"
+      },
+      {
+        "ticker": "2214",
+        "filename": "航太國防/2214.md"
+      },
+      {
+        "ticker": "2634",
+        "filename": "航太國防/2634.md"
+      },
+      {
+        "ticker": "LMT",
+        "filename": "航太國防/LMT.md"
+      },
+      {
+        "ticker": "NOC",
+        "filename": "航太國防/NOC.md"
+      }
+    ]
+  },
+  {
+    "category": "航運",
+    "files": [
+      {
+        "ticker": "2603",
+        "filename": "航運/2603.md"
+      },
+      {
+        "ticker": "2606",
+        "filename": "航運/2606.md"
+      },
+      {
+        "ticker": "2609",
+        "filename": "航運/2609.md"
+      },
+      {
+        "ticker": "DAL",
+        "filename": "航運/DAL.md"
+      },
+      {
+        "ticker": "FRO",
+        "filename": "航運/FRO.md"
+      }
+    ]
+  },
+  {
+    "category": "資安",
+    "files": [
+      {
+        "ticker": "6556",
+        "filename": "資安/6556.md"
+      },
+      {
+        "ticker": "CRWD",
+        "filename": "資安/CRWD.md"
+      },
+      {
+        "ticker": "NET",
+        "filename": "資安/NET.md"
+      },
+      {
+        "ticker": "PANW",
+        "filename": "資安/PANW.md"
+      },
+      {
+        "ticker": "S",
+        "filename": "資安/S.md"
+      },
+      {
+        "ticker": "ZS",
+        "filename": "資安/ZS.md"
+      }
+    ]
+  },
+  {
+    "category": "電動車",
+    "files": [
+      {
+        "ticker": "RIVN",
+        "filename": "電動車/RIVN.md"
+      }
+    ]
+  },
+  {
+    "category": "電子材料",
+    "files": [
+      {
+        "ticker": "2383",
+        "filename": "電子材料/2383.md"
+      }
+    ]
+  }
+]
