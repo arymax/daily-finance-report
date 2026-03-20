@@ -262,6 +262,7 @@ const SESSION_LABEL = { morning:'早盤', evening:'收盤' };
 let allocChart = null, histChart = null;
 let allReports = [];     // full index from reports_index.json
 let activeType = '';     // '' = all
+let _staticTwd = { cash: 0, contract: 0 };  // non-position TWD values for live recalc
 
 // ── Tab switching ─────────────────────────────────────────────────────────────
 function switchTab(name) {
@@ -292,6 +293,9 @@ function renderSummary(d) {
   document.getElementById('meta-date').textContent = `${m.date} ${sess} · ${m.generated_at.slice(11,16)} TST`;
   document.getElementById('meta-usd').textContent  = `USD/TWD ${m.usd_twd}`;
   document.title = `Finance Dashboard ${m.date}`;
+  // Store static (non-position) TWD values for live P&L recalc
+  _staticTwd.cash     = s.cash_twd || 0;
+  _staticTwd.contract = Math.round(s.total_value_twd * (d.allocation?.['合約保證金'] || 0) / 100);
 }
 
 // ── Positions table ───────────────────────────────────────────────────────────
@@ -627,6 +631,32 @@ const LivePrices = (() => {
       pPctEl.textContent = `${pnl >= 0 ? '+' : ''}${pnlPct.toFixed(1)}%`;
       pPctEl.className   = `td-pnlpct text-right px-4 py-2.5 font-semibold ${cls}`;
     });
+
+    // ── Recalculate Summary Cards ─────────────────────────────────────────
+    let livePositionsTotal = 0;
+    let liveCostTotal      = 0;
+    document.querySelectorAll('#positions-tbody tr[data-ticker]').forEach(row => {
+      const costTwd = parseFloat(row.dataset.costTwd || 0);
+      liveCostTotal += costTwd;
+      // Use live-updated value if available, else fall back to snapshot cost
+      const valEl  = row.querySelector('.td-value');
+      const valStr = valEl?.textContent?.replace(/,/g, '') || '';
+      livePositionsTotal += (valStr && valStr !== '—') ? (parseFloat(valStr) || costTwd) : costTwd;
+    });
+
+    const newTotal   = livePositionsTotal + _staticTwd.cash + _staticTwd.contract;
+    const newPnl     = livePositionsTotal - liveCostTotal;
+    const newPnlPct  = liveCostTotal > 0 ? newPnl / liveCostTotal * 100 : 0;
+    const newCashPct = newTotal > 0 ? _staticTwd.cash / newTotal * 100 : 0;
+
+    document.getElementById('s-total').textContent = fmt(newTotal);
+    const sEl = document.getElementById('s-pnl');
+    sEl.textContent = (newPnl >= 0 ? '+' : '') + fmt(newPnl);
+    sEl.className   = `text-2xl font-bold ${pnlCls(newPnl)}`;
+    const sPctEl = document.getElementById('s-pnl-pct');
+    sPctEl.textContent = fmtPct(newPnlPct);
+    sPctEl.className   = `text-sm mt-0.5 ${pnlCls(newPnl)}`;
+    document.getElementById('s-cash-pct').textContent = newCashPct.toFixed(1) + '%';
   }
 
   async function refresh() {
