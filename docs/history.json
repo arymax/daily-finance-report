@@ -1,0 +1,26 @@
+[
+  {
+    "date": "2026-03-20",
+    "session": "morning",
+    "timestamp": "2026-03-20T11:43:55.519613+08:00",
+    "total_value_twd": 695266,
+    "total_pnl_twd": 15397,
+    "total_pnl_pct": 4.4,
+    "cash_pct": 41.6,
+    "positions_pnl": {
+      "006208": 57.3,
+      "VTI": 10.3,
+      "VT": 1.6,
+      "VGIT": 1.9,
+      "MRVL": -3.0,
+      "CRWD": 1.4,
+      "ALAB": 2.2,
+      "NET": 9.3,
+      "3030": 13.8,
+      "USDT": -0.4,
+      "BTC": -7.3,
+      "ETH": 43.6,
+      "XRP": -44.1
+    }
+  }
+]

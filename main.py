@@ -43,6 +43,7 @@ from core.thesis import (
     apply_reeval_results,
 )
 from core.fundamentals import fetch_fundamentals, update_snapshot_in_thesis
+from core.dashboard import generate_dashboard_data
 from core.research import (
     build_enrich_prompt,
     build_candidate_prompt, parse_candidates,
@@ -543,6 +544,18 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
     else:
         logger.info("✅ 所有報告生成完畢！")
         logger.info(f"   報告目錄：{reports_dir.resolve()}")
+
+    # ── Dashboard 資料生成 ──
+    docs_dir = BASE_DIR / "docs"
+    generate_dashboard_data(
+        portfolio=portfolio,
+        prices=prices,
+        usd_twd=usd_twd,
+        session=session,
+        portfolio_content=portfolio_content,
+        market_content=market_content,
+        docs_dir=docs_dir,
+    )
 
     # ── Git 同步（執行後 push）──
     if sync_cfg.get("enabled") and sync_cfg.get("auto_push", True):
