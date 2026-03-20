@@ -1,14 +1,14 @@
 {
   "meta": {
-    "generated_at": "2026-03-20 23:56:20 TST",
-    "date": "2026-03-20",
+    "generated_at": "2026-03-21 00:16:43 TST",
+    "date": "2026-03-21",
     "session": "morning",
-    "usd_twd": 32.0
+    "usd_twd": 31.97
   },
   "summary": {
-    "total_value_twd": 690928,
-    "total_pnl_twd": 9780,
-    "total_pnl_pct": 2.9,
+    "total_value_twd": 691054,
+    "total_pnl_twd": 9906,
+    "total_pnl_pct": 3.0,
     "cash_twd": 303632,
     "cash_pct": 43.9
   },
@@ -17,7 +17,7 @@
     "長期ETF": 17.6,
     "波段個股": 20.3,
     "加密貨幣": 11.8,
-    "合約保證金": 6.4
+    "合約保證金": 6.3
   },
   "positions": [
     {
@@ -59,10 +59,10 @@
       "cost_twd": 39000,
       "shares": 4.12911,
       "sector": "美國全市場股票",
-      "current_value_twd": 42634,
-      "pnl_twd": 3634,
+      "current_value_twd": 42612,
+      "pnl_twd": 3612,
       "pnl_pct": 9.3,
-      "current_price": "322.63 USD"
+      "current_price": "322.76 USD"
     },
     {
       "ticker": "VT",
@@ -72,10 +72,10 @@
       "cost_twd": 15000,
       "shares": 3.41164,
       "sector": "全球股票",
-      "current_value_twd": 14994,
-      "pnl_twd": -6,
-      "pnl_pct": -0.0,
-      "current_price": "137.33 USD"
+      "current_value_twd": 14988,
+      "pnl_twd": -12,
+      "pnl_pct": -0.1,
+      "current_price": "137.40 USD"
     },
     {
       "ticker": "VGIT",
@@ -85,10 +85,10 @@
       "cost_twd": 15000,
       "shares": 8.01501,
       "sector": "中期美國公債",
-      "current_value_twd": 15203,
-      "pnl_twd": 203,
-      "pnl_pct": 1.4,
-      "current_price": "59.27 USD"
+      "current_value_twd": 15198,
+      "pnl_twd": 198,
+      "pnl_pct": 1.3,
+      "current_price": "59.31 USD"
     },
     {
       "ticker": "MRVL",
@@ -98,10 +98,10 @@
       "cost_twd": 32000,
       "shares": 10.83658,
       "sector": "半導體（自訂 AI 晶片／資料中心網路／光學）",
-      "current_value_twd": 30997,
-      "pnl_twd": -1003,
-      "pnl_pct": -3.1,
-      "current_price": "89.38 USD"
+      "current_value_twd": 31077,
+      "pnl_twd": -923,
+      "pnl_pct": -2.9,
+      "current_price": "89.69 USD"
     },
     {
       "ticker": "CRWD",
@@ -111,10 +111,10 @@
       "cost_twd": 20277,
       "shares": 1.5,
       "sector": "資安軟體",
-      "current_value_twd": 19735,
-      "pnl_twd": -542,
-      "pnl_pct": -2.7,
-      "current_price": "411.10 USD"
+      "current_value_twd": 19797,
+      "pnl_twd": -480,
+      "pnl_pct": -2.4,
+      "current_price": "412.77 USD"
     },
     {
       "ticker": "ALAB",
@@ -124,10 +124,10 @@
       "cost_twd": 5923,
       "shares": 1.5,
       "sector": "半導體連接方案",
-      "current_value_twd": 5712,
-      "pnl_twd": -211,
-      "pnl_pct": -3.6,
-      "current_price": "118.98 USD"
+      "current_value_twd": 5728,
+      "pnl_twd": -195,
+      "pnl_pct": -3.3,
+      "current_price": "119.42 USD"
     },
     {
       "ticker": "NET",
@@ -137,10 +137,10 @@
       "cost_twd": 6483,
       "shares": 1,
       "sector": "網路基礎建設／資安",
-      "current_value_twd": 7111,
-      "pnl_twd": 628,
-      "pnl_pct": 9.7,
-      "current_price": "222.20 USD"
+      "current_value_twd": 7144,
+      "pnl_twd": 661,
+      "pnl_pct": 10.2,
+      "current_price": "223.42 USD"
     },
     {
       "ticker": "3030",
@@ -164,9 +164,9 @@
       "exchange": "Bitget",
       "cost_twd": 42985,
       "quantity": 1337.78378259,
-      "current_value_twd": 42813,
-      "pnl_twd": -172,
-      "pnl_pct": -0.4,
+      "current_value_twd": 42774,
+      "pnl_twd": -211,
+      "pnl_pct": -0.5,
       "current_price": "1.00 USD"
     },
     {
@@ -176,10 +176,10 @@
       "exchange": "Bitget",
       "cost_twd": 25860,
       "quantity": 0.0106787,
-      "current_value_twd": 23907,
-      "pnl_twd": -1953,
-      "pnl_pct": -7.6,
-      "current_price": "69953.52 USD"
+      "current_value_twd": 23908,
+      "pnl_twd": -1952,
+      "pnl_pct": -7.5,
+      "current_price": "70021.69 USD"
     },
     {
       "ticker": "ETH",
@@ -188,10 +188,10 @@
       "exchange": "Bitget",
       "cost_twd": 6839,
       "quantity": 0.14348174,
-      "current_value_twd": 9805,
-      "pnl_twd": 2966,
-      "pnl_pct": 43.4,
-      "current_price": "2135.24 USD"
+      "current_value_twd": 9820,
+      "pnl_twd": 2981,
+      "pnl_pct": 43.6,
+      "current_price": "2140.44 USD"
     },
     {
       "ticker": "XRP",
@@ -200,9 +200,9 @@
       "exchange": "Bitget",
       "cost_twd": 9626,
       "quantity": 115.91467897,
-      "current_value_twd": 5336,
-      "pnl_twd": -4290,
-      "pnl_pct": -44.6,
+      "current_value_twd": 5327,
+      "pnl_twd": -4299,
+      "pnl_pct": -44.7,
       "current_price": "1.44 USD"
     }
   ],

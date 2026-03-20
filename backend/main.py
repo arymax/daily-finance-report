@@ -54,7 +54,8 @@ from core.research import (
 
 # ── 時區 ──────────────────────────────────────
 TST = timezone(timedelta(hours=8))
-BASE_DIR = Path(__file__).parent
+BASE_DIR = Path(__file__).parent   # backend/
+REPO_DIR = BASE_DIR.parent         # repo root (reports/, thesis/, themes/, memory/, docs/)
 
 logger = logging.getLogger(__name__)
 
@@ -242,7 +243,7 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
     claude_model  = config.get("claude_model", "")
     timeout       = config.get("claude_timeout_seconds", 300)
     stream_output = config.get("stream_claude_output", False)
-    reports_dir  = BASE_DIR / config.get("reports_dir", "reports")
+    reports_dir  = REPO_DIR / config.get("reports_dir", "reports")
     logs_dir     = BASE_DIR / config.get("logs_dir", "logs")
     portfolio_path       = BASE_DIR / config.get("portfolio_file", "portfolio.json")
     max_stock_articles        = config.get("max_articles_per_stock", 5)
@@ -254,8 +255,8 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
     memory_cfg    = config.get("memory", {})
     sync_cfg      = config.get("sync", {})
     thesis_cfg    = config.get("thesis", {})
-    memory_dir    = BASE_DIR / memory_cfg.get("memory_dir", "memory")
-    thesis_dir    = BASE_DIR / "thesis"
+    memory_dir    = REPO_DIR / memory_cfg.get("memory_dir", "memory")
+    thesis_dir    = REPO_DIR / "thesis"
     context_days  = memory_cfg.get("context_days", 5)
     max_per_day   = thesis_cfg.get("max_per_day", 3)
 
@@ -276,7 +277,7 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
     # ── Git 同步（執行前 pull）──
     if sync_cfg.get("enabled") and sync_cfg.get("auto_pull", True):
         logger.info("── Git 同步（pull）─────────────────────")
-        sync.pull(BASE_DIR)
+        sync.pull(REPO_DIR)
 
     # ── Schema 驗證 ──
     validate_portfolio(portfolio_path)
@@ -469,7 +470,7 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
             logger.warning(f"Thesis 自動更新失敗（不影響主報告）：{e}")
 
     # ── Task 4.6：Themes 燃料自動更新 ─────────────────────────────
-    themes_dir = BASE_DIR / "themes"
+    themes_dir = REPO_DIR / "themes"
     if themes_dir.exists() and market_content:
         logger.info("── Task 4.6：Themes 燃料自動更新 ──────────────")
         try:
@@ -570,7 +571,7 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
         logger.info(f"   報告目錄：{reports_dir.resolve()}")
 
     # ── Dashboard 資料生成 ──
-    docs_dir = BASE_DIR / "docs"
+    docs_dir = REPO_DIR / "docs"
     generate_dashboard_data(
         portfolio=portfolio,
         prices=prices,
@@ -580,15 +581,15 @@ def run(run_portfolio: bool = True, run_market: bool = True, session: str = "mor
         market_content=market_content,
         docs_dir=docs_dir,
         reports_dir=reports_dir,
-        thesis_dir=BASE_DIR / "thesis",
-        themes_dir=BASE_DIR / "themes",
+        thesis_dir=REPO_DIR / "thesis",
+        themes_dir=REPO_DIR / "themes",
     )
 
     # ── Git 同步（執行後 push）──
     if sync_cfg.get("enabled") and sync_cfg.get("auto_push", True):
         logger.info("── Git 同步（push）─────────────────────")
         today = datetime.now(TST).strftime("%Y-%m-%d")
-        sync.push(BASE_DIR, f"report: {today}")
+        sync.push(REPO_DIR, f"report: {today}")
 
     logger.info("=" * 55)
     _release_lock()
@@ -607,7 +608,7 @@ def run_enrich_theses(only_tickers: list[str] | None = None) -> None:
     claude_model= config.get("claude_model", "")
     timeout     = config.get("claude_timeout_seconds", 300)
     stream_output = config.get("stream_claude_output", False)
-    thesis_dir  = BASE_DIR / "thesis"
+    thesis_dir  = REPO_DIR / "thesis"
     logs_dir    = BASE_DIR / config.get("logs_dir", "logs")
     portfolio_path = BASE_DIR / config.get("portfolio_file", "portfolio.json")
 
@@ -705,9 +706,9 @@ def run_research_only(session: str = "morning") -> None:
     claude_model = config.get("claude_model", "")
     timeout      = config.get("claude_timeout_seconds", 300)
     stream_output = config.get("stream_claude_output", False)
-    reports_dir  = BASE_DIR / config.get("reports_dir", "reports")
+    reports_dir  = REPO_DIR / config.get("reports_dir", "reports")
     logs_dir     = BASE_DIR / config.get("logs_dir", "logs")
-    thesis_dir   = BASE_DIR / "thesis"
+    thesis_dir   = REPO_DIR / "thesis"
     thesis_cfg   = config.get("thesis", {})
     max_per_day  = thesis_cfg.get("max_per_day", 3)
 
@@ -797,9 +798,9 @@ def run_update_thesis(session: str = "morning") -> None:
     claude_model = config.get("claude_model", "")
     timeout      = config.get("claude_timeout_seconds", 300)
     stream_output = config.get("stream_claude_output", False)
-    reports_dir  = BASE_DIR / config.get("reports_dir", "reports")
+    reports_dir  = REPO_DIR / config.get("reports_dir", "reports")
     logs_dir     = BASE_DIR / config.get("logs_dir", "logs")
-    thesis_dir   = BASE_DIR / "thesis"
+    thesis_dir   = REPO_DIR / "thesis"
 
     setup_logging(logs_dir)
     logger.info("=" * 55)
@@ -886,7 +887,7 @@ def run_premarket_check() -> None:
     gemini_cli  = config.get("gemini_cli", "gemini")
     gemini_model= config.get("gemini_model", "")
     timeout     = config.get("claude_timeout_seconds", 180)
-    reports_dir = BASE_DIR / config.get("reports_dir", "reports")
+    reports_dir = REPO_DIR / config.get("reports_dir", "reports")
     logs_dir    = BASE_DIR / config.get("logs_dir", "logs")
     sync_cfg    = config.get("sync", {})
 
@@ -930,7 +931,7 @@ def run_premarket_check() -> None:
     # 立即 git push（不存本地報告檔案）
     if sync_cfg.get("enabled") and sync_cfg.get("auto_push", True):
         logger.info("── Git 同步（premarket push）───────────")
-        sync.push(BASE_DIR, f"premarket: {today}")
+        sync.push(REPO_DIR, f"premarket: {today}")
 
     # 開啟獨立報告視窗（關閉視窗後程式結束）
     try:
@@ -1004,17 +1005,17 @@ def run_dashboard_only(session: str | None = None) -> None:
         session=session,
         portfolio_content=portfolio_content,
         market_content=market_content,
-        docs_dir=BASE_DIR / "docs",
+        docs_dir=REPO_DIR / "docs",
         reports_dir=reports_dir,
-        thesis_dir=BASE_DIR / "thesis",
-        themes_dir=BASE_DIR / "themes",
+        thesis_dir=REPO_DIR / "thesis",
+        themes_dir=REPO_DIR / "themes",
     )
     logger.info("✅ 儀表板快照已更新（docs/data.json）")
 
     # ── Git push（若設定啟用）──
     if sync_cfg.get("enabled") and sync_cfg.get("auto_push", True):
         logger.info("── Git 同步（push）─────────────────────")
-        sync.push(BASE_DIR, f"dashboard: {datetime.now(TST).strftime('%Y-%m-%d')}")
+        sync.push(REPO_DIR, f"dashboard: {datetime.now(TST).strftime('%Y-%m-%d')}")
 
 
 # ── CLI 入口 ──────────────────────────────────

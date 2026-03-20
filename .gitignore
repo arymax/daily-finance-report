@@ -14,9 +14,19 @@ docs/config.js
 
 # 執行日誌（本地就好，不需要同步）
 logs/
+backend/logs/
 
 # 執行鎖（runtime artifact，不應進 repo）
 main.lock
+backend/main.lock
+
+# Next.js / Node
+frontend/.next/
+frontend/node_modules/
+frontend/out/
+
+# Next.js local env (API keys)
+frontend/.env.local
 
 # Windows 暫存
 Thumbs.db
