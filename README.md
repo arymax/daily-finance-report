@@ -1,14 +1,21 @@
 # 每日財經報告 Daily Finance Report
 
-每天早晨自動爬取個股與市場新聞、查詢即時股價，透過 **Claude Code CLI** 生成持倉分析與市場總覽報告，並儲存至 GitHub 供跨裝置使用。
+每天自動爬取個股與市場新聞、查詢即時股價，透過 **Claude Code CLI** 生成持倉分析與市場總覽報告，並透過 **GitHub Pages** 提供即時互動式儀表板。
+
+🔗 **Live Dashboard**：[arymax.github.io/daily-finance-report](https://arymax.github.io/daily-finance-report)
+
+---
 
 ## 功能特色
 
-- **持倉分析**：即時股價、成本損益、操作建議
-- **市場總覽**：RSS 市場新聞 + 重要個股（NVDA、AAPL 等）新聞確保不漏接財報
-- **記憶功能**：自動保留近 N 日分析摘要，提示決策連貫性
-- **GitHub 同步**：執行後自動 push，跨裝置皆可取得最新報告
-- **Windows 排程**：Task Scheduler 每日自動執行
+- **持倉儀表板**：即時股價（US / TW / Crypto）、損益、資產分配圓餅圖、歷史走勢
+- **持倉分析**：成本損益計算、操作建議（Claude 生成）
+- **市場總覽**：RSS 市場新聞 + 重要個股新聞、強弱板塊、風險提示
+- **觀察清單**：優先級評分、進場條件追蹤、主題對齊
+- **Thesis 管理**：個股深度研究文件、自動更新、產業板塊分類
+- **主題催化劑**：跨標的主題追蹤（AI / 液冷 / 核電等）
+- **記憶功能**：保留近 N 日分析摘要，確保分析連貫性
+- **GitHub 同步**：執行後自動 push，GitHub Pages 自動部署
 
 ---
 
@@ -38,113 +45,174 @@ cd daily-finance-report
 uv sync
 ```
 
-這會自動根據 `pyproject.toml` 與 `uv.lock` 建立 `.venv` 並安裝所有依賴。
-
 ### 3. 設定個人持倉
 
-複製範例並填入自己的持倉資料：
 ```bash
 cp portfolio.example.json portfolio.json
 ```
 
 編輯 `portfolio.json`，填入 ticker、持股數量、成本（TWD）等欄位。
-格式說明請參考 `portfolio.example.json` 與 `portfolio_schema.json`。
+驗證格式：
 
-驗證格式是否正確：
 ```bash
 uv run python main.py --validate
 ```
 
-### 4. 調整設定（可選）
+### 4. 安裝 pre-commit hook（必做）
+
+**作用**：每次 commit `portfolio.json` 時，自動重生成 `docs/data.json` 並加入同一個 commit，確保儀表板與持倉資料永遠同步。
+
+在 `.git/hooks/pre-commit` 建立以下內容的檔案：
+
+```sh
+#!/bin/sh
+# 跳過方式：SKIP_DASHBOARD=1 git commit -m "..."
+if [ "${SKIP_DASHBOARD}" = "1" ]; then
+  exit 0
+fi
+
+if git diff --cached --name-only | grep -q "^portfolio\.json$"; then
+  echo "[pre-commit] portfolio.json 已變動，自動重生成 docs/data.json..."
+  uv run python main.py --dashboard --session morning
+  if [ $? -ne 0 ]; then
+    echo "[pre-commit] ❌ dashboard 生成失敗，commit 中止"
+    exit 1
+  fi
+  git add docs/data.json docs/history.json
+  echo "[pre-commit] ✅ docs/data.json 已更新並加入 commit"
+fi
+exit 0
+```
+
+接著確保檔案有執行權限（macOS / Linux）：
+```bash
+chmod +x .git/hooks/pre-commit
+```
+
+> ⚠️ `.git/hooks/` 不受 git 版本控制，**換電腦或重新 clone 後需重新建立此檔案**。
+
+**跳過 hook（緊急 commit 時）：**
+```bash
+SKIP_DASHBOARD=1 git commit -m "緊急修正"
+```
+
+### 5. 調整設定（可選）
 
 編輯 `config.json`：
 
 ```json
 {
-  "claude_model": "",               // 留空使用預設模型，或指定如 "claude-opus-4-5"
+  "claude_model": "",
   "claude_timeout_seconds": 300,
   "max_articles_per_stock": 5,
   "max_market_articles": 20,
-  "news_sources": {
-    "market_extra_tickers": ["NVDA", "AAPL", "MSFT", ...]  // 保證抓到的重要個股
+  "sync": {
+    "enabled": true,
+    "auto_pull": true,
+    "auto_push": true
   },
   "memory": {
     "enabled": true,
-    "context_days": 5               // 記憶天數
-  },
-  "sync": {
-    "enabled": false,               // 設為 true 以啟用 GitHub 自動同步
-    "auto_pull": true,
-    "auto_push": true
+    "context_days": 5
   }
 }
 ```
 
-### 5. 執行
+### 6. （可選）設定 Finnhub API Key
+
+Finnhub 為 US 股票提供更即時的報價（儀表板不需要也能運作，Yahoo Finance 為主要來源）。
+
+1. 到 [finnhub.io](https://finnhub.io/) 免費註冊取得 API Key
+2. 在 `config.json` 加入：
+
+```json
+{
+  "finnhub_api_key": "你的_API_KEY"
+}
+```
+
+執行 `main.py` 後會自動生成 `docs/config.js`（已 gitignored，僅本機有效）。
+
+### 7. 執行
 
 ```bash
 uv run python main.py
 ```
 
-報告生成在 `reports/` 目錄。
+報告生成在 `reports/`，儀表板資料更新至 `docs/data.json`。
 
 ---
 
 ## 指令選項
 
 ```bash
-uv run python main.py              # 完整報告（持倉分析 + 市場總覽）
-uv run python main.py --portfolio  # 只執行持倉分析
-uv run python main.py --market     # 只執行市場總覽
-uv run python main.py --validate   # 只驗證 portfolio.json 格式，不生成報告
+uv run python main.py                        # 完整報告（持倉分析 + 市場總覽）
+uv run python main.py --portfolio            # 只執行持倉分析（Task 1）
+uv run python main.py --market               # 只執行市場總覽（Task 2）
+uv run python main.py --validate             # 只驗證 portfolio.json 格式
+uv run python main.py --dashboard            # 快速重生成儀表板（不呼叫 Claude）
+uv run python main.py --update-thesis        # 單獨執行 thesis 自動更新（Task 4）
+uv run python main.py --research             # 單獨執行自動研究新標的（Task 5）
+uv run python main.py --enrich-thesis        # 對所有 thesis 補充深度質化分析
+uv run python main.py --enrich-ticker NET    # 只補充指定 ticker 的 thesis
+uv run python main.py --premarket            # 執行美股開盤前晨檢
+uv run python main.py --session evening      # 指定時段（預設 morning）
+uv run python main.py --force                # 強制執行（忽略週末跳過邏輯）
+```
+
+### 更新持倉後同步儀表板的完整流程
+
+```bash
+# 1. 編輯 portfolio.json（手動或由 Claude 協助）
+# 2. Commit（pre-commit hook 自動重生成 data.json）
+git add portfolio.json
+git commit -m "portfolio: 更新說明"
+# 3. Push（GitHub Pages 自動部署）
+git push
+```
+
+或手動觸發儀表板重建（不 commit）：
+
+```bash
+uv run python main.py --dashboard
 ```
 
 ---
 
-## GitHub 同步設定
+## 儀表板即時報價來源
 
-若要啟用跨裝置同步，在 `config.json` 設定：
-```json
-"sync": { "enabled": true, "auto_pull": true, "auto_push": true }
-```
+儀表板每 15 秒自動更新價格，**所有來源皆免費、無需 API Key**：
 
-確認本機 git remote 已設定：
-```bash
-git remote add origin https://github.com/<你的帳號>/<repo>.git
-```
+| 資產 | 主要來源 | Fallback |
+|------|---------|---------|
+| US 股票 | Yahoo Finance（via corsproxy.io） | Finnhub（若有本機 key） |
+| TW 股票 | TWSE API（via corsproxy.io） | — |
+| 加密貨幣 | Binance ticker API | CoinGecko（via corsproxy.io） |
+| USD/TWD | open.er-api.com | — |
 
-每次執行完畢後，程式會自動將 `reports/`、`memory/`、`portfolio.json` push 到 GitHub。
+> TW 股票在非交易時段（平日 13:30 後、週末）顯示昨收價。  
+> GitHub Pages 上 Finnhub 不可用（`config.js` 為 gitignored 本機檔案），以 Yahoo Finance 為主。
 
 ---
 
 ## 每日自動排程
 
-本專案使用 **Python `schedule` 套件**，不依賴 Windows Task Scheduler，無需管理員權限。
-
-### 手動啟動（當次有效）
 ```bash
-# 有 console 視窗
+# 手動啟動排程（前景）
 uv run python scheduler_daemon.py
 
-# 背景靜默執行（無視窗）
-start "" .venv\Scripts\pythonw.exe scheduler_daemon.py
-```
-
-### 開機自動啟動（永久生效，不需管理員）
-```bash
+# 開機自動啟動（不需管理員）
 uv run python tools/install_startup.py
-```
 
-查詢狀態 / 移除：
-```bash
+# 查詢狀態 / 移除
 uv run python tools/install_startup.py --status
 uv run python tools/install_startup.py --remove
 ```
 
 | 時段 | 時間 | 說明 |
 |------|------|------|
-| morning | 07:00 | 台股盤前／美股盤後分析 |
-| evening | 18:00 | 台股盤後／美股盤前預備 |
+| morning | 07:00 | 台股盤前／美股盤後 |
+| evening | 18:00 | 台股盤後／美股盤前 |
 
 ---
 
@@ -153,44 +221,43 @@ uv run python tools/install_startup.py --remove
 ```
 daily-finance-report/
 ├── main.py                   # 主程式入口
+├── scheduler_daemon.py       # 每日自動排程
 ├── config.json               # 設定檔
-├── portfolio.json            # 個人持倉（自行建立，勿 commit 敏感資料）
+├── portfolio.json            # 個人持倉（自行建立，gitignored）
 ├── portfolio.example.json    # 持倉格式範例
-├── portfolio_schema.json     # portfolio 欄位 schema（格式驗證用）
-├── pyproject.toml            # 專案設定與依賴（uv init）
-├── uv.lock                   # 精確版本鎖定檔
+├── portfolio_schema.json     # 欄位 schema（格式驗證用）
+├── pyproject.toml
+├── uv.lock
 │
 ├── core/                     # 核心模組
 │   ├── config.py             # 設定載入 + 日誌初始化
 │   ├── portfolio.py          # 持倉載入 + schema 驗證
 │   ├── news.py               # 個股 + 市場新聞抓取
-│   ├── prices.py             # 即時股價 + 匯率查詢
+│   ├── prices.py             # 即時股價 + 匯率查詢（yfinance）
 │   ├── prompts.py            # Claude prompt 建構
 │   ├── memory.py             # 跨日記憶摘要
-│   └── sync.py               # Git 同步封裝
+│   ├── sync.py               # Git 同步封裝
+│   ├── dashboard.py          # docs/data.json 生成
+│   ├── thesis.py             # Thesis 管理與更新
+│   ├── themes_updater.py     # 主題催化劑追蹤
+│   ├── fundamentals.py       # 基本面資料抓取
+│   ├── research.py           # 自動研究新標的
+│   └── premarket.py          # 盤前晨檢
 │
-├── tools/                    # 獨立工具腳本
-│   ├── validate.py           # portfolio schema 驗證 CLI
-│   └── install_startup.py    # 開機自動啟動設定（不需管理員）
+├── docs/                     # GitHub Pages 儀表板
+│   ├── index.html            # 儀表板前端
+│   ├── data.json             # 持倉快照（由 --dashboard 生成）
+│   ├── history.json          # 歷史資產走勢
+│   ├── config.js             # 本機 API Key（gitignored）
+│   ├── reports/              # 報告 markdown（同步自 reports/）
+│   ├── thesis/               # Thesis markdown（同步自 thesis/）
+│   └── themes/               # 主題文件（同步自 themes/）
 │
 ├── reports/                  # 每日報告（自動生成）
-│   └── YYYYMMDD_*.md
-│
-└── memory/                   # 每日記憶摘要（自動生成）
-    └── YYYYMMDD.md
+├── thesis/                   # 個股深度研究文件
+├── themes/                   # 主題催化劑文件
+└── memory/                   # 跨日記憶摘要
 ```
-
----
-
-## 新聞來源
-
-| 類型 | 來源 |
-|------|------|
-| 個股新聞 | yfinance API + Yahoo Finance RSS |
-| 市場新聞 | Yahoo Finance / Reuters / MarketWatch / CNBC RSS |
-| 重要個股 | NVDA, AAPL, MSFT, META, GOOGL, AMZN, TSLA, AMD, TSM, SMCI（可在 config.json 調整）|
-| 股價 | yfinance fast_info（TW / US / Crypto）|
-| 匯率 | yfinance（USD/TWD）|
 
 ---
 
