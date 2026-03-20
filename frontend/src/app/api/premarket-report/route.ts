@@ -133,8 +133,6 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify({
           contents: [{ parts: [{ text: buildPrompt(quotes, date) }] }],
           generationConfig: { maxOutputTokens: 8192, temperature: 0.4 },
-          // Disable thinking to get a single clean text response
-          thinkingConfig: { thinkingBudget: 0 },
         }),
       }
     );
