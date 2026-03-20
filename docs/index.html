@@ -91,9 +91,8 @@
         <div id="live-clock" class="text-slate-200 font-mono tabular-nums tracking-tight" style="font-size:.8rem;">—</div>
         <div class="text-slate-600">Asia/Taipei</div>
       </div>
-      <!-- Report snapshot meta -->
+      <!-- USD/TWD (live-updated by LivePrices) -->
       <div class="text-right text-xs leading-5 text-slate-400">
-        <div id="meta-date">—</div>
         <div id="meta-usd" class="text-slate-500">USD/TWD —</div>
       </div>
     </div>
@@ -299,8 +298,6 @@ function renderSummary(d) {
   document.getElementById('s-cash-pct').textContent = s.cash_pct+'%';
   document.getElementById('s-cash-twd').textContent = fmt(s.cash_twd)+' TWD';
   document.getElementById('s-usdtwd').textContent   = m.usd_twd;
-  const sess = m.session==='morning'?'早盤':'收盤';
-  document.getElementById('meta-date').textContent = `${m.date} ${sess} · ${m.generated_at.slice(11,16)} TST`;
   document.getElementById('meta-usd').textContent  = `USD/TWD ${m.usd_twd}`;
   document.title = `Finance Dashboard ${m.date}`;
   // Store static (non-position) TWD values for live P&L recalc
