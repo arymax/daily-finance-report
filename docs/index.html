@@ -312,6 +312,21 @@ function renderPositions(d) {
   const ORDER=['長期ETF','個股','spot','stablecoin'];
   const all=[...d.positions,...d.crypto];
   let html='';
+
+  // ── 現金 ──
+  const cashTwd = d.summary?.cash_twd || 0;
+  if (cashTwd > 0) {
+    html+=`<tr><td colspan="5" class="px-4 py-1.5 text-xs font-semibold text-blue-400 uppercase tracking-wider bg-slate-900/60">現金</td></tr>`;
+    html+=`<tr class="border-t border-slate-700/40 transition-colors">
+      <td class="px-4 py-2.5"><div class="font-medium text-slate-100">現金</div><div class="text-xs text-slate-400 mt-0.5">銀行存款 / 台幣現金</div></td>
+      <td class="td-price text-right px-4 py-2.5 text-xs text-slate-400">—</td>
+      <td class="text-right px-4 py-2.5 text-slate-200" id="cash-value-cell">${fmt(cashTwd)}</td>
+      <td class="text-right px-4 py-2.5 neutral">—</td>
+      <td class="text-right px-4 py-2.5 font-semibold neutral">—</td>
+    </tr>`;
+  }
+
+  // ── 持倉 ──
   ORDER.forEach(type=>{
     const g=all.filter(p=>p.type===type);
     if(!g.length) return;
@@ -329,6 +344,20 @@ function renderPositions(d) {
       </tr>`;
     });
   });
+
+  // ── 合約保證金 ──
+  const contractTwd = _staticTwd.contract || 0;
+  if (contractTwd > 0) {
+    html+=`<tr><td colspan="5" class="px-4 py-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider bg-slate-900/60">合約保證金</td></tr>`;
+    html+=`<tr class="border-t border-slate-700/40 transition-colors">
+      <td class="px-4 py-2.5"><div class="font-medium text-slate-100">合約保證金</div><div class="text-xs text-slate-400 mt-0.5">衍生品保證金</div></td>
+      <td class="text-right px-4 py-2.5 text-xs text-slate-400">—</td>
+      <td class="text-right px-4 py-2.5 text-slate-200">${fmt(contractTwd)}</td>
+      <td class="text-right px-4 py-2.5 neutral">—</td>
+      <td class="text-right px-4 py-2.5 font-semibold neutral">—</td>
+    </tr>`;
+  }
+
   document.getElementById('positions-tbody').innerHTML = html||'<tr><td colspan="5" class="text-center py-8 text-slate-500">無持倉資料</td></tr>';
 }
 
