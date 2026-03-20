@@ -340,6 +340,125 @@ def _sync_thesis(thesis_dir: Path, docs_dir: Path) -> list[dict]:
     return index
 
 
+def _parse_front_matter(content: str) -> tuple[dict, str]:
+    """Parse YAML-like front matter between --- delimiters."""
+    if not content.startswith("---"):
+        return {}, content
+    end = content.find("\n---", 3)
+    if end == -1:
+        return {}, content
+    fm_text = content[3:end].strip()
+    body = content[end + 4:].strip()
+    meta: dict = {}
+    for line in fm_text.splitlines():
+        if ":" not in line:
+            continue
+        key, _, val = line.partition(":")
+        key = key.strip()
+        val = val.strip()
+        if val.startswith("[") and val.endswith("]"):
+            items = [v.strip().strip("\"'") for v in val[1:-1].split(",")]
+            meta[key] = [i for i in items if i]
+        else:
+            try:
+                meta[key] = int(val)
+            except ValueError:
+                try:
+                    meta[key] = float(val)
+                except ValueError:
+                    meta[key] = val
+    return meta, body
+
+
+def _sync_themes(themes_dir: Path, docs_dir: Path) -> list[dict]:
+    """
+    Sync themes/*.md → docs/themes/*.md
+    Parse YAML front matter and generate docs/themes_index.json.
+    """
+    out_dir = docs_dir / "themes"
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    index: list[dict] = []
+    STATUS_ORDER = {"active": 0, "building": 1, "cooling": 2, "peak": 3}
+
+    for md_file in sorted(themes_dir.glob("*.md")):
+        if md_file.name == "README.md":
+            continue
+        content = md_file.read_text(encoding="utf-8")
+        meta, body = _parse_front_matter(content)
+        if not meta:
+            continue
+
+        # Count milestones
+        total_ms   = len(re.findall(r"^- \[[ x]\]", body, re.MULTILINE))
+        done_ms    = len(re.findall(r"^- \[x\]",    body, re.MULTILINE))
+
+        entry = {
+            "id":           md_file.stem,
+            "name":         meta.get("name", md_file.stem),
+            "status":       meta.get("status", "building"),
+            "fuel_pct":     meta.get("fuel_pct", 50),
+            "tickers":      meta.get("tickers", []),
+            "last_updated": meta.get("last_updated", ""),
+            "filename":     md_file.name,
+            "milestones_total": total_ms,
+            "milestones_done":  done_ms,
+        }
+        index.append(entry)
+        (out_dir / md_file.name).write_bytes(md_file.read_bytes())
+
+    index.sort(key=lambda x: (STATUS_ORDER.get(x["status"], 9), -x["fuel_pct"]))
+
+    (docs_dir / "themes_index.json").write_text(
+        json.dumps(index, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    return index
+
+
+def _parse_ripple(market_content: str) -> list[dict]:
+    """
+    Parse 宏觀漣漪分析 section from market overview report.
+    Expected format:
+      ## 八、宏觀漣漪分析
+      ### Emoji Title
+      - **一階影響**：...
+      - **二階影響**：...
+      - **關聯標的**：...
+    """
+    m = re.search(
+        r"##\s*[八8]、宏觀漣漪分析(.*?)(?=^##\s|\Z)",
+        market_content, re.MULTILINE | re.DOTALL,
+    )
+    if not m:
+        return []
+
+    section = m.group(1)
+    ripples: list[dict] = []
+    entries = re.split(r"^###\s+", section, flags=re.MULTILINE)
+    for entry in entries[1:]:
+        lines = entry.strip().splitlines()
+        if not lines:
+            continue
+        title = lines[0].strip()
+        first_order = second_order = related = ""
+        for line in lines[1:]:
+            clean = re.sub(r"\*\*[^*]+\*\*[：:]?\s*", "", line).strip().lstrip("- ")
+            if "一階影響" in line:
+                first_order = clean
+            elif "二階影響" in line:
+                second_order = clean
+            elif "關聯標的" in line:
+                related = clean
+        if title:
+            ripples.append({
+                "title":        title,
+                "first_order":  first_order,
+                "second_order": second_order,
+                "related":      related,
+            })
+    return ripples
+
+
 # ── 主入口 ────────────────────────────────────────────────────────────────────
 
 def generate_dashboard_data(
@@ -352,6 +471,7 @@ def generate_dashboard_data(
     docs_dir:          Path,
     reports_dir:       Path | None = None,
     thesis_dir:        Path | None = None,
+    themes_dir:        Path | None = None,
 ) -> None:
     """
     生成 docs/data.json（當日快照）並追加至 docs/history.json。
@@ -451,6 +571,7 @@ def generate_dashboard_data(
         sectors    = _parse_sectors(market_content)    if market_content else {"strong": [], "weak": []}
         key_events = _parse_key_events(market_content) if market_content else []
         risks      = _parse_risks(market_content)      if market_content else []
+        ripple     = _parse_ripple(market_content)     if market_content else []
 
         # ── 觀察清單 ──
         watchlist_data = _parse_watchlist_status(portfolio_content, watchlist)
@@ -479,6 +600,7 @@ def generate_dashboard_data(
                 "sectors":    sectors,
                 "key_events": key_events,
                 "risks":      risks,
+                "ripple":     ripple,
             },
         }
 
@@ -532,6 +654,11 @@ def generate_dashboard_data(
             thesis_index = _sync_thesis(thesis_dir, docs_dir)
             total = sum(len(c["files"]) for c in thesis_index)
             logger.info(f"✅ Thesis 已同步：docs/thesis/（{len(thesis_index)} 板塊，{total} 份）")
+
+        # ── 同步主題催化劑 ──
+        if themes_dir and themes_dir.exists():
+            themes_index = _sync_themes(themes_dir, docs_dir)
+            logger.info(f"✅ 主題已同步：docs/themes/（{len(themes_index)} 個主題）")
 
     except Exception as exc:
         logger.warning(f"看板資料生成失敗（不影響主報告）：{exc}", exc_info=True)

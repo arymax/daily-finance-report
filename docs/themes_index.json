@@ -1,0 +1,209 @@
+[
+  {
+    "id": "AI國防應用",
+    "name": "AI國防應用",
+    "status": "active",
+    "fuel_pct": 80,
+    "tickers": [
+      "PLTR",
+      "LMT",
+      "NOC",
+      "RTX",
+      "BWXT",
+      "ACHR"
+    ],
+    "last_updated": "2026-03-20",
+    "filename": "AI國防應用.md",
+    "milestones_total": 7,
+    "milestones_done": 4
+  },
+  {
+    "id": "CPO",
+    "name": "CPO（共封裝光學）",
+    "status": "active",
+    "fuel_pct": 80,
+    "tickers": [
+      "ALAB",
+      "COHR",
+      "LITE",
+      "3081"
+    ],
+    "last_updated": "2026-03-20",
+    "filename": "CPO.md",
+    "milestones_total": 6,
+    "milestones_done": 3
+  },
+  {
+    "id": "AI電力核能",
+    "name": "AI電力／核能復興",
+    "status": "active",
+    "fuel_pct": 75,
+    "tickers": [
+      "CEG",
+      "VST",
+      "ETR",
+      "NRG",
+      "LNG",
+      "NEE"
+    ],
+    "last_updated": "2026-03-20",
+    "filename": "AI電力核能.md",
+    "milestones_total": 8,
+    "milestones_done": 4
+  },
+  {
+    "id": "半導體去美化",
+    "name": "半導體去美化／供應鏈重組",
+    "status": "active",
+    "fuel_pct": 75,
+    "tickers": [
+      "AMAT",
+      "LRCX",
+      "KLAC",
+      "2330",
+      "ASML",
+      "ONTO"
+    ],
+    "last_updated": "2026-03-20",
+    "filename": "半導體去美化.md",
+    "milestones_total": 8,
+    "milestones_done": 4
+  },
+  {
+    "id": "光進銅退",
+    "name": "光進銅退（光纖取代銅纜互連）",
+    "status": "active",
+    "fuel_pct": 70,
+    "tickers": [
+      "COHR",
+      "LITE",
+      "4977",
+      "3081",
+      "AAOI",
+      "IIVI"
+    ],
+    "last_updated": "2026-03-20",
+    "filename": "光進銅退.md",
+    "milestones_total": 7,
+    "milestones_done": 4
+  },
+  {
+    "id": "歐洲再武裝",
+    "name": "歐洲再武裝",
+    "status": "active",
+    "fuel_pct": 70,
+    "tickers": [
+      "LMT",
+      "NOC",
+      "RTX",
+      "LDOS",
+      "CACI"
+    ],
+    "last_updated": "2026-03-20",
+    "filename": "歐洲再武裝.md",
+    "milestones_total": 7,
+    "milestones_done": 4
+  },
+  {
+    "id": "ABF載板",
+    "name": "ABF載板（先進封裝基板）",
+    "status": "active",
+    "fuel_pct": 65,
+    "tickers": [
+      "3037",
+      "8150",
+      "AMKR",
+      "ASX"
+    ],
+    "last_updated": "2026-03-20",
+    "filename": "ABF載板.md",
+    "milestones_total": 6,
+    "milestones_done": 3
+  },
+  {
+    "id": "HBM先進封裝",
+    "name": "HBM／先進封裝（CoWoS）",
+    "status": "active",
+    "fuel_pct": 60,
+    "tickers": [
+      "MU",
+      "AMAT",
+      "ASML",
+      "3034",
+      "2330"
+    ],
+    "last_updated": "2026-03-20",
+    "filename": "HBM先進封裝.md",
+    "milestones_total": 7,
+    "milestones_done": 3
+  },
+  {
+    "id": "量子運算",
+    "name": "量子運算（Quantum Computing）",
+    "status": "building",
+    "fuel_pct": 92,
+    "tickers": [
+      "IBM",
+      "GOOGL",
+      "IONQ",
+      "RGTI",
+      "QUBT"
+    ],
+    "last_updated": "2026-03-20",
+    "filename": "量子運算.md",
+    "milestones_total": 7,
+    "milestones_done": 3
+  },
+  {
+    "id": "AI_Agent工作流",
+    "name": "AI Agent工作流（Agentic AI）",
+    "status": "building",
+    "fuel_pct": 90,
+    "tickers": [
+      "PLTR",
+      "NOW",
+      "CRM",
+      "MSFT",
+      "UBER"
+    ],
+    "last_updated": "2026-03-20",
+    "filename": "AI_Agent工作流.md",
+    "milestones_total": 8,
+    "milestones_done": 4
+  },
+  {
+    "id": "邊緣AI",
+    "name": "邊緣AI（Edge AI）",
+    "status": "building",
+    "fuel_pct": 88,
+    "tickers": [
+      "QCOM",
+      "NVDA",
+      "AMD",
+      "INTC",
+      "2330",
+      "AAPL"
+    ],
+    "last_updated": "2026-03-20",
+    "filename": "邊緣AI.md",
+    "milestones_total": 8,
+    "milestones_done": 4
+  },
+  {
+    "id": "低軌衛星",
+    "name": "低軌衛星（LEO Satellite）",
+    "status": "building",
+    "fuel_pct": 85,
+    "tickers": [
+      "RKLB",
+      "ASTS",
+      "LMT",
+      "NOC",
+      "MNTS"
+    ],
+    "last_updated": "2026-03-20",
+    "filename": "低軌衛星.md",
+    "milestones_total": 8,
+    "milestones_done": 4
+  }
+]

@@ -79,6 +79,7 @@
       <button id="tab-watchlist" onclick="switchTab('watchlist')" class="tab-btn px-4 text-sm font-medium">觀察清單</button>
       <button id="tab-market"    onclick="switchTab('market')"    class="tab-btn px-4 text-sm font-medium">市場摘要</button>
       <button id="tab-reports"   onclick="switchTab('reports')"   class="tab-btn px-4 text-sm font-medium">報告記錄</button>
+      <button id="tab-themes"    onclick="switchTab('themes')"    class="tab-btn px-4 text-sm font-medium">主題催化劑</button>
       <button id="tab-thesis"    onclick="switchTab('thesis')"    class="tab-btn px-4 text-sm font-medium">產業研究</button>
     </nav>
     <div class="ml-auto flex items-center gap-4 shrink-0">
@@ -198,6 +199,35 @@
       <p class="text-sm font-medium text-yellow-400 mb-3">⚠️ 風險提示</p>
       <div id="risk-alerts" class="divide-y divide-slate-700/50"></div>
     </div>
+    <div class="bg-slate-800 rounded-xl border border-slate-700 p-5" id="ripple-section" style="display:none">
+      <p class="text-sm font-medium text-cyan-400 mb-4">🌊 宏觀漣漪效應</p>
+      <div id="ripple-list" class="space-y-4"></div>
+    </div>
+  </div>
+
+  <!-- ─── 主題催化劑 ────────────────────────────────────────────────────── -->
+  <div id="panel-themes" class="hidden">
+    <div class="flex gap-5 min-h-[70vh]">
+
+      <!-- Left: theme card grid -->
+      <div class="flex-1 min-w-0">
+        <div id="themes-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div class="text-slate-500 text-center py-10 col-span-3">載入中…</div>
+        </div>
+      </div>
+
+      <!-- Right: theme detail viewer -->
+      <div class="w-[480px] shrink-0 hidden" id="theme-viewer-panel">
+        <div class="bg-slate-800 rounded-xl border border-slate-700 h-full flex flex-col sticky top-20">
+          <div class="px-5 py-3 border-b border-slate-700 flex items-center justify-between shrink-0">
+            <span id="theme-viewer-title" class="text-sm font-medium text-slate-200"></span>
+            <button onclick="closeThemeViewer()" class="text-slate-500 hover:text-slate-300 text-xs px-2 py-1 rounded hover:bg-slate-700">✕ 關閉</button>
+          </div>
+          <div id="theme-viewer-content" class="flex-1 overflow-y-auto px-6 py-4 prose text-sm"></div>
+        </div>
+      </div>
+
+    </div>
   </div>
 
   <!-- ─── 產業研究 ─────────────────────────────────────────────────────── -->
@@ -306,7 +336,7 @@ let _staticTwd = { cash: 0, contract: 0 };  // non-position TWD values for live 
 
 // ── Tab switching ─────────────────────────────────────────────────────────────
 function switchTab(name) {
-  ['portfolio','watchlist','market','reports','thesis'].forEach(t => {
+  ['portfolio','watchlist','market','reports','themes','thesis'].forEach(t => {
     document.getElementById(`panel-${t}`).classList.toggle('hidden', t !== name);
     document.getElementById(`tab-${t}`).classList.toggle('active', t === name);
   });
@@ -571,11 +601,12 @@ function renderReportsTab(index) {
 async function loadDashboard() {
   try {
     const bust = `?t=${Date.now()}`;
-    const [data, history, reportIndex, thesisIndex] = await Promise.all([
+    const [data, history, reportIndex, thesisIndex, themesIndex] = await Promise.all([
       fetch(`data.json${bust}`).then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); }),
       fetch(`history.json${bust}`).then(r=>r.ok?r.json():[]).catch(()=>[]),
       fetch(`reports_index.json${bust}`).then(r=>r.ok?r.json():[]).catch(()=>[]),
       fetch(`thesis_index.json${bust}`).then(r=>r.ok?r.json():[]).catch(()=>[]),
+      fetch(`themes_index.json${bust}`).then(r=>r.ok?r.json():[]).catch(()=>[]),
     ]);
 
     renderSummary(data);
@@ -586,6 +617,8 @@ async function loadDashboard() {
     renderMarket(data.market);
     renderReportsTab(reportIndex);
     renderThesisTab(thesisIndex);
+    renderThemesTab(themesIndex);
+    renderRipple(data.market?.ripple);
     LivePrices.start();
 
   } catch(err) {
@@ -598,6 +631,102 @@ async function loadDashboard() {
         <p class="text-xs text-slate-700 mt-1">（本機預覽需用 <code class="bg-slate-800 px-1 rounded">python -m http.server 8080 --directory docs</code>）</p>
       </div>`;
   }
+}
+
+// ── Themes (主題催化劑) ────────────────────────────────────────────────────────
+const STATUS_CFG_THEME = {
+  active:   { icon:'🔥', label:'熱門推進', cls:'bg-red-500/15 text-red-400 border-red-500/30' },
+  building: { icon:'⏳', label:'蓄積中',   cls:'bg-yellow-500/15 text-yellow-400 border-yellow-500/30' },
+  cooling:  { icon:'💤', label:'降溫',     cls:'bg-blue-500/15 text-blue-400 border-blue-500/30' },
+  peak:     { icon:'✅', label:'頂峰已過', cls:'bg-slate-500/15 text-slate-400 border-slate-500/30' },
+};
+
+let allThemesData = [];
+
+function renderThemesTab(index) {
+  allThemesData = index || [];
+  const grid = document.getElementById('themes-grid');
+  if (!allThemesData.length) {
+    grid.innerHTML = '<div class="text-slate-500 text-center py-10 col-span-3">無主題資料</div>';
+    return;
+  }
+
+  grid.innerHTML = allThemesData.map(t => {
+    const sc  = STATUS_CFG_THEME[t.status] || STATUS_CFG_THEME.building;
+    const fp  = t.fuel_pct || 0;
+    const fuelColor = fp >= 70 ? '#22c55e' : fp >= 40 ? '#f59e0b' : '#ef4444';
+    const msText = t.milestones_total > 0
+      ? `${t.milestones_done}/${t.milestones_total} 里程碑`
+      : '—';
+    const tickers = (t.tickers || []).map(tk =>
+      `<span class="text-xs bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded font-mono">${tk}</span>`
+    ).join(' ');
+
+    return `<div class="bg-slate-800 rounded-xl border border-slate-700 p-5 flex flex-col gap-3
+                         hover:border-slate-600 transition-colors cursor-pointer"
+                 onclick="openThemeViewer('${t.filename}','${t.name}')">
+      <div class="flex items-start justify-between gap-2">
+        <p class="font-semibold text-slate-100 text-sm leading-snug">${t.name}</p>
+        <span class="text-xs px-2 py-0.5 rounded-full border font-medium shrink-0 ${sc.cls}">${sc.icon} ${sc.label}</span>
+      </div>
+
+      <!-- Fuel gauge -->
+      <div>
+        <div class="flex justify-between text-xs text-slate-400 mb-1">
+          <span>燃料剩餘</span><span class="font-semibold" style="color:${fuelColor}">${fp}%</span>
+        </div>
+        <div class="w-full bg-slate-700 rounded-full h-1.5">
+          <div class="h-1.5 rounded-full transition-all" style="width:${fp}%;background:${fuelColor}"></div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between text-xs text-slate-500">
+        <span>📌 ${msText}</span>
+        <span>${t.last_updated || '—'}</span>
+      </div>
+      <div class="flex flex-wrap gap-1">${tickers}</div>
+    </div>`;
+  }).join('');
+}
+
+async function openThemeViewer(filename, name) {
+  const panel = document.getElementById('theme-viewer-panel');
+  panel.classList.remove('hidden');
+  document.getElementById('theme-viewer-title').textContent = name;
+  document.getElementById('theme-viewer-content').innerHTML =
+    '<div class="text-slate-500 text-center py-10">載入中…</div>';
+  try {
+    const r = await fetch(`themes/${filename}?t=${Date.now()}`);
+    if (!r.ok) throw new Error(r.status);
+    let text = await r.text();
+    // Strip YAML front matter before rendering
+    if (text.startsWith('---')) {
+      const end = text.indexOf('\n---', 3);
+      if (end !== -1) text = text.slice(end + 4).trim();
+    }
+    document.getElementById('theme-viewer-content').innerHTML =
+      `<div class="prose">${marked.parse(text)}</div>`;
+  } catch(e) {
+    document.getElementById('theme-viewer-content').innerHTML =
+      `<div class="text-red-400 py-10 text-center text-sm">無法載入：${e.message}</div>`;
+  }
+}
+
+function closeThemeViewer() {
+  document.getElementById('theme-viewer-panel').classList.add('hidden');
+}
+
+// ── Ripple (宏觀漣漪) ─────────────────────────────────────────────────────────
+function renderRipple(ripple) {
+  if (!ripple?.length) return;
+  document.getElementById('ripple-section').style.display = '';
+  document.getElementById('ripple-list').innerHTML = ripple.map(r => `
+    <div class="border border-slate-700/60 rounded-lg p-4 bg-slate-900/40">
+      <p class="text-sm font-semibold text-cyan-300 mb-2">${r.title}</p>
+      ${r.first_order  ? `<p class="text-xs text-slate-400 mb-1"><span class="text-slate-500 mr-1.5">一階</span>${r.first_order}</p>`  : ''}
+      ${r.second_order ? `<p class="text-xs text-slate-400 mb-1"><span class="text-slate-500 mr-1.5">二階</span>${r.second_order}</p>` : ''}
+      ${r.related      ? `<p class="text-xs text-slate-300 mt-2 font-mono leading-relaxed">${r.related}</p>` : ''}
+    </div>`).join('');
 }
 
 // ── Thesis ────────────────────────────────────────────────────────────────────
