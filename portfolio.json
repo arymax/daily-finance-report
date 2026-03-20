@@ -182,21 +182,21 @@
         "name": "Cloudflare Inc.",
         "type": "stock",
         "market": "US",
-        "cost_twd": 19448,
-        "shares": 3,
+        "cost_twd": 6483,
+        "shares": 1,
         "sector": "網路基礎建設／資安",
         "theme": "AI流量成長、Zero Trust、CDN",
         "position_size": "custom",
         "position_pct": 0.1,
-        "status": "已進場，3 股試探倉位",
-        "strategy": "技術面底部確認後進場；後續觀察帶量突破確認趨勢",
+        "status": "已部分平倉，剩餘 1 股觀察",
+        "strategy": "技術面底部確認後進場；2026-03-20 平倉 2 股獲利了結，留 1 股追蹤後續突破",
         "catalysts": [
           "AI流量爆發推動 CDN 與 Zero Trust 需求持續成長",
           "企業資安預算升溫，Cloudflare 平台整合優勢顯著",
           "從 52 週高點 $175 回調約 34%，提供較佳進場點"
         ],
         "broker": "Firstrade",
-        "note": "均價 202.59 USD（3 股）；原始成本 607.77 USD；cost_twd 依匯率估算 32 換算約 19,448 TWD"
+        "note": "均價 202.59 USD；原始 3 股（607.77 USD），2026-03-20 平倉 2 股 @222.01 USD，剩餘 1 股；cost_twd 依均價估算（19,448 ÷ 3 ≈ 6,483 TWD）"
       },
       {
         "ticker": "3030",
