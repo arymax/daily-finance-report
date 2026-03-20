@@ -34,6 +34,23 @@
     "milestones_done": 3
   },
   {
+    "id": "AI_ASIC客製晶片",
+    "name": "AI ASIC 客製晶片（Hyperscaler 自研芯片週期）",
+    "status": "active",
+    "fuel_pct": 78,
+    "tickers": [
+      "MRVL",
+      "AVGO",
+      "NVDA",
+      "2330",
+      "ALAB"
+    ],
+    "last_updated": "2026-03-20",
+    "filename": "AI_ASIC客製晶片.md",
+    "milestones_total": 9,
+    "milestones_done": 5
+  },
+  {
     "id": "AI電力核能",
     "name": "AI電力／核能復興",
     "status": "active",
@@ -68,6 +85,23 @@
     "filename": "半導體去美化.md",
     "milestones_total": 8,
     "milestones_done": 4
+  },
+  {
+    "id": "零信任資安",
+    "name": "零信任資安（Zero Trust / SASE）",
+    "status": "active",
+    "fuel_pct": 72,
+    "tickers": [
+      "CRWD",
+      "NET",
+      "PANW",
+      "ZS",
+      "S"
+    ],
+    "last_updated": "2026-03-20",
+    "filename": "零信任資安.md",
+    "milestones_total": 8,
+    "milestones_done": 5
   },
   {
     "id": "光進銅退",
