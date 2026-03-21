@@ -1,9 +1,9 @@
 ---
 name: AI電力／核能復興
 status: active
-fuel_pct: 75
+fuel_pct: 80
 tickers: [CEG, VST, ETR, NRG, LNG, NEE]
-last_updated: 2026-03-20
+last_updated: 2026-03-22
 ---
 
 ## 核心驅動力

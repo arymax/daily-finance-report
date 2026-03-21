@@ -1,9 +1,9 @@
 ---
 name: ABF載板（先進封裝基板）
 status: active
-fuel_pct: 65
+fuel_pct: 58
 tickers: [3037, 8150, AMKR, ASX]
-last_updated: 2026-03-20
+last_updated: 2026-03-22
 ---
 
 ## 核心驅動力

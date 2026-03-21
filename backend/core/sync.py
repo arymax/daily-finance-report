@@ -26,6 +26,7 @@ _STAGED_PATHS = [
     "memory/",
     "portfolio.json",
     "thesis/",
+    "themes/",
     "docs/",
     "frontend/src/data/",
 ]

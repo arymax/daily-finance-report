@@ -1,9 +1,9 @@
 ---
 name: AI Agent工作流（Agentic AI）
 status: building
-fuel_pct: 90
+fuel_pct: 85
 tickers: [PLTR, NOW, CRM, MSFT, UBER]
-last_updated: 2026-03-20
+last_updated: 2026-03-22
 ---
 
 ## 核心驅動力
