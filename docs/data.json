@@ -1,13 +1,13 @@
 {
   "meta": {
-    "generated_at": "2026-03-21 04:21:03 TST",
-    "date": "2026-03-21",
-    "session": "morning",
+    "generated_at": "2026-03-22 01:03:38 TST",
+    "date": "2026-03-22",
+    "session": "evening",
     "usd_twd": 32.01
   },
   "summary": {
-    "total_value_twd": 689674,
-    "total_pnl_twd": 8526,
+    "total_value_twd": 689846,
+    "total_pnl_twd": 8698,
     "total_pnl_pct": 2.6,
     "cash_twd": 303632,
     "cash_pct": 44.0,
@@ -60,10 +60,10 @@
       "cost_twd": 39000,
       "shares": 4.12911,
       "sector": "美國全市場股票",
-      "current_value_twd": 42352,
-      "pnl_twd": 3352,
+      "current_value_twd": 42346,
+      "pnl_twd": 3346,
       "pnl_pct": 8.6,
-      "current_price": "320.40 USD"
+      "current_price": "320.34 USD"
     },
     {
       "ticker": "VT",
@@ -73,8 +73,8 @@
       "cost_twd": 15000,
       "shares": 3.41164,
       "sector": "全球股票",
-      "current_value_twd": 14888,
-      "pnl_twd": -112,
+      "current_value_twd": 14889,
+      "pnl_twd": -111,
       "pnl_pct": -0.7,
       "current_price": "136.32 USD"
     },
@@ -99,8 +99,8 @@
       "cost_twd": 32000,
       "shares": 10.83658,
       "sector": "半導體（自訂 AI 晶片／資料中心網路／光學）",
-      "current_value_twd": 30497,
-      "pnl_twd": -1503,
+      "current_value_twd": 30498,
+      "pnl_twd": -1502,
       "pnl_pct": -4.7,
       "current_price": "87.91 USD"
     },
@@ -112,8 +112,8 @@
       "cost_twd": 20277,
       "shares": 1.5,
       "sector": "資安軟體",
-      "current_value_twd": 19640,
-      "pnl_twd": -637,
+      "current_value_twd": 19641,
+      "pnl_twd": -636,
       "pnl_pct": -3.1,
       "current_price": "409.00 USD"
     },
@@ -165,8 +165,8 @@
       "exchange": "Bitget",
       "cost_twd": 42985,
       "quantity": 1337.78378259,
-      "current_value_twd": 42826,
-      "pnl_twd": -159,
+      "current_value_twd": 42828,
+      "pnl_twd": -157,
       "pnl_pct": -0.4,
       "current_price": "1.00 USD"
     },
@@ -177,10 +177,10 @@
       "exchange": "Bitget",
       "cost_twd": 25860,
       "quantity": 0.0106787,
-      "current_value_twd": 23988,
-      "pnl_twd": -1872,
-      "pnl_pct": -7.2,
-      "current_price": "70169.56 USD"
+      "current_value_twd": 24083,
+      "pnl_twd": -1777,
+      "pnl_pct": -6.9,
+      "current_price": "70446.54 USD"
     },
     {
       "ticker": "ETH",
@@ -189,10 +189,10 @@
       "exchange": "Bitget",
       "cost_twd": 6839,
       "quantity": 0.14348174,
-      "current_value_twd": 9800,
-      "pnl_twd": 2961,
-      "pnl_pct": 43.3,
-      "current_price": "2133.49 USD"
+      "current_value_twd": 9875,
+      "pnl_twd": 3036,
+      "pnl_pct": 44.4,
+      "current_price": "2149.71 USD"
     },
     {
       "ticker": "XRP",
@@ -201,9 +201,9 @@
       "exchange": "Bitget",
       "cost_twd": 9626,
       "quantity": 115.91467897,
-      "current_value_twd": 5326,
-      "pnl_twd": -4300,
-      "pnl_pct": -44.7,
+      "current_value_twd": 5329,
+      "pnl_twd": -4297,
+      "pnl_pct": -44.6,
       "current_price": "1.44 USD"
     }
   ],
@@ -327,6 +327,31 @@
     },
     "key_events": [],
     "risks": [],
-    "ripple": []
+    "ripple": [
+      {
+        "title": "🛢 WTI $119（↑ 地緣政治油價高位）",
+        "first_order": "",
+        "second_order": "",
+        "related": ""
+      },
+      {
+        "title": "🛡 美伊衝突擴散（↑ 地緣政治風險溢價上升）",
+        "first_order": "",
+        "second_order": "",
+        "related": ""
+      },
+      {
+        "title": "🤖 AI 商品化恐慌（OpenClaw 引發 AI 模型「ChatGPT 時刻」）",
+        "first_order": "",
+        "second_order": "",
+        "related": ""
+      },
+      {
+        "title": "🏦 聯準會偏鷹 + 公債殖利率上升（↑ 殖利率）",
+        "first_order": "",
+        "second_order": "",
+        "related": ""
+      }
+    ]
   }
 }

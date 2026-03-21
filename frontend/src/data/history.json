@@ -46,5 +46,29 @@
       "ETH": 43.3,
       "XRP": -44.7
     }
+  },
+  {
+    "date": "2026-03-22",
+    "session": "evening",
+    "timestamp": "2026-03-22T01:03:38.907283+08:00",
+    "total_value_twd": 689846,
+    "total_pnl_twd": 8698,
+    "total_pnl_pct": 2.6,
+    "cash_pct": 44.0,
+    "positions_pnl": {
+      "006208": 56.9,
+      "VTI": 8.6,
+      "VT": -0.7,
+      "VGIT": 1.4,
+      "MRVL": -4.7,
+      "CRWD": -3.1,
+      "ALAB": -5.9,
+      "NET": 6.4,
+      "3030": 10.4,
+      "USDT": -0.4,
+      "BTC": -6.9,
+      "ETH": 44.4,
+      "XRP": -44.6
+    }
   }
 ]

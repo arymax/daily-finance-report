@@ -1,5 +1,19 @@
 [
   {
+    "date": "2026-03-22",
+    "session": "evening",
+    "type": "market_overview",
+    "filename": "20260322_evening_market_overview.md",
+    "label": "2026-03-22 收盤・市場總覽"
+  },
+  {
+    "date": "2026-03-22",
+    "session": "evening",
+    "type": "portfolio_analysis",
+    "filename": "20260322_evening_portfolio_analysis.md",
+    "label": "2026-03-22 收盤・持倉分析"
+  },
+  {
     "date": "2026-03-20",
     "session": "morning",
     "type": "market_overview",
