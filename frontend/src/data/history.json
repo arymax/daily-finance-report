@@ -50,11 +50,11 @@
   {
     "date": "2026-03-22",
     "session": "evening",
-    "timestamp": "2026-03-22T01:03:38.907283+08:00",
-    "total_value_twd": 689846,
-    "total_pnl_twd": 8698,
-    "total_pnl_pct": 2.6,
-    "cash_pct": 44.0,
+    "timestamp": "2026-03-22T14:45:59.149781+08:00",
+    "total_value_twd": 689153,
+    "total_pnl_twd": 8005,
+    "total_pnl_pct": 2.4,
+    "cash_pct": 44.1,
     "positions_pnl": {
       "006208": 56.9,
       "VTI": 8.6,
@@ -66,9 +66,9 @@
       "NET": 6.4,
       "3030": 10.4,
       "USDT": -0.4,
-      "BTC": -6.9,
-      "ETH": 44.4,
-      "XRP": -44.6
+      "BTC": -8.5,
+      "ETH": 41.8,
+      "XRP": -45.6
     }
   }
 ]

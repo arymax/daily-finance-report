@@ -1,23 +1,23 @@
 {
   "meta": {
-    "generated_at": "2026-03-22 01:03:38 TST",
+    "generated_at": "2026-03-22 14:45:59 TST",
     "date": "2026-03-22",
     "session": "evening",
     "usd_twd": 32.01
   },
   "summary": {
-    "total_value_twd": 689846,
-    "total_pnl_twd": 8698,
-    "total_pnl_pct": 2.6,
+    "total_value_twd": 689153,
+    "total_pnl_twd": 8005,
+    "total_pnl_pct": 2.4,
     "cash_twd": 303632,
-    "cash_pct": 44.0,
+    "cash_pct": 44.1,
     "contract_margin_twd": 43878
   },
   "allocation": {
-    "現金": 44.0,
-    "長期ETF": 17.5,
+    "現金": 44.1,
+    "長期ETF": 17.6,
     "波段個股": 20.2,
-    "加密貨幣": 11.9,
+    "加密貨幣": 11.8,
     "合約保證金": 6.4
   },
   "positions": [
@@ -164,7 +164,7 @@
       "type": "stablecoin",
       "exchange": "Bitget",
       "cost_twd": 42985,
-      "quantity": 1337.78378259,
+      "shares": 1337.78378259,
       "current_value_twd": 42828,
       "pnl_twd": -157,
       "pnl_pct": -0.4,
@@ -176,11 +176,11 @@
       "type": "spot",
       "exchange": "Bitget",
       "cost_twd": 25860,
-      "quantity": 0.0106787,
-      "current_value_twd": 24083,
-      "pnl_twd": -1777,
-      "pnl_pct": -6.9,
-      "current_price": "70446.54 USD"
+      "shares": 0.0106787,
+      "current_value_twd": 23658,
+      "pnl_twd": -2202,
+      "pnl_pct": -8.5,
+      "current_price": "69203.39 USD"
     },
     {
       "ticker": "ETH",
@@ -188,11 +188,11 @@
       "type": "spot",
       "exchange": "Bitget",
       "cost_twd": 6839,
-      "quantity": 0.14348174,
-      "current_value_twd": 9875,
-      "pnl_twd": 3036,
-      "pnl_pct": 44.4,
-      "current_price": "2149.71 USD"
+      "shares": 0.14348174,
+      "current_value_twd": 9699,
+      "pnl_twd": 2860,
+      "pnl_pct": 41.8,
+      "current_price": "2111.44 USD"
     },
     {
       "ticker": "XRP",
@@ -200,14 +200,25 @@
       "type": "spot",
       "exchange": "Bitget",
       "cost_twd": 9626,
-      "quantity": 115.91467897,
-      "current_value_twd": 5329,
-      "pnl_twd": -4297,
-      "pnl_pct": -44.6,
-      "current_price": "1.44 USD"
+      "shares": 115.91467897,
+      "current_value_twd": 5237,
+      "pnl_twd": -4389,
+      "pnl_pct": -45.6,
+      "current_price": "1.41 USD"
     }
   ],
   "watchlist": [
+    {
+      "ticker": "NBIS",
+      "name": "Nebius Group N.V.",
+      "priority": 1,
+      "market": "US",
+      "sector": "AI 雲端基礎設施 / Neocloud GPU 算力租用",
+      "theme": "Nvidia 欽點的歐洲 Neocloud 龍頭——獨立 GPU 雲的結構性稀缺標的，5GW 算力藍圖獲 $2B 戰略背書",
+      "status": "未達成",
+      "status_icon": "⏳",
+      "action": ""
+    },
     {
       "ticker": "2330",
       "name": "台灣積體電路製造股份有限公司（台積電）",
@@ -226,6 +237,17 @@
       "market": "US",
       "sector": "半導體 + 企業基礎設施軟體（Diversified Semiconductor & Infrastructure Software）",
       "theme": "AI 基礎建設雙引擎——自訂 XPU ASIC 為超大型雲端客戶定製算力，VMware 軟體訂閱轉型提供高黏性現金流，共同構建最稀缺的「AI 算力 × 企業 I",
+      "status": "未達成",
+      "status_icon": "⏳",
+      "action": ""
+    },
+    {
+      "ticker": "2609",
+      "name": "陽明海運股份有限公司",
+      "priority": 1,
+      "market": "TW",
+      "sector": "貨櫃航運",
+      "theme": "霍爾木茲封鎖威脅觸發歐亞航線運費率非線性跳升，P/B 0.65x 提供下行保護，即期業績敏感度為台灣航運股最高",
       "status": "未達成",
       "status_icon": "⏳",
       "action": ""
@@ -259,28 +281,6 @@
       "market": "US",
       "sector": "獨立電力生產商（IPP）／核能發電",
       "theme": "美國最大核電營運商，24/7 無碳基載電力稀缺資產，AI 資料中心電力飢渴驅動 PPAs 溢價重估，Forward EPS $13.61 僅反映起點，Calpi",
-      "status": "未達成",
-      "status_icon": "⏳",
-      "action": ""
-    },
-    {
-      "ticker": "NBIS",
-      "name": "Nebius Group N.V.",
-      "priority": 2,
-      "market": "US",
-      "sector": "AI 雲端基礎設施 / Neocloud GPU 算力租用",
-      "theme": "Nvidia 欽點的歐洲 Neocloud 龍頭——獨立 GPU 雲的結構性稀缺標的，5GW 算力藍圖獲 $2B 戰略背書",
-      "status": "未達成",
-      "status_icon": "⏳",
-      "action": ""
-    },
-    {
-      "ticker": "2609",
-      "name": "陽明海運股份有限公司",
-      "priority": 2,
-      "market": "TW",
-      "sector": "貨櫃航運",
-      "theme": "霍爾木茲封鎖威脅觸發歐亞航線運費率非線性跳升，P/B 0.65x 提供下行保護，即期業績敏感度為台灣航運股最高",
       "status": "未達成",
       "status_icon": "⏳",
       "action": ""
@@ -327,31 +327,6 @@
     },
     "key_events": [],
     "risks": [],
-    "ripple": [
-      {
-        "title": "🛢 WTI $119（↑ 地緣政治油價高位）",
-        "first_order": "",
-        "second_order": "",
-        "related": ""
-      },
-      {
-        "title": "🛡 美伊衝突擴散（↑ 地緣政治風險溢價上升）",
-        "first_order": "",
-        "second_order": "",
-        "related": ""
-      },
-      {
-        "title": "🤖 AI 商品化恐慌（OpenClaw 引發 AI 模型「ChatGPT 時刻」）",
-        "first_order": "",
-        "second_order": "",
-        "related": ""
-      },
-      {
-        "title": "🏦 聯準會偏鷹 + 公債殖利率上升（↑ 殖利率）",
-        "first_order": "",
-        "second_order": "",
-        "related": ""
-      }
-    ]
+    "ripple": []
   }
 }
