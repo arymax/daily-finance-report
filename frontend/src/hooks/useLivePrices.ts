@@ -100,7 +100,8 @@ export function useLivePrices(
     for (const [tk, usdPrice] of Object.entries(cryptoPrices)) {
       cryptoPricesTwd[tk] = usdPrice * usdTwd;
     }
-    setPrices({ ...twPrices, ...usPrices, ...cryptoPricesTwd });
+    // Store crypto prices in USD (conversion to TWD happens at calculation sites)
+    setPrices({ ...twPrices, ...usPrices, ...cryptoPrices });
     setLastUpdated(new Date());
   };
 

@@ -55,7 +55,7 @@ export default function Dashboard({ data, history, reports, thesis, themes }: Pr
     for (const pos of data.crypto) {
       const lp = prices[pos.ticker];
       if (lp && pos.shares) {
-        liveValue += lp * pos.shares; // hook already converted to TWD
+        liveValue += lp * pos.shares * usd; // crypto price in USD → TWD
       } else {
         liveValue += (pos as { current_value_twd?: number }).current_value_twd ?? pos.cost_twd;
       }

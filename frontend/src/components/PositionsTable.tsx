@@ -20,9 +20,11 @@ function computeLive(
 ) {
   const livePrice = prices[ticker];
   if (!livePrice || !shares) return null;
-  // TW stocks in TWD, US stocks in USD, crypto stored as TWD via hook
+  // TW stocks: price in TWD; US stocks: price in USD; CRYPTO: price in USD
   const valueTwd =
-    market === "US" ? livePrice * shares * usdTwd : livePrice * shares;
+    market === "US" || market === "CRYPTO"
+      ? livePrice * shares * usdTwd
+      : livePrice * shares;
   const pnlTwd = valueTwd - costTwd;
   const pnlPct = costTwd ? (pnlTwd / costTwd) * 100 : 0;
   return { livePrice, valueTwd, pnlTwd, pnlPct };
