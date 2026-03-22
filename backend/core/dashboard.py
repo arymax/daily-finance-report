@@ -536,7 +536,7 @@ def generate_dashboard_data(
                 "type":     pos_type,
                 "exchange": pos.get("exchange", ""),
                 "cost_twd": pos.get("cost_twd", 0),
-                "quantity": pos.get("quantity", 0.0),
+                "shares":   pos.get("quantity", pos.get("shares", 0.0)),
             }
             entry.update(_compute_crypto_value(pos, prices, usd_twd))
             crypto_out.append(entry)
