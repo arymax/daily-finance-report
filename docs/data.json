@@ -1,14 +1,14 @@
 {
   "meta": {
-    "generated_at": "2026-03-22 14:45:59 TST",
-    "date": "2026-03-22",
-    "session": "evening",
-    "usd_twd": 32.01
+    "generated_at": "2026-03-23 07:25:36 TST",
+    "date": "2026-03-23",
+    "session": "morning",
+    "usd_twd": 32.03
   },
   "summary": {
-    "total_value_twd": 689153,
-    "total_pnl_twd": 8005,
-    "total_pnl_pct": 2.4,
+    "total_value_twd": 688666,
+    "total_pnl_twd": 7518,
+    "total_pnl_pct": 2.3,
     "cash_twd": 303632,
     "cash_pct": 44.1,
     "contract_margin_twd": 43878
@@ -17,7 +17,7 @@
     "現金": 44.1,
     "長期ETF": 17.6,
     "波段個股": 20.2,
-    "加密貨幣": 11.8,
+    "加密貨幣": 11.7,
     "合約保證金": 6.4
   },
   "positions": [
@@ -60,8 +60,8 @@
       "cost_twd": 39000,
       "shares": 4.12911,
       "sector": "美國全市場股票",
-      "current_value_twd": 42346,
-      "pnl_twd": 3346,
+      "current_value_twd": 42371,
+      "pnl_twd": 3371,
       "pnl_pct": 8.6,
       "current_price": "320.34 USD"
     },
@@ -73,8 +73,8 @@
       "cost_twd": 15000,
       "shares": 3.41164,
       "sector": "全球股票",
-      "current_value_twd": 14889,
-      "pnl_twd": -111,
+      "current_value_twd": 14898,
+      "pnl_twd": -102,
       "pnl_pct": -0.7,
       "current_price": "136.32 USD"
     },
@@ -86,8 +86,8 @@
       "cost_twd": 15000,
       "shares": 8.01501,
       "sector": "中期美國公債",
-      "current_value_twd": 15208,
-      "pnl_twd": 208,
+      "current_value_twd": 15217,
+      "pnl_twd": 217,
       "pnl_pct": 1.4,
       "current_price": "59.27 USD"
     },
@@ -99,9 +99,9 @@
       "cost_twd": 32000,
       "shares": 10.83658,
       "sector": "半導體（自訂 AI 晶片／資料中心網路／光學）",
-      "current_value_twd": 30498,
-      "pnl_twd": -1502,
-      "pnl_pct": -4.7,
+      "current_value_twd": 30516,
+      "pnl_twd": -1484,
+      "pnl_pct": -4.6,
       "current_price": "87.91 USD"
     },
     {
@@ -112,8 +112,8 @@
       "cost_twd": 20277,
       "shares": 1.5,
       "sector": "資安軟體",
-      "current_value_twd": 19641,
-      "pnl_twd": -636,
+      "current_value_twd": 19652,
+      "pnl_twd": -625,
       "pnl_pct": -3.1,
       "current_price": "409.00 USD"
     },
@@ -125,8 +125,8 @@
       "cost_twd": 5923,
       "shares": 1.5,
       "sector": "半導體連接方案",
-      "current_value_twd": 5572,
-      "pnl_twd": -351,
+      "current_value_twd": 5576,
+      "pnl_twd": -347,
       "pnl_pct": -5.9,
       "current_price": "116.04 USD"
     },
@@ -138,8 +138,8 @@
       "cost_twd": 6483,
       "shares": 1,
       "sector": "網路基礎建設／資安",
-      "current_value_twd": 6896,
-      "pnl_twd": 413,
+      "current_value_twd": 6901,
+      "pnl_twd": 418,
       "pnl_pct": 6.4,
       "current_price": "215.42 USD"
     },
@@ -165,9 +165,9 @@
       "exchange": "Bitget",
       "cost_twd": 42985,
       "shares": 1337.78378259,
-      "current_value_twd": 42828,
-      "pnl_twd": -157,
-      "pnl_pct": -0.4,
+      "current_value_twd": 42853,
+      "pnl_twd": -132,
+      "pnl_pct": -0.3,
       "current_price": "1.00 USD"
     },
     {
@@ -177,10 +177,10 @@
       "exchange": "Bitget",
       "cost_twd": 25860,
       "shares": 0.0106787,
-      "current_value_twd": 23658,
-      "pnl_twd": -2202,
-      "pnl_pct": -8.5,
-      "current_price": "69203.39 USD"
+      "current_value_twd": 23362,
+      "pnl_twd": -2498,
+      "pnl_pct": -9.7,
+      "current_price": "68294.80 USD"
     },
     {
       "ticker": "ETH",
@@ -189,10 +189,10 @@
       "exchange": "Bitget",
       "cost_twd": 6839,
       "shares": 0.14348174,
-      "current_value_twd": 9699,
-      "pnl_twd": 2860,
-      "pnl_pct": 41.8,
-      "current_price": "2111.44 USD"
+      "current_value_twd": 9475,
+      "pnl_twd": 2636,
+      "pnl_pct": 38.5,
+      "current_price": "2061.41 USD"
     },
     {
       "ticker": "XRP",
@@ -201,10 +201,10 @@
       "exchange": "Bitget",
       "cost_twd": 9626,
       "shares": 115.91467897,
-      "current_value_twd": 5237,
-      "pnl_twd": -4389,
-      "pnl_pct": -45.6,
-      "current_price": "1.41 USD"
+      "current_value_twd": 5164,
+      "pnl_twd": -4462,
+      "pnl_pct": -46.4,
+      "current_price": "1.39 USD"
     }
   ],
   "watchlist": [
@@ -327,6 +327,31 @@
     },
     "key_events": [],
     "risks": [],
-    "ripple": []
+    "ripple": [
+      {
+        "title": "🛢 WTI 高位（估 $110-120）：霍爾木茲封鎖溢價",
+        "first_order": "",
+        "second_order": "",
+        "related": "↑ OXY⚠️ · LNG · CEG · 2609（陽明） · 能源 ETF（XLE） ／ ↓ 航空股 · 塑料包裝 · 高耗能半導體廠（電費成本上升）"
+      },
+      {
+        "title": "🌍 美伊地緣衝突：TACO 邏輯失效風險",
+        "first_order": "",
+        "second_order": "",
+        "related": "↑ 2609⚠️ · 2603（長榮） · OXY · 國防股（LMT/RTX） · GLD / ↓ 科技成長股 · 消費旅遊 · 全球貿易量相關"
+      },
+      {
+        "title": "📉 VIX 24：歷史上的 AI 股反彈先行指標",
+        "first_order": "",
+        "second_order": "",
+        "related": "↑（中長期）2330 · AVGO · NBIS · 3017 / ↓（短期，若 VIX 繼續上升） 所有高 PE 科技成長股"
+      },
+      {
+        "title": "💻 OpenAI 淡化基礎建設計劃：AI CapEx 泡沫質疑升溫",
+        "first_order": "",
+        "second_order": "",
+        "related": "↑ AI 應用軟體（CRM、NOW） / ↓（情緒面）NBIS · SMCI · 高 PE AI 硬體股 ⚠️"
+      }
+    ]
   }
 }

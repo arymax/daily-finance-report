@@ -3,7 +3,7 @@
     "id": "AI國防應用",
     "name": "AI國防應用",
     "status": "active",
-    "fuel_pct": 87,
+    "fuel_pct": 91,
     "tickers": [
       "PLTR",
       "LMT",
@@ -12,10 +12,43 @@
       "BWXT",
       "ACHR"
     ],
-    "last_updated": "2026-03-22",
+    "last_updated": "2026-03-23",
     "filename": "AI國防應用.md",
     "milestones_total": 7,
     "milestones_done": 4
+  },
+  {
+    "id": "CPO",
+    "name": "CPO（共封裝光學）",
+    "status": "active",
+    "fuel_pct": 84,
+    "tickers": [
+      "ALAB",
+      "COHR",
+      "LITE",
+      "3081"
+    ],
+    "last_updated": "2026-03-23",
+    "filename": "CPO.md",
+    "milestones_total": 6,
+    "milestones_done": 3
+  },
+  {
+    "id": "AI_ASIC客製晶片",
+    "name": "AI ASIC 客製晶片（Hyperscaler 自研芯片週期）",
+    "status": "active",
+    "fuel_pct": 82,
+    "tickers": [
+      "MRVL",
+      "AVGO",
+      "NVDA",
+      "2330",
+      "ALAB"
+    ],
+    "last_updated": "2026-03-23",
+    "filename": "AI_ASIC客製晶片.md",
+    "milestones_total": 9,
+    "milestones_done": 5
   },
   {
     "id": "AI電力核能",
@@ -34,22 +67,6 @@
     "filename": "AI電力核能.md",
     "milestones_total": 8,
     "milestones_done": 4
-  },
-  {
-    "id": "CPO",
-    "name": "CPO（共封裝光學）",
-    "status": "active",
-    "fuel_pct": 80,
-    "tickers": [
-      "ALAB",
-      "COHR",
-      "LITE",
-      "3081"
-    ],
-    "last_updated": "2026-03-20",
-    "filename": "CPO.md",
-    "milestones_total": 6,
-    "milestones_done": 3
   },
   {
     "id": "半導體去美化",
@@ -71,23 +88,6 @@
     "milestones_done": 4
   },
   {
-    "id": "AI_ASIC客製晶片",
-    "name": "AI ASIC 客製晶片（Hyperscaler 自研芯片週期）",
-    "status": "active",
-    "fuel_pct": 78,
-    "tickers": [
-      "MRVL",
-      "AVGO",
-      "NVDA",
-      "2330",
-      "ALAB"
-    ],
-    "last_updated": "2026-03-20",
-    "filename": "AI_ASIC客製晶片.md",
-    "milestones_total": 9,
-    "milestones_done": 5
-  },
-  {
     "id": "歐洲再武裝",
     "name": "歐洲再武裝",
     "status": "active",
@@ -101,6 +101,24 @@
     ],
     "last_updated": "2026-03-22",
     "filename": "歐洲再武裝.md",
+    "milestones_total": 7,
+    "milestones_done": 4
+  },
+  {
+    "id": "光進銅退",
+    "name": "光進銅退（光纖取代銅纜互連）",
+    "status": "active",
+    "fuel_pct": 73,
+    "tickers": [
+      "COHR",
+      "LITE",
+      "4977",
+      "3081",
+      "AAOI",
+      "IIVI"
+    ],
+    "last_updated": "2026-03-23",
+    "filename": "光進銅退.md",
     "milestones_total": 7,
     "milestones_done": 4
   },
@@ -120,24 +138,6 @@
     "filename": "零信任資安.md",
     "milestones_total": 8,
     "milestones_done": 5
-  },
-  {
-    "id": "光進銅退",
-    "name": "光進銅退（光纖取代銅纜互連）",
-    "status": "active",
-    "fuel_pct": 70,
-    "tickers": [
-      "COHR",
-      "LITE",
-      "4977",
-      "3081",
-      "AAOI",
-      "IIVI"
-    ],
-    "last_updated": "2026-03-20",
-    "filename": "光進銅退.md",
-    "milestones_total": 7,
-    "milestones_done": 4
   },
   {
     "id": "記憶體週期",
@@ -178,14 +178,14 @@
     "id": "ABF載板",
     "name": "ABF載板（先進封裝基板）",
     "status": "active",
-    "fuel_pct": 58,
+    "fuel_pct": 55,
     "tickers": [
       "3037",
       "8150",
       "AMKR",
       "ASX"
     ],
-    "last_updated": "2026-03-22",
+    "last_updated": "2026-03-23",
     "filename": "ABF載板.md",
     "milestones_total": 6,
     "milestones_done": 3

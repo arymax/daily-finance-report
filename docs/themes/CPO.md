@@ -1,9 +1,9 @@
 ---
 name: CPO（共封裝光學）
 status: active
-fuel_pct: 80
+fuel_pct: 84
 tickers: [ALAB, COHR, LITE, 3081]
-last_updated: 2026-03-20
+last_updated: 2026-03-23
 ---
 
 ## 核心驅動力

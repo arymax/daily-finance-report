@@ -1,9 +1,9 @@
 ---
 name: AI國防應用
 status: active
-fuel_pct: 87
+fuel_pct: 91
 tickers: [PLTR, LMT, NOC, RTX, BWXT, ACHR]
-last_updated: 2026-03-22
+last_updated: 2026-03-23
 ---
 
 ## 核心驅動力

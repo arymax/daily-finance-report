@@ -35,6 +35,10 @@
         "filename": "AI基礎建設/CRWV.md"
       },
       {
+        "ticker": "DELL",
+        "filename": "AI基礎建設/DELL.md"
+      },
+      {
         "ticker": "ETN",
         "filename": "AI基礎建設/ETN.md"
       },
@@ -255,6 +259,10 @@
       {
         "ticker": "NOC",
         "filename": "航太國防/NOC.md"
+      },
+      {
+        "ticker": "RTX",
+        "filename": "航太國防/RTX.md"
       }
     ]
   },

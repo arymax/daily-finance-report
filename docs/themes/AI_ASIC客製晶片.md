@@ -1,9 +1,9 @@
 ---
 name: AI ASIC 客製晶片（Hyperscaler 自研芯片週期）
 status: active
-fuel_pct: 78
+fuel_pct: 82
 tickers: [MRVL, AVGO, NVDA, 2330, ALAB]
-last_updated: 2026-03-20
+last_updated: 2026-03-23
 ---
 
 ## 核心驅動力
